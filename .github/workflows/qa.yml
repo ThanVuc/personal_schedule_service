@@ -1,0 +1,41 @@
+name: Deploy to VPS on merge to main
+
+on:
+  pull_request:
+    types: [closed]
+    branches:
+      - qa
+
+env:
+  CONTAINER_NAME: personal_schedule_service
+
+jobs:
+  deploy:
+    if: github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Log in to Docker Hub
+        run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+
+      - name: Set image name
+        id: vars
+        run: echo "IMAGE_NAME=${{ secrets.DOCKER_USERNAME }}/personal_schedule_service:latest" >> $GITHUB_ENV
+
+      - name: Build Docker image
+        run: docker build -t $IMAGE_NAME .
+
+      - name: Push Docker image
+        run: docker push $IMAGE_NAME
+
+      - name: SSH and deploy
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          script: |
+            bash /home/schedule/deploy.sh "${{ env.IMAGE_NAME }}" "${{ env.CONTAINER_NAME }}"
