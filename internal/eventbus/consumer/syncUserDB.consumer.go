@@ -41,7 +41,7 @@ func (c *SyncAuthDBConsumer) ConsumeUserDB(ctx context.Context) {
 				c.dlqPublisher.PublishSyncUserDLQMessage(ctx, requestId, d.Body)
 				return rabbitmq.NackDiscard
 			}
-			err = c.handler.SyncUserDB(ctx, outbox.Payload)
+			err = c.handler.SyncUserDB(ctx, outbox.Payload, requestId)
 			if err != nil {
 				c.logger.Error("Failed to sync user DB", "", zap.Error(err))
 				c.dlqPublisher.PublishSyncUserDLQMessage(ctx, requestId, d.Body)

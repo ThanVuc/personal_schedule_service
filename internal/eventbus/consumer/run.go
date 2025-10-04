@@ -3,8 +3,8 @@ package consumer
 import (
 	"context"
 	"personal_schedule_service/global"
-	"personal_schedule_service/internal/eventbus/handler"
 	"personal_schedule_service/internal/eventbus/publisher"
+	"personal_schedule_service/internal/grpc/wire"
 )
 
 func RunConsumer(ctx context.Context) {
@@ -13,7 +13,7 @@ func RunConsumer(ctx context.Context) {
 	syncAuthDBConsumer := &SyncAuthDBConsumer{
 		logger:       global.Logger,
 		dlqPublisher: dlqPublisher,
-		handler:      handler.NewSyncAuthHandler(),
+		handler:      wire.InjectSyncAuthHandler(),
 	}
 
 	syncAuthDBConsumer.ConsumeUserDB(ctx)
