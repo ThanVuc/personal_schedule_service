@@ -5,6 +5,7 @@ import (
 	"os"
 	"os/signal"
 	"personal_schedule_service/global"
+	"personal_schedule_service/internal/eventbus/consumer"
 	"sync"
 	"syscall"
 
@@ -21,6 +22,7 @@ func Run() {
 	wg := &sync.WaitGroup{}
 
 	startGrpcSerivces(ctx, wg)
+	consumer.RunConsumer(ctx)
 
 	stop := make(chan os.Signal, 1)
 	signal.Notify(stop, syscall.SIGINT, syscall.SIGTERM)
