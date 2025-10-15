@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"personal_schedule_service/global"
 	"personal_schedule_service/internal/collection"
+	"personal_schedule_service/internal/grpc/services"
 	"sync"
 	"time"
 
@@ -28,10 +29,16 @@ func initMongoDB() {
 			global.MongoDbConntector, err = mongolib.NewMongoConnector(context.Background(), cfg)
 			if err == nil {
 				logger.Info("MongoDB connected successfully", "")
-
+				// create collections, validators, indexes
 				err := createCollections()
 				if err != nil {
 					logger.Error("Failed to create collections", "")
+				}
+
+				// seed initial data
+				err = seedData()
+				if err != nil {
+					panic("Failed to seed initial data")
 				}
 
 				return
@@ -59,4 +66,14 @@ func createMongoConfiguration() mongolib.MongoConnectorConfig {
 // call the create function in each model
 func createCollections() error {
 	return collection.CreateCollections()
+}
+
+func seedData() error {
+	labelService := services.NewLabelService()
+	err := labelService.SeedLabels(context.Background())
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

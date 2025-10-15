@@ -19,6 +19,7 @@ type Label struct {
 	LabelType      int           `bson:"label_type" json:"label_type"` // now integer
 	CreatedAt      time.Time     `bson:"created_at" json:"created_at"`
 	LastModifiedAt time.Time     `bson:"last_modified_at" json:"last_modified_at"`
+	Key            string        `bson:"key,omitempty" json:"key"`
 }
 
 func (l *Label) CollectionName() string {
@@ -66,6 +67,10 @@ func createLabelCollection() error {
 					"bsonType":    "date",
 					"description": "Last modification timestamp, required",
 				},
+				"key": bson.M{
+					"bsonType":    []string{"string"},
+					"description": "Optional key for additional identification",
+				},
 			},
 		},
 	}
@@ -78,6 +83,10 @@ func createLabelCollection() error {
 		{
 			Keys:    bson.D{{Key: "name", Value: 1}},
 			Options: options.Index().SetName("idx_name"),
+		},
+		{
+			Keys:    bson.D{{Key: "key", Value: 1}},
+			Options: options.Index().SetName("idx_key").SetUnique(true),
 		},
 	}
 
