@@ -1,4 +1,4 @@
-package constant
+package outbox_constant
 
 const (
 	EventTypeCreate = "create"
