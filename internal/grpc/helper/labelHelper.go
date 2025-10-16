@@ -7,9 +7,9 @@ import (
 	"time"
 )
 
-type LabelHelper struct{}
+type labelHelper struct{}
 
-func (h *LabelHelper) GenerateLabel() []collection.Label {
+func (h *labelHelper) GenerateLabel() []collection.Label {
 	now := time.Now()
 
 	labels := []collection.Label{

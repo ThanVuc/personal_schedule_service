@@ -13,7 +13,7 @@ import (
 
 type labelService struct {
 	mongoConnector mongolib.MongoConnector
-	labelHelper    *helper.LabelHelper
+	labelHelper    helper.LabelHelper
 	logger         log.Logger
 }
 

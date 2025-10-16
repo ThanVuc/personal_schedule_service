@@ -15,7 +15,7 @@ type (
 func NewLabelService() LabelService {
 	return &labelService{
 		mongoConnector: *global.MongoDbConntector,
-		labelHelper:    &helper.LabelHelper{},
+		labelHelper:    helper.NewLabelHelper(),
 		logger:         global.Logger,
 	}
 }
