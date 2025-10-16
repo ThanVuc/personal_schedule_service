@@ -83,6 +83,7 @@ type Error struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Code          ErrorCode              `protobuf:"varint,1,opt,name=code,proto3,enum=common.ErrorCode" json:"code"`
 	Message       string                 `protobuf:"bytes,2,opt,name=message,proto3" json:"message"`
+	ErrorCode     *int32                 `protobuf:"varint,3,opt,name=error_code,json=errorCode,proto3,oneof" json:"error_code"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -131,14 +132,24 @@ func (x *Error) GetMessage() string {
 	return ""
 }
 
+func (x *Error) GetErrorCode() int32 {
+	if x != nil && x.ErrorCode != nil {
+		return *x.ErrorCode
+	}
+	return 0
+}
+
 var File_common_error_proto protoreflect.FileDescriptor
 
 const file_common_error_proto_rawDesc = "" +
 	"\n" +
-	"\x12common/error.proto\x12\x06common\"H\n" +
+	"\x12common/error.proto\x12\x06common\"{\n" +
 	"\x05Error\x12%\n" +
 	"\x04code\x18\x01 \x01(\x0e2\x11.common.ErrorCodeR\x04code\x12\x18\n" +
-	"\amessage\x18\x02 \x01(\tR\amessage*\xc1\x01\n" +
+	"\amessage\x18\x02 \x01(\tR\amessage\x12\"\n" +
+	"\n" +
+	"error_code\x18\x03 \x01(\x05H\x00R\terrorCode\x88\x01\x01B\r\n" +
+	"\v_error_code*\xc1\x01\n" +
 	"\tErrorCode\x12\x1b\n" +
 	"\x17ERROR_CODE_UNAUTHORIZED\x10\x00\x12\x18\n" +
 	"\x14ERROR_CODE_NOT_FOUND\x10\x01\x12\x1d\n" +
@@ -179,6 +190,7 @@ func file_common_error_proto_init() {
 	if File_common_error_proto != nil {
 		return
 	}
+	file_common_error_proto_msgTypes[0].OneofWrappers = []any{}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
