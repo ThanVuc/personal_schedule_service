@@ -10,6 +10,7 @@ import (
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
+	sync "sync"
 	unsafe "unsafe"
 )
 
@@ -20,19 +21,192 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
+type Label struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id"`
+	Name          string                 `protobuf:"bytes,2,opt,name=name,proto3" json:"name"`
+	Key           string                 `protobuf:"bytes,3,opt,name=key,proto3" json:"key"`
+	Meaning       string                 `protobuf:"bytes,4,opt,name=meaning,proto3" json:"meaning"`
+	Note          string                 `protobuf:"bytes,5,opt,name=note,proto3" json:"note"`
+	Color         string                 `protobuf:"bytes,6,opt,name=color,proto3" json:"color"`
+	LabelType     int32                  `protobuf:"varint,7,opt,name=label_type,json=labelType,proto3" json:"label_type"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *Label) Reset() {
+	*x = Label{}
+	mi := &file_personal_schedule_service_common_schedule_proto_msgTypes[0]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *Label) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*Label) ProtoMessage() {}
+
+func (x *Label) ProtoReflect() protoreflect.Message {
+	mi := &file_personal_schedule_service_common_schedule_proto_msgTypes[0]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use Label.ProtoReflect.Descriptor instead.
+func (*Label) Descriptor() ([]byte, []int) {
+	return file_personal_schedule_service_common_schedule_proto_rawDescGZIP(), []int{0}
+}
+
+func (x *Label) GetId() string {
+	if x != nil {
+		return x.Id
+	}
+	return ""
+}
+
+func (x *Label) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *Label) GetKey() string {
+	if x != nil {
+		return x.Key
+	}
+	return ""
+}
+
+func (x *Label) GetMeaning() string {
+	if x != nil {
+		return x.Meaning
+	}
+	return ""
+}
+
+func (x *Label) GetNote() string {
+	if x != nil {
+		return x.Note
+	}
+	return ""
+}
+
+func (x *Label) GetColor() string {
+	if x != nil {
+		return x.Color
+	}
+	return ""
+}
+
+func (x *Label) GetLabelType() int32 {
+	if x != nil {
+		return x.LabelType
+	}
+	return 0
+}
+
+type LabelPerType struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Type          int32                  `protobuf:"varint,1,opt,name=type,proto3" json:"type"`
+	Labels        []*Label               `protobuf:"bytes,2,rep,name=labels,proto3" json:"labels"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *LabelPerType) Reset() {
+	*x = LabelPerType{}
+	mi := &file_personal_schedule_service_common_schedule_proto_msgTypes[1]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *LabelPerType) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*LabelPerType) ProtoMessage() {}
+
+func (x *LabelPerType) ProtoReflect() protoreflect.Message {
+	mi := &file_personal_schedule_service_common_schedule_proto_msgTypes[1]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use LabelPerType.ProtoReflect.Descriptor instead.
+func (*LabelPerType) Descriptor() ([]byte, []int) {
+	return file_personal_schedule_service_common_schedule_proto_rawDescGZIP(), []int{1}
+}
+
+func (x *LabelPerType) GetType() int32 {
+	if x != nil {
+		return x.Type
+	}
+	return 0
+}
+
+func (x *LabelPerType) GetLabels() []*Label {
+	if x != nil {
+		return x.Labels
+	}
+	return nil
+}
+
 var File_personal_schedule_service_common_schedule_proto protoreflect.FileDescriptor
 
 const file_personal_schedule_service_common_schedule_proto_rawDesc = "" +
 	"\n" +
-	"/personal_schedule_service/common.schedule.proto\x12\x11personal_scheduleB\x19Z\x17proto/personal_scheduleb\x06proto3"
+	"/personal_schedule_service/common.schedule.proto\x12\x11personal_schedule\"\xa0\x01\n" +
+	"\x05Label\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\x12\x12\n" +
+	"\x04name\x18\x02 \x01(\tR\x04name\x12\x10\n" +
+	"\x03key\x18\x03 \x01(\tR\x03key\x12\x18\n" +
+	"\ameaning\x18\x04 \x01(\tR\ameaning\x12\x12\n" +
+	"\x04note\x18\x05 \x01(\tR\x04note\x12\x14\n" +
+	"\x05color\x18\x06 \x01(\tR\x05color\x12\x1d\n" +
+	"\n" +
+	"label_type\x18\a \x01(\x05R\tlabelType\"T\n" +
+	"\fLabelPerType\x12\x12\n" +
+	"\x04type\x18\x01 \x01(\x05R\x04type\x120\n" +
+	"\x06labels\x18\x02 \x03(\v2\x18.personal_schedule.LabelR\x06labelsB\x19Z\x17proto/personal_scheduleb\x06proto3"
 
-var file_personal_schedule_service_common_schedule_proto_goTypes = []any{}
+var (
+	file_personal_schedule_service_common_schedule_proto_rawDescOnce sync.Once
+	file_personal_schedule_service_common_schedule_proto_rawDescData []byte
+)
+
+func file_personal_schedule_service_common_schedule_proto_rawDescGZIP() []byte {
+	file_personal_schedule_service_common_schedule_proto_rawDescOnce.Do(func() {
+		file_personal_schedule_service_common_schedule_proto_rawDescData = protoimpl.X.CompressGZIP(unsafe.Slice(unsafe.StringData(file_personal_schedule_service_common_schedule_proto_rawDesc), len(file_personal_schedule_service_common_schedule_proto_rawDesc)))
+	})
+	return file_personal_schedule_service_common_schedule_proto_rawDescData
+}
+
+var file_personal_schedule_service_common_schedule_proto_msgTypes = make([]protoimpl.MessageInfo, 2)
+var file_personal_schedule_service_common_schedule_proto_goTypes = []any{
+	(*Label)(nil),        // 0: personal_schedule.Label
+	(*LabelPerType)(nil), // 1: personal_schedule.LabelPerType
+}
 var file_personal_schedule_service_common_schedule_proto_depIdxs = []int32{
-	0, // [0:0] is the sub-list for method output_type
-	0, // [0:0] is the sub-list for method input_type
-	0, // [0:0] is the sub-list for extension type_name
-	0, // [0:0] is the sub-list for extension extendee
-	0, // [0:0] is the sub-list for field type_name
+	0, // 0: personal_schedule.LabelPerType.labels:type_name -> personal_schedule.Label
+	1, // [1:1] is the sub-list for method output_type
+	1, // [1:1] is the sub-list for method input_type
+	1, // [1:1] is the sub-list for extension type_name
+	1, // [1:1] is the sub-list for extension extendee
+	0, // [0:1] is the sub-list for field type_name
 }
 
 func init() { file_personal_schedule_service_common_schedule_proto_init() }
@@ -46,12 +220,13 @@ func file_personal_schedule_service_common_schedule_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_personal_schedule_service_common_schedule_proto_rawDesc), len(file_personal_schedule_service_common_schedule_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   0,
+			NumMessages:   2,
 			NumExtensions: 0,
 			NumServices:   0,
 		},
 		GoTypes:           file_personal_schedule_service_common_schedule_proto_goTypes,
 		DependencyIndexes: file_personal_schedule_service_common_schedule_proto_depIdxs,
+		MessageInfos:      file_personal_schedule_service_common_schedule_proto_msgTypes,
 	}.Build()
 	File_personal_schedule_service_common_schedule_proto = out.File
 	file_personal_schedule_service_common_schedule_proto_goTypes = nil
