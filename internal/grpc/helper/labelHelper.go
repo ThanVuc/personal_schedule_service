@@ -25,8 +25,8 @@ func (h *labelHelper) GenerateLabel() []collection.Label {
 			LastModifiedAt: now,
 		},
 		{
-			Name:           "Hàng Ngày",
-			Key:            labels_constant.LabelDaily,
+			Name:           "Trong Ngày",
+			Key:            labels_constant.LabelInDay,
 			Meaning:        utils.ToStringPointer("Công việc thực hiện chỉ trong ngày hôm đó"),
 			Note:           utils.ToStringPointer("Thường dùng cho các tác vụ giải quyết được trong ngày, không cần kéo dài"),
 			Color:          utils.ToStringPointer("#E8E8E8"),

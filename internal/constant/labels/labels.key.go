@@ -5,7 +5,7 @@ const (
 	// Work Type
 	LabelRepeated = "REPEATED"
 	LabelGroup    = "GROUP"
-	LabelDaily    = "DAILY"
+	LabelInDay    = "IN_DAY"
 
 	// Status
 	LabelPending    = "PENDING"
