@@ -24,8 +24,12 @@ func (lr *labelRepo) CountLabels(ctx context.Context) (int, error) {
 }
 
 func (lr *labelRepo) InsertLabels(ctx context.Context, labels *[]collection.Label) error {
+	if labels == nil || len(*labels) == 0 {
+		return nil
+	}
+
 	collection := lr.mongoConnector.GetCollection(collection.LabelsCollection)
-	_, err := collection.InsertMany(ctx, labels)
+	_, err := collection.InsertMany(ctx, *labels)
 	if err != nil {
 		return err
 	}
