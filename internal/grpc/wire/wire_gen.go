@@ -8,8 +8,21 @@ package wire
 
 import (
 	"personal_schedule_service/internal/eventbus/handler"
+	"personal_schedule_service/internal/grpc/controller"
+	"personal_schedule_service/internal/grpc/mapper"
+	"personal_schedule_service/internal/grpc/services"
 	"personal_schedule_service/internal/repos"
 )
+
+// Injectors from controller.wire.go:
+
+func InjectLabelController() *controller.LabelController {
+	labelRepo := repos.NewLabelRepo()
+	labelMapper := mapper.NewLabelMapper()
+	labelService := services.NewLabelService(labelRepo, labelMapper)
+	labelController := controller.NewLabelController(labelService)
+	return labelController
+}
 
 // Injectors from handler.wire.go:
 

@@ -20,8 +20,8 @@ func initConfigAndResources() error {
 }
 
 func startGrpcSerivces(ctx context.Context, wg *sync.WaitGroup) {
-	authService := NewAuthService()
-	authService.runServers(ctx, wg)
+	personalScheduleService := NewPersonalScheduleService()
+	personalScheduleService.runServers(ctx, wg)
 }
 
 func gracefulShutdown(wg *sync.WaitGroup, logger log.Logger) {

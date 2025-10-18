@@ -5,7 +5,9 @@ import (
 	"fmt"
 	"personal_schedule_service/global"
 	"personal_schedule_service/internal/collection"
+	"personal_schedule_service/internal/grpc/mapper"
 	"personal_schedule_service/internal/grpc/services"
+	"personal_schedule_service/internal/repos"
 	"sync"
 	"time"
 
@@ -69,7 +71,10 @@ func createCollections() error {
 }
 
 func seedData() error {
-	labelService := services.NewLabelService()
+	labelService := services.NewLabelService(
+		repos.NewLabelRepo(),
+		mapper.NewLabelMapper(),
+	)
 	err := labelService.SeedLabels(context.Background())
 	if err != nil {
 		return err
