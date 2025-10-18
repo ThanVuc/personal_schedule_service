@@ -79,3 +79,44 @@ func InternalServerError(ctx context.Context, err error) *common.Error {
 	}
 	return e
 }
+
+// CustomError allows creating a custom error with a specific error code and message.
+// with code is the type of common.ErrorCode
+// errorCode is an integer representing a specific error scenario within that type.
+// errorCode is defined in the ErrorMessage const map on each service level.
+func CustomError(ctx context.Context, code common.ErrorCode, errorCode int32, err error) *common.Error {
+	logger := global.Logger
+	requestId := GetRequestIDFromOutgoingContext(ctx)
+	logger.Error("Custom error occurred", requestId, zap.Error(err))
+	e := &common.Error{
+		Code:      code,
+		Message:   GetErrorKeyByCode(code),
+		ErrorCode: &errorCode,
+	}
+	return e
+}
+
+func GetErrorKeyByCode(code common.ErrorCode) string {
+	// ERROR_CODE_UNAUTHORIZED = 0;
+	// ERROR_CODE_NOT_FOUND = 1;
+	// ERROR_CODE_DATABASE_ERROR = 2;
+	// ERROR_CODE_RUN_TIME_ERROR = 3;
+	// ERROR_CODE_PERMISSION_DENIED = 4;
+	// ERROR_CODE_INTERNAL_ERROR = 5;
+	switch code {
+	case common.ErrorCode_ERROR_CODE_UNAUTHORIZED:
+		return "UnauthorizedError"
+	case common.ErrorCode_ERROR_CODE_NOT_FOUND:
+		return "NotFoundError"
+	case common.ErrorCode_ERROR_CODE_DATABASE_ERROR:
+		return "DatabaseError"
+	case common.ErrorCode_ERROR_CODE_RUN_TIME_ERROR:
+		return "RuntimeError"
+	case common.ErrorCode_ERROR_CODE_PERMISSION_DENIED:
+		return "PermissionDeniedError"
+	case common.ErrorCode_ERROR_CODE_INTERNAL_ERROR:
+		return "InternalServerError"
+	default:
+		return "RuntimeError"
+	}
+}
