@@ -5,7 +5,10 @@ import (
 	"fmt"
 	"net"
 	"personal_schedule_service/global"
+	"personal_schedule_service/internal/grpc/controller"
+	"personal_schedule_service/internal/grpc/wire"
 	"personal_schedule_service/pkg/settings"
+	"personal_schedule_service/proto/personal_schedule"
 	"sync"
 
 	"github.com/thanvuc/go-core-lib/log"
@@ -13,76 +16,80 @@ import (
 	"google.golang.org/grpc"
 )
 
-type AuthServer struct {
-	logger log.Logger
-	config *settings.Server
+type PersonalScheduleServer struct {
+	logger             log.Logger
+	config             *settings.Server
+	labelServiceServer *controller.LabelController
 }
 
-func NewAuthService() *AuthServer {
-	return &AuthServer{
-		logger: global.Logger,
-		config: &global.Config.Server,
+func NewPersonalScheduleService() *PersonalScheduleServer {
+	return &PersonalScheduleServer{
+		logger:             global.Logger,
+		config:             &global.Config.Server,
+		labelServiceServer: wire.InjectLabelController(),
 	}
 }
 
-func (as *AuthServer) runServers(ctx context.Context, wg *sync.WaitGroup) {
+func (ps *PersonalScheduleServer) runServers(ctx context.Context, wg *sync.WaitGroup) {
 	wg.Add(1)
-	go as.runServiceServer(ctx, wg)
+	go ps.runServiceServer(ctx, wg)
 }
 
 // create server factory
-func (as *AuthServer) createServer() *grpc.Server {
+func (ps *PersonalScheduleServer) createServer() *grpc.Server {
 	server := grpc.NewServer()
+
+	personal_schedule.RegisterLabelServiceServer(server, ps.labelServiceServer)
 
 	return server
 }
 
-func (as *AuthServer) runServiceServer(ctx context.Context, wg *sync.WaitGroup) {
+func (ps *PersonalScheduleServer) runServiceServer(ctx context.Context, wg *sync.WaitGroup) {
 	defer wg.Done()
-	lis, err := as.createListener()
+	lis, err := ps.createListener()
 	if err != nil {
-		as.logger.Error("Failed to create listener",
+		ps.logger.Error("Failed to create listener",
 			"", zap.Error(err),
 		)
 		return
 	}
 
 	// Create a new gRPC server instance
-	server := as.createServer()
+	server := ps.createServer()
 
 	// Gracefully handle server shutdown
-	go as.gracefullyShutdownServer(ctx, server)
+	go ps.gracefullyShutdownServer(ctx, server)
 
 	// Server listening on the specified port
-	as.serverListening(server, lis)
+	ps.serverListening(server, lis)
 }
 
-func (as *AuthServer) gracefullyShutdownServer(ctx context.Context, server *grpc.Server) {
+func (ps *PersonalScheduleServer) gracefullyShutdownServer(ctx context.Context, server *grpc.Server) {
 	<-ctx.Done()
-	as.logger.Info("gRPC server is shutting down...", "")
+	ps.logger.Info("gRPC server is shutting down...", "")
 	server.GracefulStop()
-	as.logger.Info("gRPC server stopped gracefully!", "")
+	ps.logger.Info("gRPC server stopped gracefully!", "")
 }
 
-func (as *AuthServer) serverListening(server *grpc.Server, lis net.Listener) {
-	as.logger.Info(fmt.Sprintf("gRPC server listening on %s:%d", as.config.Host, lis.Addr().(*net.TCPAddr).Port), "")
+func (ps *PersonalScheduleServer) serverListening(server *grpc.Server, lis net.Listener) {
+	ps.logger.Info(fmt.Sprintf("gRPC server listening on %s:%d", ps.config.Host, lis.Addr().(*net.TCPAddr).Port), "")
 	if err := server.Serve(lis); err != nil {
 		if err == grpc.ErrServerStopped {
-			as.logger.Info("gRPC server exited normally", "")
+			ps.logger.Info("gRPC server exited normally", "")
 		} else {
-			as.logger.Error("Failed to serve gRPC server",
+			ps.logger.Error("Failed to serve gRPC server",
 				"", zap.Error(err),
 			)
 		}
 	}
 }
 
-func (as *AuthServer) createListener() (net.Listener, error) {
+func (ps *PersonalScheduleServer) createListener() (net.Listener, error) {
 	err := error(nil)
 	lis := net.Listener(nil)
-	lis, err = net.Listen("tcp", fmt.Sprintf("%s:%d", as.config.Host, as.config.PersonalSchedulePort))
+	lis, err = net.Listen("tcp", fmt.Sprintf("%s:%d", ps.config.Host, ps.config.PersonalSchedulePort))
 	if err != nil {
-		as.logger.Error("Failed to listen: %v", "", zap.Error(err))
+		ps.logger.Error("Failed to listen: %v", "", zap.Error(err))
 		return nil, err
 	}
 
