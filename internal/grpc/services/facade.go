@@ -14,6 +14,7 @@ type (
 	LabelService interface {
 		SeedLabels(ctx context.Context) error
 		GetLabelPerTypes(ctx context.Context, req *common.EmptyRequest) (*personal_schedule.GetLabelPerTypesResponse, error)
+		GetLabelsByTypeIDs(ctx context.Context, req *common.IDRequest) (*personal_schedule.GetLabelsByTypeIDsResponse, error)
 	}
 )
 

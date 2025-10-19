@@ -39,3 +39,12 @@ func ToBoolPointer(b bool) *bool {
 func ToStringPointer(s string) *string {
 	return &s
 }
+
+func StringToInt32(s string) int32 {
+	var result int32
+	err := json.Unmarshal([]byte(s), &result)
+	if err != nil {
+		return 0
+	}
+	return result
+}

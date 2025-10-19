@@ -8,6 +8,7 @@ import (
 type (
 	LabelMapper interface {
 		MapLabelsToLabelTypesProto(labels []collection.Label) []*personal_schedule.LabelPerType
+		MapLabelsToLabelsProto(labels []collection.Label) []*personal_schedule.Label
 	}
 )
 

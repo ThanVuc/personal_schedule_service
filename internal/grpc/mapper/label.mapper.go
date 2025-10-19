@@ -12,15 +12,7 @@ func (m *labelMapper) MapLabelsToLabelTypesProto(labels []collection.Label) []*p
 	var protoLabels []*personal_schedule.LabelPerType
 	var labelTypeMap = make(map[int32][]*personal_schedule.Label)
 	for _, label := range labels {
-		labelProto := &personal_schedule.Label{
-			Id:        label.ID.Hex(),
-			Name:      label.Name,
-			Color:     *label.Color,
-			Key:       label.Key,
-			Meaning:   *label.Meaning,
-			Note:      *label.Note,
-			LabelType: int32(label.LabelType),
-		}
+		labelProto := m.MapLabelToLabelProto(label)
 		labelTypeMap[int32(label.LabelType)] = append(labelTypeMap[int32(label.LabelType)], labelProto)
 	}
 
@@ -37,4 +29,26 @@ func (m *labelMapper) MapLabelsToLabelTypesProto(labels []collection.Label) []*p
 	})
 
 	return protoLabels
+}
+
+func (m *labelMapper) MapLabelsToLabelsProto(labels []collection.Label) []*personal_schedule.Label {
+	var protoLabels []*personal_schedule.Label
+	for _, label := range labels {
+		labelProto := m.MapLabelToLabelProto(label)
+		protoLabels = append(protoLabels, labelProto)
+	}
+
+	return protoLabels
+}
+
+func (m *labelMapper) MapLabelToLabelProto(labels collection.Label) *personal_schedule.Label {
+	return &personal_schedule.Label{
+		Id:        labels.ID.Hex(),
+		Name:      labels.Name,
+		Color:     *labels.Color,
+		Key:       labels.Key,
+		Meaning:   *labels.Meaning,
+		Note:      *labels.Note,
+		LabelType: int32(labels.LabelType),
+	}
 }
