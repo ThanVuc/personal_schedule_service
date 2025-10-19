@@ -87,7 +87,7 @@ func InternalServerError(ctx context.Context, err error) *common.Error {
 func CustomError(ctx context.Context, code common.ErrorCode, errorCode int32, err error) *common.Error {
 	logger := global.Logger
 	requestId := GetRequestIDFromOutgoingContext(ctx)
-	logger.Error("Custom error occurred", requestId, zap.Error(err))
+	logger.Error("custom error occurred", requestId, zap.Error(err))
 	e := &common.Error{
 		Code:      code,
 		Message:   GetErrorKeyByCode(code),

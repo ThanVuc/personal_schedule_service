@@ -2,6 +2,7 @@ package services
 
 import (
 	"context"
+	"fmt"
 	"personal_schedule_service/internal/grpc/helper"
 	"personal_schedule_service/internal/grpc/mapper"
 	"personal_schedule_service/internal/grpc/utils"
@@ -66,6 +67,30 @@ func (s *labelService) GetLabelPerTypes(ctx context.Context, req *common.EmptyRe
 	resp := &personal_schedule.GetLabelPerTypesResponse{
 		LabelPerTypes: labelPerTypes,
 		Error:         nil,
+	}
+
+	return resp, nil
+}
+
+func (s *labelService) GetLabelsByTypeIDs(ctx context.Context, req *common.IDRequest) (*personal_schedule.GetLabelsByTypeIDsResponse, error) {
+	labels, err := s.labelRepo.GetLabelsByTypeIDs(ctx, utils.StringToInt32(req.Id))
+	if err != nil {
+		return &personal_schedule.GetLabelsByTypeIDsResponse{
+			Labels: nil,
+			Error:  utils.DatabaseError(ctx, err),
+		}, err
+	}
+
+	if len(labels) == 0 {
+		return &personal_schedule.GetLabelsByTypeIDsResponse{
+			Labels: nil,
+			Error:  utils.CustomError(ctx, common.ErrorCode_ERROR_CODE_NOT_FOUND, app_error.LabelNotFoundCode, fmt.Errorf("not found the labels")),
+		}, nil
+	}
+
+	resp := &personal_schedule.GetLabelsByTypeIDsResponse{
+		Labels: s.labelMapper.MapLabelsToLabelsProto(labels),
+		Error:  nil,
 	}
 
 	return resp, nil

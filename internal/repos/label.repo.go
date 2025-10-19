@@ -7,6 +7,7 @@ import (
 	"github.com/thanvuc/go-core-lib/log"
 	"github.com/thanvuc/go-core-lib/mongolib"
 	"go.mongodb.org/mongo-driver/v2/bson"
+	"go.mongodb.org/mongo-driver/v2/mongo/options"
 )
 
 type labelRepo struct {
@@ -48,5 +49,21 @@ func (lr *labelRepo) GetLabels(ctx context.Context) ([]collection.Label, error) 
 		return nil, err
 	}
 
+	return labels, nil
+}
+
+func (lr *labelRepo) GetLabelsByTypeIDs(ctx context.Context, typeID int32) ([]collection.Label, error) {
+	var labels []collection.Label
+	collection := lr.mongoConnector.GetCollection(collection.LabelsCollection)
+	println("typeID:", typeID)
+	filter := bson.M{"label_type": typeID}
+	options := options.Find().SetSort(bson.D{{Key: "color", Value: 1}})
+	cursor, err := collection.Find(ctx, filter, options)
+	if err != nil {
+		return nil, err
+	}
+	if err = cursor.All(ctx, &labels); err != nil {
+		return nil, err
+	}
 	return labels, nil
 }

@@ -16,6 +16,7 @@ type (
 		CountLabels(ctx context.Context) (int, error)
 		InsertLabels(ctx context.Context, labels *[]collection.Label) error
 		GetLabels(ctx context.Context) ([]collection.Label, error)
+		GetLabelsByTypeIDs(ctx context.Context, typeIDs int32) ([]collection.Label, error)
 	}
 )
 
