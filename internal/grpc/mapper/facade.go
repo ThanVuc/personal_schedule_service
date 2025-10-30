@@ -2,6 +2,7 @@ package mapper
 
 import (
 	"personal_schedule_service/internal/collection"
+	"personal_schedule_service/internal/repos"
 	"personal_schedule_service/proto/personal_schedule"
 )
 
@@ -10,8 +11,17 @@ type (
 		MapLabelsToLabelTypesProto(labels []collection.Label) []*personal_schedule.LabelPerType
 		MapLabelsToLabelsProto(labels []collection.Label) []*personal_schedule.Label
 	}
+
+	GoalMapper interface {
+		ConvertAggregatedGoalsToProto(aggGoals []repos.AggregatedGoal) []*personal_schedule.Goal
+		MapAggregatedGoalToProto(aggGoal repos.AggregatedGoal) *personal_schedule.Goal
+	}
 )
 
 func NewLabelMapper() LabelMapper {
 	return &labelMapper{}
+}
+
+func NewGoalMapper() GoalMapper {
+	return &goalMapper{}
 }
