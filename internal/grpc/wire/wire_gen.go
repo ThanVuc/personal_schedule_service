@@ -24,6 +24,14 @@ func InjectLabelController() *controller.LabelController {
 	return labelController
 }
 
+func InjectGoalController() *controller.GoalController {
+	goalRepo := repos.NewGoalRepo()
+	goalMapper := mapper.NewGoalMapper()
+	goalService := services.NewGoalService(goalRepo, goalMapper)
+	goalController := controller.NewGoalController(goalService)
+	return goalController
+}
+
 // Injectors from handler.wire.go:
 
 func InjectSyncAuthHandler() *handler.SyncAuthHandler {

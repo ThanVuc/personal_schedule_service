@@ -16,6 +16,10 @@ type (
 		GetLabelPerTypes(ctx context.Context, req *common.EmptyRequest) (*personal_schedule.GetLabelPerTypesResponse, error)
 		GetLabelsByTypeIDs(ctx context.Context, req *common.IDRequest) (*personal_schedule.GetLabelsByTypeIDsResponse, error)
 	}
+
+	GoalService interface {
+		GetGoals(ctx context.Context, req *personal_schedule.GetGoalsRequest) (*personal_schedule.GetGoalsResponse, error)
+	}
 )
 
 func NewLabelService(
@@ -27,5 +31,16 @@ func NewLabelService(
 		logger:      global.Logger,
 		labelRepo:   labelRepo,
 		labelMapper: labelMapper,
+	}
+}
+
+func NewGoalService(
+	goalRepo repos.GoalRepo,
+	goalMapper mapper.GoalMapper,
+) GoalService {
+	return &goalService{
+		logger:     global.Logger,
+		goalRepo:   goalRepo,
+		goalMapper: goalMapper,
 	}
 }
