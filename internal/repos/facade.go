@@ -5,6 +5,7 @@ import (
 	"personal_schedule_service/global"
 	"personal_schedule_service/internal/collection"
 	"personal_schedule_service/internal/grpc/models"
+	"personal_schedule_service/proto/personal_schedule"
 )
 
 type (
@@ -18,6 +19,10 @@ type (
 		GetLabels(ctx context.Context) ([]collection.Label, error)
 		GetLabelsByTypeIDs(ctx context.Context, typeIDs int32) ([]collection.Label, error)
 	}
+
+	GoalRepo interface {
+		GetGoals(ctx context.Context, req *personal_schedule.GetGoalsRequest) ([]AggregatedGoal, int32, error)
+	}
 )
 
 func NewUserRepo() UserRepo {
@@ -29,6 +34,13 @@ func NewUserRepo() UserRepo {
 
 func NewLabelRepo() LabelRepo {
 	return &labelRepo{
+		logger:         global.Logger,
+		mongoConnector: global.MongoDbConntector,
+	}
+}
+
+func NewGoalRepo() GoalRepo {
+	return &goalRepo{
 		logger:         global.Logger,
 		mongoConnector: global.MongoDbConntector,
 	}
