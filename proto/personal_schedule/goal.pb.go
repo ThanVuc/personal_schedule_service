@@ -158,6 +158,190 @@ func (x *GetGoalsResponse) GetError() *common.Error {
 	return nil
 }
 
+type UpsertGoalRequest struct {
+	state               protoimpl.MessageState `protogen:"open.v1"`
+	UserId              string                 `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id"`
+	Id                  *string                `protobuf:"bytes,2,opt,name=id,proto3,oneof" json:"id"`
+	Name                string                 `protobuf:"bytes,3,opt,name=name,proto3" json:"name"`
+	ShortDescriptions   *string                `protobuf:"bytes,4,opt,name=short_descriptions,json=shortDescriptions,proto3,oneof" json:"short_descriptions"`
+	DetailedDescription *string                `protobuf:"bytes,5,opt,name=detailed_description,json=detailedDescription,proto3,oneof" json:"detailed_description"`
+	StartDate           *int64                 `protobuf:"varint,6,opt,name=start_date,json=startDate,proto3,oneof" json:"start_date"`
+	EndDate             *int64                 `protobuf:"varint,7,opt,name=end_date,json=endDate,proto3,oneof" json:"end_date"`
+	StatusId            string                 `protobuf:"bytes,8,opt,name=status_id,json=statusId,proto3" json:"status_id"`
+	DifficultyId        string                 `protobuf:"bytes,9,opt,name=difficulty_id,json=difficultyId,proto3" json:"difficulty_id"`
+	PriorityId          string                 `protobuf:"bytes,10,opt,name=priority_id,json=priorityId,proto3" json:"priority_id"`
+	Tasks               []*GoalTaskPayload     `protobuf:"bytes,11,rep,name=tasks,proto3" json:"tasks"`
+	unknownFields       protoimpl.UnknownFields
+	sizeCache           protoimpl.SizeCache
+}
+
+func (x *UpsertGoalRequest) Reset() {
+	*x = UpsertGoalRequest{}
+	mi := &file_personal_schedule_service_goal_proto_msgTypes[2]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UpsertGoalRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UpsertGoalRequest) ProtoMessage() {}
+
+func (x *UpsertGoalRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_personal_schedule_service_goal_proto_msgTypes[2]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UpsertGoalRequest.ProtoReflect.Descriptor instead.
+func (*UpsertGoalRequest) Descriptor() ([]byte, []int) {
+	return file_personal_schedule_service_goal_proto_rawDescGZIP(), []int{2}
+}
+
+func (x *UpsertGoalRequest) GetUserId() string {
+	if x != nil {
+		return x.UserId
+	}
+	return ""
+}
+
+func (x *UpsertGoalRequest) GetId() string {
+	if x != nil && x.Id != nil {
+		return *x.Id
+	}
+	return ""
+}
+
+func (x *UpsertGoalRequest) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *UpsertGoalRequest) GetShortDescriptions() string {
+	if x != nil && x.ShortDescriptions != nil {
+		return *x.ShortDescriptions
+	}
+	return ""
+}
+
+func (x *UpsertGoalRequest) GetDetailedDescription() string {
+	if x != nil && x.DetailedDescription != nil {
+		return *x.DetailedDescription
+	}
+	return ""
+}
+
+func (x *UpsertGoalRequest) GetStartDate() int64 {
+	if x != nil && x.StartDate != nil {
+		return *x.StartDate
+	}
+	return 0
+}
+
+func (x *UpsertGoalRequest) GetEndDate() int64 {
+	if x != nil && x.EndDate != nil {
+		return *x.EndDate
+	}
+	return 0
+}
+
+func (x *UpsertGoalRequest) GetStatusId() string {
+	if x != nil {
+		return x.StatusId
+	}
+	return ""
+}
+
+func (x *UpsertGoalRequest) GetDifficultyId() string {
+	if x != nil {
+		return x.DifficultyId
+	}
+	return ""
+}
+
+func (x *UpsertGoalRequest) GetPriorityId() string {
+	if x != nil {
+		return x.PriorityId
+	}
+	return ""
+}
+
+func (x *UpsertGoalRequest) GetTasks() []*GoalTaskPayload {
+	if x != nil {
+		return x.Tasks
+	}
+	return nil
+}
+
+type UpsertGoalResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	IsSuccess     bool                   `protobuf:"varint,1,opt,name=is_success,json=isSuccess,proto3" json:"is_success"`
+	Message       string                 `protobuf:"bytes,2,opt,name=message,proto3" json:"message"`
+	Error         *common.Error          `protobuf:"bytes,3,opt,name=error,proto3,oneof" json:"error"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *UpsertGoalResponse) Reset() {
+	*x = UpsertGoalResponse{}
+	mi := &file_personal_schedule_service_goal_proto_msgTypes[3]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UpsertGoalResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UpsertGoalResponse) ProtoMessage() {}
+
+func (x *UpsertGoalResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_personal_schedule_service_goal_proto_msgTypes[3]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UpsertGoalResponse.ProtoReflect.Descriptor instead.
+func (*UpsertGoalResponse) Descriptor() ([]byte, []int) {
+	return file_personal_schedule_service_goal_proto_rawDescGZIP(), []int{3}
+}
+
+func (x *UpsertGoalResponse) GetIsSuccess() bool {
+	if x != nil {
+		return x.IsSuccess
+	}
+	return false
+}
+
+func (x *UpsertGoalResponse) GetMessage() string {
+	if x != nil {
+		return x.Message
+	}
+	return ""
+}
+
+func (x *UpsertGoalResponse) GetError() *common.Error {
+	if x != nil {
+		return x.Error
+	}
+	return nil
+}
+
 var File_personal_schedule_service_goal_proto protoreflect.FileDescriptor
 
 const file_personal_schedule_service_goal_proto_rawDesc = "" +
@@ -175,9 +359,37 @@ const file_personal_schedule_service_goal_proto_rawDesc = "" +
 	"\vtotal_goals\x18\x03 \x01(\x05R\n" +
 	"totalGoals\x12(\n" +
 	"\x05error\x18\x04 \x01(\v2\r.common.ErrorH\x00R\x05error\x88\x01\x01B\b\n" +
-	"\x06_error2b\n" +
+	"\x06_error\"\xf5\x03\n" +
+	"\x11UpsertGoalRequest\x12\x17\n" +
+	"\auser_id\x18\x01 \x01(\tR\x06userId\x12\x13\n" +
+	"\x02id\x18\x02 \x01(\tH\x00R\x02id\x88\x01\x01\x12\x12\n" +
+	"\x04name\x18\x03 \x01(\tR\x04name\x122\n" +
+	"\x12short_descriptions\x18\x04 \x01(\tH\x01R\x11shortDescriptions\x88\x01\x01\x126\n" +
+	"\x14detailed_description\x18\x05 \x01(\tH\x02R\x13detailedDescription\x88\x01\x01\x12\"\n" +
+	"\n" +
+	"start_date\x18\x06 \x01(\x03H\x03R\tstartDate\x88\x01\x01\x12\x1e\n" +
+	"\bend_date\x18\a \x01(\x03H\x04R\aendDate\x88\x01\x01\x12\x1b\n" +
+	"\tstatus_id\x18\b \x01(\tR\bstatusId\x12#\n" +
+	"\rdifficulty_id\x18\t \x01(\tR\fdifficultyId\x12\x1f\n" +
+	"\vpriority_id\x18\n" +
+	" \x01(\tR\n" +
+	"priorityId\x128\n" +
+	"\x05tasks\x18\v \x03(\v2\".personal_schedule.GoalTaskPayloadR\x05tasksB\x05\n" +
+	"\x03_idB\x15\n" +
+	"\x13_short_descriptionsB\x17\n" +
+	"\x15_detailed_descriptionB\r\n" +
+	"\v_start_dateB\v\n" +
+	"\t_end_date\"\x81\x01\n" +
+	"\x12UpsertGoalResponse\x12\x1d\n" +
+	"\n" +
+	"is_success\x18\x01 \x01(\bR\tisSuccess\x12\x18\n" +
+	"\amessage\x18\x02 \x01(\tR\amessage\x12(\n" +
+	"\x05error\x18\x03 \x01(\v2\r.common.ErrorH\x00R\x05error\x88\x01\x01B\b\n" +
+	"\x06_error2\xbd\x01\n" +
 	"\vGoalService\x12S\n" +
-	"\bGetGoals\x12\".personal_schedule.GetGoalsRequest\x1a#.personal_schedule.GetGoalsResponseB\x19Z\x17proto/personal_scheduleb\x06proto3"
+	"\bGetGoals\x12\".personal_schedule.GetGoalsRequest\x1a#.personal_schedule.GetGoalsResponse\x12Y\n" +
+	"\n" +
+	"UpsertGoal\x12$.personal_schedule.UpsertGoalRequest\x1a%.personal_schedule.UpsertGoalResponseB\x19Z\x17proto/personal_scheduleb\x06proto3"
 
 var (
 	file_personal_schedule_service_goal_proto_rawDescOnce sync.Once
@@ -191,27 +403,34 @@ func file_personal_schedule_service_goal_proto_rawDescGZIP() []byte {
 	return file_personal_schedule_service_goal_proto_rawDescData
 }
 
-var file_personal_schedule_service_goal_proto_msgTypes = make([]protoimpl.MessageInfo, 2)
+var file_personal_schedule_service_goal_proto_msgTypes = make([]protoimpl.MessageInfo, 4)
 var file_personal_schedule_service_goal_proto_goTypes = []any{
-	(*GetGoalsRequest)(nil),  // 0: personal_schedule.GetGoalsRequest
-	(*GetGoalsResponse)(nil), // 1: personal_schedule.GetGoalsResponse
-	(*common.PageQuery)(nil), // 2: common.PageQuery
-	(*Goal)(nil),             // 3: personal_schedule.Goal
-	(*common.PageInfo)(nil),  // 4: common.PageInfo
-	(*common.Error)(nil),     // 5: common.Error
+	(*GetGoalsRequest)(nil),    // 0: personal_schedule.GetGoalsRequest
+	(*GetGoalsResponse)(nil),   // 1: personal_schedule.GetGoalsResponse
+	(*UpsertGoalRequest)(nil),  // 2: personal_schedule.UpsertGoalRequest
+	(*UpsertGoalResponse)(nil), // 3: personal_schedule.UpsertGoalResponse
+	(*common.PageQuery)(nil),   // 4: common.PageQuery
+	(*Goal)(nil),               // 5: personal_schedule.Goal
+	(*common.PageInfo)(nil),    // 6: common.PageInfo
+	(*common.Error)(nil),       // 7: common.Error
+	(*GoalTaskPayload)(nil),    // 8: personal_schedule.GoalTaskPayload
 }
 var file_personal_schedule_service_goal_proto_depIdxs = []int32{
-	2, // 0: personal_schedule.GetGoalsRequest.page_query:type_name -> common.PageQuery
-	3, // 1: personal_schedule.GetGoalsResponse.goals:type_name -> personal_schedule.Goal
-	4, // 2: personal_schedule.GetGoalsResponse.page_info:type_name -> common.PageInfo
-	5, // 3: personal_schedule.GetGoalsResponse.error:type_name -> common.Error
-	0, // 4: personal_schedule.GoalService.GetGoals:input_type -> personal_schedule.GetGoalsRequest
-	1, // 5: personal_schedule.GoalService.GetGoals:output_type -> personal_schedule.GetGoalsResponse
-	5, // [5:6] is the sub-list for method output_type
-	4, // [4:5] is the sub-list for method input_type
-	4, // [4:4] is the sub-list for extension type_name
-	4, // [4:4] is the sub-list for extension extendee
-	0, // [0:4] is the sub-list for field type_name
+	4, // 0: personal_schedule.GetGoalsRequest.page_query:type_name -> common.PageQuery
+	5, // 1: personal_schedule.GetGoalsResponse.goals:type_name -> personal_schedule.Goal
+	6, // 2: personal_schedule.GetGoalsResponse.page_info:type_name -> common.PageInfo
+	7, // 3: personal_schedule.GetGoalsResponse.error:type_name -> common.Error
+	8, // 4: personal_schedule.UpsertGoalRequest.tasks:type_name -> personal_schedule.GoalTaskPayload
+	7, // 5: personal_schedule.UpsertGoalResponse.error:type_name -> common.Error
+	0, // 6: personal_schedule.GoalService.GetGoals:input_type -> personal_schedule.GetGoalsRequest
+	2, // 7: personal_schedule.GoalService.UpsertGoal:input_type -> personal_schedule.UpsertGoalRequest
+	1, // 8: personal_schedule.GoalService.GetGoals:output_type -> personal_schedule.GetGoalsResponse
+	3, // 9: personal_schedule.GoalService.UpsertGoal:output_type -> personal_schedule.UpsertGoalResponse
+	8, // [8:10] is the sub-list for method output_type
+	6, // [6:8] is the sub-list for method input_type
+	6, // [6:6] is the sub-list for extension type_name
+	6, // [6:6] is the sub-list for extension extendee
+	0, // [0:6] is the sub-list for field type_name
 }
 
 func init() { file_personal_schedule_service_goal_proto_init() }
@@ -221,13 +440,15 @@ func file_personal_schedule_service_goal_proto_init() {
 	}
 	file_personal_schedule_service_common_schedule_proto_init()
 	file_personal_schedule_service_goal_proto_msgTypes[1].OneofWrappers = []any{}
+	file_personal_schedule_service_goal_proto_msgTypes[2].OneofWrappers = []any{}
+	file_personal_schedule_service_goal_proto_msgTypes[3].OneofWrappers = []any{}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_personal_schedule_service_goal_proto_rawDesc), len(file_personal_schedule_service_goal_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   2,
+			NumMessages:   4,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

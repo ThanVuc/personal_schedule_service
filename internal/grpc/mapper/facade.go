@@ -14,7 +14,7 @@ type (
 
 	GoalMapper interface {
 		ConvertAggregatedGoalsToProto(aggGoals []repos.AggregatedGoal) []*personal_schedule.Goal
-		MapAggregatedGoalToProto(aggGoal repos.AggregatedGoal) *personal_schedule.Goal
+		MapUpsertProtoToModels(req *personal_schedule.UpsertGoalRequest) (*collection.Goal, []collection.GoalTask, error)
 	}
 )
 
