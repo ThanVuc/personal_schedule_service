@@ -23,3 +23,7 @@ func NewGoalController(
 func (g *GoalController) GetGoals(ctx context.Context, req *personal_schedule.GetGoalsRequest) (*personal_schedule.GetGoalsResponse, error) {
 	return utils.WithSafePanic(ctx, req, g.goalService.GetGoals)
 }
+
+func (g *GoalController) UpsertGoal(ctx context.Context, req *personal_schedule.UpsertGoalRequest) (*personal_schedule.UpsertGoalResponse, error) {
+	return utils.WithSafePanic(ctx, req, g.goalService.UpsertGoal)
+}

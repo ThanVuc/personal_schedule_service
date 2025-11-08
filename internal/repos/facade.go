@@ -6,6 +6,9 @@ import (
 	"personal_schedule_service/internal/collection"
 	"personal_schedule_service/internal/grpc/models"
 	"personal_schedule_service/proto/personal_schedule"
+
+	"go.mongodb.org/mongo-driver/v2/bson"
+	"go.mongodb.org/mongo-driver/v2/mongo"
 )
 
 type (
@@ -22,6 +25,11 @@ type (
 
 	GoalRepo interface {
 		GetGoals(ctx context.Context, req *personal_schedule.GetGoalsRequest) ([]AggregatedGoal, int32, error)
+		CreateGoal(ctx context.Context, goal *collection.Goal) (bson.ObjectID, error)
+		UpdateGoal(ctx context.Context, goalID bson.ObjectID, updates bson.M) error
+		GetTasksByGoalID(ctx context.Context, goalID bson.ObjectID) ([]collection.GoalTask, error)
+		BulkWriteTasks(ctx context.Context, operations []mongo.WriteModel) (*mongo.BulkWriteResult, error)
+		GetGoalByID(ctx context.Context, goalID bson.ObjectID) (*collection.Goal, error)
 	}
 )
 

@@ -139,3 +139,55 @@ func (r *goalRepo) GetGoals(ctx context.Context, req *personal_schedule.GetGoals
 
 	return goals, totalGoals, nil
 }
+
+func (r *goalRepo) GetGoalByID(ctx context.Context, goalID bson.ObjectID) (*collection.Goal, error) {
+	coll := r.mongoConnector.GetCollection(collection.GoalsCollection)
+	var goal collection.Goal
+	err := coll.FindOne(ctx, bson.M{"_id": goalID}).Decode(&goal)
+	if err != nil {
+		if err == mongo.ErrNoDocuments {
+			return nil, nil
+		}
+		return nil, err
+	}
+	return &goal, nil
+}
+
+func (r *goalRepo) CreateGoal(ctx context.Context, goal *collection.Goal) (bson.ObjectID, error) {
+	coll := r.mongoConnector.GetCollection(collection.GoalsCollection)
+	goal.ID = bson.NewObjectID()
+	res, err := coll.InsertOne(ctx, goal) 
+	if err != nil {
+		return bson.NilObjectID, err
+	}
+	return res.InsertedID.(bson.ObjectID), nil
+}
+
+func (r *goalRepo) UpdateGoal(ctx context.Context, goalID bson.ObjectID, updates bson.M) error {
+	coll := r.mongoConnector.GetCollection(collection.GoalsCollection)
+	_, err := coll.UpdateOne(ctx, bson.M{"_id": goalID}, bson.M{"$set": updates})
+	return err
+}
+
+func (r *goalRepo) GetTasksByGoalID(ctx context.Context, goalID bson.ObjectID) ([]collection.GoalTask, error) {
+	coll := r.mongoConnector.GetCollection(collection.GoalTasksCollection)
+	cursor, err := coll.Find(ctx, bson.M{"goal_id": goalID})
+	if err != nil {
+		return nil, err
+	}
+	defer cursor.Close(ctx)
+	
+	var tasks []collection.GoalTask
+	if err = cursor.All(ctx, &tasks); err != nil {
+		return nil, err
+	}
+	return tasks, nil
+}
+
+func (r *goalRepo) BulkWriteTasks(ctx context.Context, operations []mongo.WriteModel) (*mongo.BulkWriteResult, error) {
+	if len(operations) == 0 {
+		return nil, nil
+	}
+	coll := r.mongoConnector.GetCollection(collection.GoalTasksCollection)
+	return coll.BulkWrite(ctx, operations)
+}

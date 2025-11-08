@@ -19,6 +19,7 @@ type (
 
 	GoalService interface {
 		GetGoals(ctx context.Context, req *personal_schedule.GetGoalsRequest) (*personal_schedule.GetGoalsResponse, error)
+		UpsertGoal(ctx context.Context, req *personal_schedule.UpsertGoalRequest) (*personal_schedule.UpsertGoalResponse, error)
 	}
 )
 
@@ -42,5 +43,6 @@ func NewGoalService(
 		logger:     global.Logger,
 		goalRepo:   goalRepo,
 		goalMapper: goalMapper,
+		mongoConnector: global.MongoDbConntector,
 	}
 }

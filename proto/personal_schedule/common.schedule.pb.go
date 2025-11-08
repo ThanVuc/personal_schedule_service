@@ -281,6 +281,66 @@ func (x *Goal) GetUserId() string {
 	return ""
 }
 
+type GoalTaskPayload struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            *string                `protobuf:"bytes,1,opt,name=id,proto3,oneof" json:"id"`
+	Name          string                 `protobuf:"bytes,2,opt,name=name,proto3" json:"name"`
+	IsCompleted   bool                   `protobuf:"varint,3,opt,name=is_completed,json=isCompleted,proto3" json:"is_completed"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GoalTaskPayload) Reset() {
+	*x = GoalTaskPayload{}
+	mi := &file_personal_schedule_service_common_schedule_proto_msgTypes[3]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GoalTaskPayload) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GoalTaskPayload) ProtoMessage() {}
+
+func (x *GoalTaskPayload) ProtoReflect() protoreflect.Message {
+	mi := &file_personal_schedule_service_common_schedule_proto_msgTypes[3]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GoalTaskPayload.ProtoReflect.Descriptor instead.
+func (*GoalTaskPayload) Descriptor() ([]byte, []int) {
+	return file_personal_schedule_service_common_schedule_proto_rawDescGZIP(), []int{3}
+}
+
+func (x *GoalTaskPayload) GetId() string {
+	if x != nil && x.Id != nil {
+		return *x.Id
+	}
+	return ""
+}
+
+func (x *GoalTaskPayload) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *GoalTaskPayload) GetIsCompleted() bool {
+	if x != nil {
+		return x.IsCompleted
+	}
+	return false
+}
+
 var File_personal_schedule_service_common_schedule_proto protoreflect.FileDescriptor
 
 const file_personal_schedule_service_common_schedule_proto_rawDesc = "" +
@@ -312,7 +372,12 @@ const file_personal_schedule_service_common_schedule_proto_rawDesc = "" +
 	"difficulty\x124\n" +
 	"\bpriority\x18\t \x03(\v2\x18.personal_schedule.LabelR\bpriority\x12\x17\n" +
 	"\auser_id\x18\n" +
-	" \x01(\tR\x06userIdB\x19Z\x17proto/personal_scheduleb\x06proto3"
+	" \x01(\tR\x06userId\"d\n" +
+	"\x0fGoalTaskPayload\x12\x13\n" +
+	"\x02id\x18\x01 \x01(\tH\x00R\x02id\x88\x01\x01\x12\x12\n" +
+	"\x04name\x18\x02 \x01(\tR\x04name\x12!\n" +
+	"\fis_completed\x18\x03 \x01(\bR\visCompletedB\x05\n" +
+	"\x03_idB\x19Z\x17proto/personal_scheduleb\x06proto3"
 
 var (
 	file_personal_schedule_service_common_schedule_proto_rawDescOnce sync.Once
@@ -326,11 +391,12 @@ func file_personal_schedule_service_common_schedule_proto_rawDescGZIP() []byte {
 	return file_personal_schedule_service_common_schedule_proto_rawDescData
 }
 
-var file_personal_schedule_service_common_schedule_proto_msgTypes = make([]protoimpl.MessageInfo, 3)
+var file_personal_schedule_service_common_schedule_proto_msgTypes = make([]protoimpl.MessageInfo, 4)
 var file_personal_schedule_service_common_schedule_proto_goTypes = []any{
-	(*Label)(nil),        // 0: personal_schedule.Label
-	(*LabelPerType)(nil), // 1: personal_schedule.LabelPerType
-	(*Goal)(nil),         // 2: personal_schedule.Goal
+	(*Label)(nil),           // 0: personal_schedule.Label
+	(*LabelPerType)(nil),    // 1: personal_schedule.LabelPerType
+	(*Goal)(nil),            // 2: personal_schedule.Goal
+	(*GoalTaskPayload)(nil), // 3: personal_schedule.GoalTaskPayload
 }
 var file_personal_schedule_service_common_schedule_proto_depIdxs = []int32{
 	0, // 0: personal_schedule.LabelPerType.labels:type_name -> personal_schedule.Label
@@ -349,13 +415,14 @@ func file_personal_schedule_service_common_schedule_proto_init() {
 	if File_personal_schedule_service_common_schedule_proto != nil {
 		return
 	}
+	file_personal_schedule_service_common_schedule_proto_msgTypes[3].OneofWrappers = []any{}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_personal_schedule_service_common_schedule_proto_rawDesc), len(file_personal_schedule_service_common_schedule_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   3,
+			NumMessages:   4,
 			NumExtensions: 0,
 			NumServices:   0,
 		},
