@@ -6,6 +6,8 @@ import (
 	"personal_schedule_service/proto/personal_schedule"
 
 	"time"
+
+	"go.mongodb.org/mongo-driver/v2/bson"
 )
 
 type goalMapper struct{}
@@ -54,7 +56,7 @@ func (m *goalMapper) MapAggregatedGoalToProto(aggGoal repos.AggregatedGoal) *per
 
 func (m *goalMapper) mapLabelsToProto(labels []collection.Label) []*personal_schedule.Label {
 	protoLabels := make([]*personal_schedule.Label, 0, len(labels))
-	for _, label := range labels {	
+	for _, label := range labels {
 		lc := ""
 		if label.Color != nil {
 			lc = *label.Color
@@ -66,4 +68,65 @@ func (m *goalMapper) mapLabelsToProto(labels []collection.Label) []*personal_sch
 		})
 	}
 	return protoLabels
+}
+
+func (m *goalMapper) MapUpsertProtoToModels(req *personal_schedule.UpsertGoalRequest) (*collection.Goal, []collection.GoalTask, error) {
+	goalDB, err := m.mapProtoGoalToDB(req)
+	if err != nil {
+		return nil, nil, err
+	}
+	tasksDB, err := m.mapGoalTasktoDB(req.Tasks)
+	if err != nil {
+		return nil, nil, err
+	}
+	return goalDB, tasksDB, nil
+}
+
+func (m *goalMapper) mapProtoGoalToDB(req *personal_schedule.UpsertGoalRequest) (*collection.Goal, error) {
+	statusID, err := bson.ObjectIDFromHex(req.StatusId)
+	if err != nil {
+		return nil, err
+	}
+
+	difficultyID, err := bson.ObjectIDFromHex(req.DifficultyId)
+	if err != nil {
+		return nil, err
+	}
+	priorityID, err := bson.ObjectIDFromHex(req.PriorityId)
+	if err != nil {
+		return nil, err
+	}
+
+	startDate := time.Unix(*req.StartDate, 0)
+
+	enđate := time.Unix(*req.EndDate, 0)
+
+	return &collection.Goal{
+		Name:                req.Name,
+		ShortDescriptions:   req.ShortDescriptions,
+		DetailedDescription: req.DetailedDescription,
+		StartDate:           &startDate,
+		EndDate:             &enđate,
+		UserID:              req.UserId,
+		StatusID:            statusID,
+		DifficultyID:        difficultyID,
+		PriorityID:          priorityID,
+	}, nil
+}
+
+func (m *goalMapper) mapGoalTasktoDB(pt []*personal_schedule.GoalTaskPayload) ([]collection.GoalTask, error) {
+	taskDB := make([]collection.GoalTask, len(pt))
+
+	for i, task := range pt {
+		var taskId bson.ObjectID
+		if task.Id != nil {
+			taskId, _ = bson.ObjectIDFromHex(*task.Id)
+		}
+		taskDB[i] = collection.GoalTask{
+			ID:          taskId,
+			Name:        task.Name,
+			IsCompleted: task.IsCompleted,
+		}
+	}
+	return taskDB, nil
 }

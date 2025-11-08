@@ -19,7 +19,8 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	GoalService_GetGoals_FullMethodName = "/personal_schedule.GoalService/GetGoals"
+	GoalService_GetGoals_FullMethodName   = "/personal_schedule.GoalService/GetGoals"
+	GoalService_UpsertGoal_FullMethodName = "/personal_schedule.GoalService/UpsertGoal"
 )
 
 // GoalServiceClient is the client API for GoalService service.
@@ -27,6 +28,7 @@ const (
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type GoalServiceClient interface {
 	GetGoals(ctx context.Context, in *GetGoalsRequest, opts ...grpc.CallOption) (*GetGoalsResponse, error)
+	UpsertGoal(ctx context.Context, in *UpsertGoalRequest, opts ...grpc.CallOption) (*UpsertGoalResponse, error)
 }
 
 type goalServiceClient struct {
@@ -47,11 +49,22 @@ func (c *goalServiceClient) GetGoals(ctx context.Context, in *GetGoalsRequest, o
 	return out, nil
 }
 
+func (c *goalServiceClient) UpsertGoal(ctx context.Context, in *UpsertGoalRequest, opts ...grpc.CallOption) (*UpsertGoalResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(UpsertGoalResponse)
+	err := c.cc.Invoke(ctx, GoalService_UpsertGoal_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // GoalServiceServer is the server API for GoalService service.
 // All implementations must embed UnimplementedGoalServiceServer
 // for forward compatibility.
 type GoalServiceServer interface {
 	GetGoals(context.Context, *GetGoalsRequest) (*GetGoalsResponse, error)
+	UpsertGoal(context.Context, *UpsertGoalRequest) (*UpsertGoalResponse, error)
 	mustEmbedUnimplementedGoalServiceServer()
 }
 
@@ -64,6 +77,9 @@ type UnimplementedGoalServiceServer struct{}
 
 func (UnimplementedGoalServiceServer) GetGoals(context.Context, *GetGoalsRequest) (*GetGoalsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetGoals not implemented")
+}
+func (UnimplementedGoalServiceServer) UpsertGoal(context.Context, *UpsertGoalRequest) (*UpsertGoalResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpsertGoal not implemented")
 }
 func (UnimplementedGoalServiceServer) mustEmbedUnimplementedGoalServiceServer() {}
 func (UnimplementedGoalServiceServer) testEmbeddedByValue()                     {}
@@ -104,6 +120,24 @@ func _GoalService_GetGoals_Handler(srv interface{}, ctx context.Context, dec fun
 	return interceptor(ctx, in, info, handler)
 }
 
+func _GoalService_UpsertGoal_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpsertGoalRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(GoalServiceServer).UpsertGoal(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: GoalService_UpsertGoal_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(GoalServiceServer).UpsertGoal(ctx, req.(*UpsertGoalRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // GoalService_ServiceDesc is the grpc.ServiceDesc for GoalService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -114,6 +148,10 @@ var GoalService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetGoals",
 			Handler:    _GoalService_GetGoals_Handler,
+		},
+		{
+			MethodName: "UpsertGoal",
+			Handler:    _GoalService_UpsertGoal_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

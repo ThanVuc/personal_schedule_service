@@ -5,6 +5,7 @@ go 1.24.3
 require (
 	github.com/google/wire v0.7.0
 	github.com/thanvuc/go-core-lib v1.1.2
+	go.mongodb.org/mongo-driver v1.17.6
 	go.mongodb.org/mongo-driver/v2 v2.3.0
 	go.uber.org/zap v1.27.0
 	google.golang.org/grpc v1.73.0
