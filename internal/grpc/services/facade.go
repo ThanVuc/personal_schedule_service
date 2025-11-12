@@ -20,6 +20,8 @@ type (
 	GoalService interface {
 		GetGoals(ctx context.Context, req *personal_schedule.GetGoalsRequest) (*personal_schedule.GetGoalsResponse, error)
 		UpsertGoal(ctx context.Context, req *personal_schedule.UpsertGoalRequest) (*personal_schedule.UpsertGoalResponse, error)
+		GetGoal(ctx context.Context, req *personal_schedule.GetGoalRequest) (*personal_schedule.GetGoalResponse, error)
+		DeleteGoal(ctx context.Context, req *personal_schedule.DeleteGoalRequest) (*personal_schedule.DeleteGoalResponse, error)
 	}
 )
 

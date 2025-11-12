@@ -30,6 +30,9 @@ type (
 		GetTasksByGoalID(ctx context.Context, goalID bson.ObjectID) ([]collection.GoalTask, error)
 		BulkWriteTasks(ctx context.Context, operations []mongo.WriteModel) (*mongo.BulkWriteResult, error)
 		GetGoalByID(ctx context.Context, goalID bson.ObjectID) (*collection.Goal, error)
+		GetAggregatedGoalByID(ctx context.Context, goalID bson.ObjectID) (*AggregatedGoal, error)
+		DeleteTasksByGoalID(ctx context.Context, goalID bson.ObjectID) error
+		DeleteGoal(ctx context.Context, goalID bson.ObjectID) error
 	}
 )
 

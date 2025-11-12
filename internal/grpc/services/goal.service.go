@@ -2,6 +2,8 @@ package services
 
 import (
 	"context"
+	"fmt"
+
 	// "fmt"
 	"personal_schedule_service/internal/collection"
 	"personal_schedule_service/internal/grpc/mapper"
@@ -62,7 +64,7 @@ func (s *goalService) GetGoals(ctx context.Context, req *personal_schedule.GetGo
 func (s *goalService) UpsertGoal(ctx context.Context, req *personal_schedule.UpsertGoalRequest) (*personal_schedule.UpsertGoalResponse, error) {
 	goalDB, tasksDB, err := s.goalMapper.MapUpsertProtoToModels(req)
 	if err != nil {
-		s.logger.Warn("Failed to map UpsertGoal proto", "",zap.Error(err))
+		s.logger.Warn("Failed to map UpsertGoal proto", "", zap.Error(err))
 		errMsg := "Invalid data format: " + err.Error()
 		return &personal_schedule.UpsertGoalResponse{
 			IsSuccess: false,
@@ -74,14 +76,14 @@ func (s *goalService) UpsertGoal(ctx context.Context, req *personal_schedule.Ups
 	var goalID bson.ObjectID
 	now := time.Now()
 
-	if req.Id == nil || *req.Id == ""  { 
+	if req.Id == nil || *req.Id == "" {
 		goalDB.UserID = req.UserId
 		goalDB.CreatedAt = now
 		goalDB.LastModifiedAt = now
 
 		newID, err := s.goalRepo.CreateGoal(ctx, goalDB)
 		if err != nil {
-			s.logger.Error("Failed to create goal", "",zap.Error(err))
+			s.logger.Error("Failed to create goal", "", zap.Error(err))
 			return &personal_schedule.UpsertGoalResponse{
 				IsSuccess: false,
 				Message:   "Failed to create goal",
@@ -95,7 +97,7 @@ func (s *goalService) UpsertGoal(ctx context.Context, req *personal_schedule.Ups
 
 		existingGoal, err := s.goalRepo.GetGoalByID(ctx, goalID)
 		if err != nil {
-			s.logger.Error("Failed to get goal by ID", "",zap.Error(err))
+			s.logger.Error("Failed to get goal by ID", "", zap.Error(err))
 			return &personal_schedule.UpsertGoalResponse{
 				IsSuccess: false,
 				Message:   "Database error",
@@ -104,16 +106,16 @@ func (s *goalService) UpsertGoal(ctx context.Context, req *personal_schedule.Ups
 		}
 		if existingGoal == nil {
 			errMsg := "goal not found"
-			s.logger.Warn(errMsg,"", zap.String("goal_id", *req.Id))
+			s.logger.Warn(errMsg, "", zap.String("goal_id", *req.Id))
 			return &personal_schedule.UpsertGoalResponse{
 				IsSuccess: false,
 				Message:   errMsg,
-				Error:     utils.NotFoundError(ctx, err ),
+				Error:     utils.NotFoundError(ctx, err),
 			}, nil
 		}
 		if existingGoal.UserID != req.UserId {
 			errMsg := "forbidden: user does not own this goal"
-			s.logger.Warn(errMsg, "",zap.String("goal_id", *req.Id), zap.String("user_id", req.UserId))
+			s.logger.Warn(errMsg, "", zap.String("goal_id", *req.Id), zap.String("user_id", req.UserId))
 			return &personal_schedule.UpsertGoalResponse{
 				IsSuccess: false,
 				Message:   errMsg,
@@ -134,7 +136,7 @@ func (s *goalService) UpsertGoal(ctx context.Context, req *personal_schedule.Ups
 		}
 
 		if err := s.goalRepo.UpdateGoal(ctx, goalID, updates); err != nil {
-			s.logger.Error("Failed to update goal","", zap.Error(err))
+			s.logger.Error("Failed to update goal", "", zap.Error(err))
 			return &personal_schedule.UpsertGoalResponse{
 				IsSuccess: false,
 				Message:   "Failed to update goal",
@@ -144,7 +146,7 @@ func (s *goalService) UpsertGoal(ctx context.Context, req *personal_schedule.Ups
 	}
 
 	if err := s.syncGoalTasks(ctx, goalID, tasksDB); err != nil {
-		s.logger.Error("Failed to sync goal tasks","", zap.Error(err))
+		s.logger.Error("Failed to sync goal tasks", "", zap.Error(err))
 		return &personal_schedule.UpsertGoalResponse{
 			IsSuccess: false,
 			Message:   "Failed to sync tasks (Goal was upserted but tasks failed)",
@@ -157,7 +159,6 @@ func (s *goalService) UpsertGoal(ctx context.Context, req *personal_schedule.Ups
 		Message:   "Goal upserted successfully",
 	}, nil
 }
-
 
 func (s *goalService) syncGoalTasks(ctx context.Context, goalID bson.ObjectID, payloadTasks []collection.GoalTask) error {
 	existingTasks, err := s.goalRepo.GetTasksByGoalID(ctx, goalID)
@@ -203,4 +204,95 @@ func (s *goalService) syncGoalTasks(ctx context.Context, goalID bson.ObjectID, p
 	}
 
 	return nil
+}
+
+func (s *goalService) GetGoal(ctx context.Context, req *personal_schedule.GetGoalRequest) (*personal_schedule.GetGoalResponse, error) {
+	goalID, err := bson.ObjectIDFromHex(req.GoalId)
+	if err != nil {
+		s.logger.Warn("Invalid goal ID format", "", zap.String("goal_id", req.GoalId), zap.Error(err))
+		return &personal_schedule.GetGoalResponse{
+			Goal:  nil,
+			Error: utils.InternalServerError(ctx, err),
+		}, nil
+	}
+
+	goal, err := s.goalRepo.GetAggregatedGoalByID(ctx, goalID)
+	if err != nil {
+		s.logger.Error("Error fetching goal from repo", "err", zap.Error(err))
+		return &personal_schedule.GetGoalResponse{
+			Goal:  nil,
+			Error: utils.DatabaseError(ctx, err),
+		}, err
+	}
+
+	if goal == nil {
+		s.logger.Info("Goal not found", "", zap.String("goal_id", req.GoalId))
+		return &personal_schedule.GetGoalResponse{
+			Goal:  nil,
+			Error: utils.NotFoundError(ctx, err),
+		}, nil
+	}
+
+	if goal.UserID != req.UserId {
+		s.logger.Warn("Forbidden: user does not own this goal", "", zap.String("goal_id", req.GoalId), zap.String("user_id", req.UserId))
+		return &personal_schedule.GetGoalResponse{
+			Goal:  nil,
+			Error: utils.PermissionDeniedError(ctx, err),
+		}, nil
+	}
+
+	taskDB, err := s.goalRepo.GetTasksByGoalID(ctx, goalID)
+	if err != nil {
+		s.logger.Error("Error fetching goal tasks from repo", "err", zap.Error(err))
+		return &personal_schedule.GetGoalResponse{
+			Goal:  nil,
+			Error: utils.DatabaseError(ctx, err),
+		}, err
+	}
+
+	protoGoal := s.goalMapper.MapAggregatedToDetailProto(*goal, taskDB)
+
+	return &personal_schedule.GetGoalResponse{
+		Goal:  protoGoal,
+		Error: nil,
+	}, nil
+}
+
+func (s *goalService) DeleteGoal(ctx context.Context, req *personal_schedule.DeleteGoalRequest) (*personal_schedule.DeleteGoalResponse, error) {
+	goalID, err := bson.ObjectIDFromHex(req.GoalId)
+	if err != nil {
+		s.logger.Warn("Invalid goal ID format", "", zap.String("goal_id", req.GoalId), zap.Error(err))
+		return &personal_schedule.DeleteGoalResponse{
+			Success: false,
+			Error:   utils.InternalServerError(ctx, err),
+		}, nil
+	}
+
+	goal, err := s.goalRepo.GetGoalByID(ctx, goalID)
+	if err != nil {
+		s.logger.Error("Error fetching goal from repo", "err", zap.Error(err))
+		return nil, err
+	}
+	if goal == nil {
+		s.logger.Info("Goal not found", "", zap.String("goal_id", req.GoalId))
+		return nil, nil
+	}
+
+	if goal.UserID != req.UserId {
+		return nil, fmt.Errorf("forbidden: user does not own this goal")
+	}
+
+	if err := s.goalRepo.DeleteTasksByGoalID(ctx, goalID); err != nil {
+		s.logger.Error("Error deleting goal tasks", "err", zap.Error(err))
+		return nil, err
+	}
+	if err := s.goalRepo.DeleteGoal(ctx, goalID); err != nil {
+		s.logger.Error("Error deleting goal", "err", zap.Error(err))
+		return nil, err
+	}
+
+	return &personal_schedule.DeleteGoalResponse{
+		Success: true,
+		Error:   nil,
+	}, nil
 }
