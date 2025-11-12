@@ -20,6 +20,7 @@ type Goal struct {
 	StatusID            bson.ObjectID `bson:"status_id" json:"status_id"`
 	DifficultyID        bson.ObjectID `bson:"difficulty_id" json:"difficulty_id"`
 	PriorityID          bson.ObjectID `bson:"priority_id" json:"priority_id"`
+	WorkTypeID          bson.ObjectID `bson:"work_type_id" json:"work_type_id"`
 	UserID              string        `bson:"user_id" json:"user_id"`
 	CreatedAt           time.Time     `bson:"created_at" json:"created_at"`
 	LastModifiedAt      time.Time     `bson:"last_modified_at" json:"last_modified_at"`
@@ -36,7 +37,7 @@ func createGoalCollection() error {
 	goalValidator := bson.M{
 		"$jsonSchema": bson.M{
 			"bsonType": "object",
-			"required": []string{"name", "status_id", "difficulty_id", "priority_id", "user_id", "created_at", "last_modified_at"},
+			"required": []string{"name", "status_id", "difficulty_id", "priority_id","work_type_id", "user_id", "created_at", "last_modified_at"},
 			"properties": bson.M{
 				"_id": bson.M{
 					"bsonType":    "objectId",
@@ -73,6 +74,10 @@ func createGoalCollection() error {
 				"priority_id": bson.M{
 					"bsonType":    "objectId",
 					"description": "Reference to priority, required",
+				},
+				"work_type_id": bson.M{
+					"bsonType":    "objectId",
+					"description": "Reference to work type, required",
 				},
 				"user_id": bson.M{
 					"bsonType":    "string",
