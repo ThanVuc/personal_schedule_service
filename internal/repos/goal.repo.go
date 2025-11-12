@@ -31,6 +31,7 @@ type AggregatedGoal struct {
 	Status              []collection.Label `bson:"statusInfo"`
 	Priority            []collection.Label `bson:"priorityInfo"`
 	Difficulty          []collection.Label `bson:"difficultyInfo"`
+	WorkLabel           []collection.Label `bson:"workTypeInfo"`
 	CreatedAt           time.Time          `bson:"created_at"`
 }
 
@@ -90,6 +91,15 @@ func (r *goalRepo) GetGoals(ctx context.Context, req *personal_schedule.GetGoals
 			"as":           "difficultyInfo",
 		},
 	}}
+	lookupWorkType := bson.D{{
+		Key: "$lookup",
+		Value: bson.M{
+			"from":         collection.LabelsCollection,
+			"localField":   "work_type_id",
+			"foreignField": "_id",
+			"as":           "workTypeInfo",
+		},	
+	}}
 
 	// Pipeline for data
 	pipelineData := mongo.Pipeline{
@@ -97,6 +107,7 @@ func (r *goalRepo) GetGoals(ctx context.Context, req *personal_schedule.GetGoals
 		lookupStatus,
 		lookupPriority,
 		lookupDifficulty,
+		lookupWorkType,
 		{{Key: "$sort", Value: bson.M{"created_at": -1}}},
 		{{Key: "$skip", Value: pagination.Offset}},
 		{{Key: "$limit", Value: pagination.Limit}},
@@ -190,4 +201,92 @@ func (r *goalRepo) BulkWriteTasks(ctx context.Context, operations []mongo.WriteM
 	}
 	coll := r.mongoConnector.GetCollection(collection.GoalTasksCollection)
 	return coll.BulkWrite(ctx, operations)
+}
+
+
+func (r *goalRepo) GetAggregatedGoalByID(ctx context.Context, goalID bson.ObjectID) (*AggregatedGoal, error) {
+	goalCollection := r.mongoConnector.GetCollection(collection.GoalsCollection)
+	matchStage := bson.D{{Key: "_id", Value: goalID}}
+	lookupStatus := bson.D{{
+		Key: "$lookup",
+		Value: bson.M{
+			"from":         collection.LabelsCollection,
+			"localField":   "status_id",
+			"foreignField": "_id",
+			"as":           "statusInfo",
+		},
+	}}
+	lookupPriority := bson.D{{
+		Key: "$lookup",
+		Value: bson.M{
+			"from":         collection.LabelsCollection,
+			"localField":   "priority_id",
+			"foreignField": "_id",
+			"as":           "priorityInfo",
+		},
+	}}
+	lookupDifficulty := bson.D{{
+		Key: "$lookup",
+		Value: bson.M{
+			"from":         collection.LabelsCollection,
+			"localField":   "difficulty_id",
+			"foreignField": "_id",
+			"as":           "difficultyInfo",
+		},
+	}}
+	lookupWorkType := bson.D{{
+		Key: "$lookup",
+		Value: bson.M{
+			"from":         collection.LabelsCollection,
+			"localField":   "work_type_id",
+			"foreignField": "_id",
+			"as":           "workTypeInfo",
+		},	
+	}}
+
+	pipeline := mongo.Pipeline{
+		{{Key: "$match", Value: matchStage}},
+		lookupStatus,
+		lookupPriority,
+		lookupDifficulty,
+		lookupWorkType,
+		{{Key: "$limit", Value: 1}}, 
+	}
+
+	cursor, err := goalCollection.Aggregate(ctx, pipeline)
+	if err != nil {
+		r.logger.Error("Failed to aggregate single goal", "err", zap.Error(err), zap.String("goal_id", goalID.Hex()))
+		return nil, err
+	}
+	defer cursor.Close(ctx)
+
+	var results []AggregatedGoal
+	if err = cursor.All(ctx, &results); err != nil {
+		r.logger.Error("Failed to decode single goal", "err", zap.Error(err))
+		return nil, err
+	}
+	
+	if len(results) == 0 {
+		return nil, nil
+	}
+
+	return &results[0], nil
+}
+
+func (r *goalRepo) DeleteGoal(ctx context.Context, goalID bson.ObjectID) error {
+	coll := r.mongoConnector.GetCollection(collection.GoalsCollection)
+	result, err := coll.DeleteOne(ctx, bson.M{"_id": goalID})
+	if err != nil {
+		return err
+	}
+	if result.DeletedCount == 0 {
+		return mongo.ErrNoDocuments
+	}
+	return nil
+}
+
+func (r *goalRepo) DeleteTasksByGoalID(ctx context.Context, goalID bson.ObjectID) error {
+	coll := r.mongoConnector.GetCollection(collection.GoalTasksCollection)
+	_, err := coll.DeleteMany(ctx, bson.M{"goal_id": goalID})
+	return err
 }

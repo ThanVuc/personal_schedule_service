@@ -51,20 +51,23 @@ func (m *goalMapper) MapAggregatedGoalToProto(aggGoal repos.AggregatedGoal) *per
 		Status:              m.mapLabelsToProto(aggGoal.Status),
 		Difficulty:          m.mapLabelsToProto(aggGoal.Difficulty),
 		Priority:            m.mapLabelsToProto(aggGoal.Priority),
+		Worktype:            m.mapLabelsToProto(aggGoal.WorkLabel),
 	}
 }
 
-func (m *goalMapper) mapLabelsToProto(labels []collection.Label) []*personal_schedule.Label {
-	protoLabels := make([]*personal_schedule.Label, 0, len(labels))
+func (m *goalMapper) mapLabelsToProto(labels []collection.Label) []*personal_schedule.LabelInfo {
+	protoLabels := make([]*personal_schedule.LabelInfo, 0, len(labels))
 	for _, label := range labels {
 		lc := ""
 		if label.Color != nil {
 			lc = *label.Color
 		}
-		protoLabels = append(protoLabels, &personal_schedule.Label{
+		protoLabels = append(protoLabels, &personal_schedule.LabelInfo{
 			Id:    label.ID.Hex(),
 			Name:  label.Name,
 			Color: lc,
+			Key:   label.Key,
+			LabelType: int32(label.LabelType),
 		})
 	}
 	return protoLabels
@@ -96,6 +99,10 @@ func (m *goalMapper) mapProtoGoalToDB(req *personal_schedule.UpsertGoalRequest) 
 	if err != nil {
 		return nil, err
 	}
+	workLabelID, err := bson.ObjectIDFromHex(req.WorkTypeId)
+	if err != nil {
+		return nil, err
+	}
 
 	startDate := time.Unix(*req.StartDate, 0)
 
@@ -111,6 +118,7 @@ func (m *goalMapper) mapProtoGoalToDB(req *personal_schedule.UpsertGoalRequest) 
 		StatusID:            statusID,
 		DifficultyID:        difficultyID,
 		PriorityID:          priorityID,
+		WorkTypeID:          workLabelID,
 	}, nil
 }
 
@@ -129,4 +137,36 @@ func (m *goalMapper) mapGoalTasktoDB(pt []*personal_schedule.GoalTaskPayload) ([
 		}
 	}
 	return taskDB, nil
+}
+
+func (m *goalMapper) MapTasksToProto(dbTasks []collection.GoalTask) []*personal_schedule.GoalTaskPayload {
+	protoTasks := make([]*personal_schedule.GoalTaskPayload, len(dbTasks))
+	for i, task := range dbTasks {
+		taskIDHex := task.ID.Hex()
+		protoTasks[i] = &personal_schedule.GoalTaskPayload{
+			Id:          &taskIDHex,
+			Name:        task.Name,
+			IsCompleted: task.IsCompleted,
+		}
+	}
+	return protoTasks
+}
+
+func (m *goalMapper) MapAggregatedToDetailProto(aggGoal repos.AggregatedGoal, dbTasks []collection.GoalTask) *personal_schedule.GoalDetail {
+	goalBaseProto := m.MapAggregatedGoalToProto(aggGoal)
+	tasksProto := m.MapTasksToProto(dbTasks)
+	return &personal_schedule.GoalDetail{
+		Id:                  goalBaseProto.Id,
+		Name:                goalBaseProto.Name,
+		ShortDescriptions:   goalBaseProto.ShortDescriptions,
+		DetailedDescription: goalBaseProto.DetailedDescription,
+		StartDate:           goalBaseProto.StartDate,
+		EndDate:             goalBaseProto.EndDate,
+		Status:              goalBaseProto.Status,
+		Difficulty:          goalBaseProto.Difficulty,
+		Priority:            goalBaseProto.Priority,
+		Worktype:            goalBaseProto.Worktype,
+		UserId:              goalBaseProto.UserId,
+		Tasks:               tasksProto,
+	}
 }

@@ -27,3 +27,11 @@ func (g *GoalController) GetGoals(ctx context.Context, req *personal_schedule.Ge
 func (g *GoalController) UpsertGoal(ctx context.Context, req *personal_schedule.UpsertGoalRequest) (*personal_schedule.UpsertGoalResponse, error) {
 	return utils.WithSafePanic(ctx, req, g.goalService.UpsertGoal)
 }
+
+func (g *GoalController) GetGoal(ctx context.Context, req *personal_schedule.GetGoalRequest) (*personal_schedule.GetGoalResponse, error) {
+	return utils.WithSafePanic(ctx, req, g.goalService.GetGoal)
+}
+
+func (g *GoalController) DeleteGoal(ctx context.Context, req *personal_schedule.DeleteGoalRequest) (*personal_schedule.DeleteGoalResponse, error) {
+	return utils.WithSafePanic(ctx, req, g.goalService.DeleteGoal)
+}
