@@ -10,32 +10,23 @@ import (
 	"go.mongodb.org/mongo-driver/v2/mongo/options"
 )
 
-type Notification struct {
-	ID               bson.ObjectID `bson:"_id,omitempty" json:"id"`
-	Mode             string        `bson:"mode" json:"mode"`
-	NotifyAt         time.Time     `bson:"notify_at" json:"notify_at"`
-	ShortDescription *string       `bson:"short_description,omitempty" json:"short_description,omitempty"`
-	CreatedAt        time.Time     `bson:"created_at" json:"created_at"`
-	LastModifiedAt   time.Time     `bson:"last_modified_at" json:"last_modified_at"`
-}
-
 type Work struct {
-	ID                  bson.ObjectID  `bson:"_id,omitempty" json:"id"`
-	Name                string         `bson:"name" json:"name"`
-	ShortDescriptions   *string        `bson:"short_descriptions,omitempty" json:"short_descriptions,omitempty"`
-	DetailedDescription *string        `bson:"detailed_description,omitempty" json:"detailed_description,omitempty"`
-	StartDate           *time.Time     `bson:"start_date,omitempty" json:"start_date,omitempty"`
-	EndDate             time.Time      `bson:"end_date" json:"end_date"`
-	Notifications       []Notification `bson:"notifications,omitempty" json:"notifications,omitempty"`
-	StatusID            bson.ObjectID  `bson:"status_id" json:"status_id"`
-	DifficultyID        bson.ObjectID  `bson:"difficulty_id" json:"difficulty_id"`
-	PriorityID          bson.ObjectID  `bson:"priority_id" json:"priority_id"`
-	TypeID              bson.ObjectID  `bson:"type_id" json:"type_id"`
-	CategoryID          bson.ObjectID  `bson:"category_id" json:"category_id"`
-	UserID              string         `bson:"user_id" json:"user_id"`
-	GoalID              bson.ObjectID  `bson:"goal_id" json:"goal_id"`
-	CreatedAt           time.Time      `bson:"created_at" json:"created_at"`
-	LastModifiedAt      time.Time      `bson:"last_modified_at" json:"last_modified_at"`
+	ID                  bson.ObjectID   `bson:"_id,omitempty" json:"id"`
+	Name                string          `bson:"name" json:"name"`
+	ShortDescriptions   *string         `bson:"short_descriptions,omitempty" json:"short_descriptions,omitempty"`
+	DetailedDescription *string         `bson:"detailed_description,omitempty" json:"detailed_description,omitempty"`
+	StartDate           *time.Time      `bson:"start_date,omitempty" json:"start_date,omitempty"`
+	EndDate             time.Time       `bson:"end_date" json:"end_date"`
+	Notifications       []bson.ObjectID `bson:"notification_ids,omitempty" json:"notification_ids,omitempty"`
+	StatusID            bson.ObjectID   `bson:"status_id" json:"status_id"`
+	DifficultyID        bson.ObjectID   `bson:"difficulty_id" json:"difficulty_id"`
+	PriorityID          bson.ObjectID   `bson:"priority_id" json:"priority_id"`
+	TypeID              bson.ObjectID   `bson:"type_id" json:"type_id"`
+	CategoryID          bson.ObjectID   `bson:"category_id" json:"category_id"`
+	UserID              string          `bson:"user_id" json:"user_id"`
+	GoalID              bson.ObjectID   `bson:"goal_id" json:"goal_id"`
+	CreatedAt           time.Time       `bson:"created_at" json:"created_at"`
+	LastModifiedAt      time.Time       `bson:"last_modified_at" json:"last_modified_at"`
 }
 
 func (w *Work) CollectionName() string {
