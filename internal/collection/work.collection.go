@@ -17,7 +17,7 @@ type Work struct {
 	DetailedDescription *string         `bson:"detailed_description,omitempty" json:"detailed_description,omitempty"`
 	StartDate           *time.Time      `bson:"start_date,omitempty" json:"start_date,omitempty"`
 	EndDate             time.Time       `bson:"end_date" json:"end_date"`
-	Notifications       []bson.ObjectID `bson:"notification_ids,omitempty" json:"notification_ids,omitempty"`
+	NotificationIds     []bson.ObjectID `bson:"notification_ids,omitempty" json:"notification_ids,omitempty"`
 	StatusID            bson.ObjectID   `bson:"status_id" json:"status_id"`
 	DifficultyID        bson.ObjectID   `bson:"difficulty_id" json:"difficulty_id"`
 	PriorityID          bson.ObjectID   `bson:"priority_id" json:"priority_id"`
