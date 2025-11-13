@@ -31,13 +31,13 @@ func (m *goalMapper) MapAggregatedGoalToProto(aggGoal repos.AggregatedGoal) *per
 	if aggGoal.DetailedDescription != nil {
 		dd = *aggGoal.DetailedDescription
 	}
-	stDate := ""
+	var stDate int64 = 0
 	if aggGoal.StartDate != nil {
-		stDate = aggGoal.StartDate.Format(time.RFC3339)
+		stDate = aggGoal.StartDate.Unix()
 	}
-	enDate := ""
+	var enDate int64 = 0
 	if aggGoal.EndDate != nil {
-		enDate = aggGoal.EndDate.Format(time.RFC3339)
+		enDate = aggGoal.EndDate.Unix()
 	}
 
 	return &personal_schedule.Goal{
@@ -48,10 +48,12 @@ func (m *goalMapper) MapAggregatedGoalToProto(aggGoal repos.AggregatedGoal) *per
 		StartDate:           stDate,
 		EndDate:             enDate,
 		UserId:              aggGoal.UserID,
-		Status:              m.mapLabelsToProto(aggGoal.Status),
-		Difficulty:          m.mapLabelsToProto(aggGoal.Difficulty),
-		Priority:            m.mapLabelsToProto(aggGoal.Priority),
-		Worktype:            m.mapLabelsToProto(aggGoal.WorkLabel),
+		GoalLabels: &personal_schedule.GoalLabels{
+			Status:     m.mapLabelsToProto(aggGoal.Status),
+			Difficulty: m.mapLabelsToProto(aggGoal.Difficulty),
+			Priority:   m.mapLabelsToProto(aggGoal.Priority),
+		},
+		Category: m.mapLabelsToProto(aggGoal.Category),
 	}
 }
 
@@ -63,10 +65,10 @@ func (m *goalMapper) mapLabelsToProto(labels []collection.Label) []*personal_sch
 			lc = *label.Color
 		}
 		protoLabels = append(protoLabels, &personal_schedule.LabelInfo{
-			Id:    label.ID.Hex(),
-			Name:  label.Name,
-			Color: lc,
-			Key:   label.Key,
+			Id:        label.ID.Hex(),
+			Name:      label.Name,
+			Color:     lc,
+			Key:       label.Key,
 			LabelType: int32(label.LabelType),
 		})
 	}
@@ -99,7 +101,7 @@ func (m *goalMapper) mapProtoGoalToDB(req *personal_schedule.UpsertGoalRequest) 
 	if err != nil {
 		return nil, err
 	}
-	workLabelID, err := bson.ObjectIDFromHex(req.WorkTypeId)
+	categoryID, err := bson.ObjectIDFromHex(req.CategoryId)
 	if err != nil {
 		return nil, err
 	}
@@ -118,7 +120,7 @@ func (m *goalMapper) mapProtoGoalToDB(req *personal_schedule.UpsertGoalRequest) 
 		StatusID:            statusID,
 		DifficultyID:        difficultyID,
 		PriorityID:          priorityID,
-		WorkTypeID:          workLabelID,
+		CategoryID:          categoryID,
 	}, nil
 }
 
@@ -162,11 +164,13 @@ func (m *goalMapper) MapAggregatedToDetailProto(aggGoal repos.AggregatedGoal, db
 		DetailedDescription: goalBaseProto.DetailedDescription,
 		StartDate:           goalBaseProto.StartDate,
 		EndDate:             goalBaseProto.EndDate,
-		Status:              goalBaseProto.Status,
-		Difficulty:          goalBaseProto.Difficulty,
-		Priority:            goalBaseProto.Priority,
-		Worktype:            goalBaseProto.Worktype,
-		UserId:              goalBaseProto.UserId,
-		Tasks:               tasksProto,
+		GoalLabels: &personal_schedule.GoalLabel{
+			Status:     goalBaseProto.GoalLabels.Status,
+			Difficulty: goalBaseProto.GoalLabels.Difficulty,
+			Priority:   goalBaseProto.GoalLabels.Priority,
+			Category:   goalBaseProto.Category,
+		},
+		UserId: goalBaseProto.UserId,
+		Tasks:  tasksProto,
 	}
 }

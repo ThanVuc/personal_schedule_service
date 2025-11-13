@@ -31,7 +31,7 @@ type AggregatedGoal struct {
 	Status              []collection.Label `bson:"statusInfo"`
 	Priority            []collection.Label `bson:"priorityInfo"`
 	Difficulty          []collection.Label `bson:"difficultyInfo"`
-	WorkLabel           []collection.Label `bson:"workTypeInfo"`
+	Category            []collection.Label `bson:"categoryInfo"`
 	CreatedAt           time.Time          `bson:"created_at"`
 }
 
@@ -91,14 +91,14 @@ func (r *goalRepo) GetGoals(ctx context.Context, req *personal_schedule.GetGoals
 			"as":           "difficultyInfo",
 		},
 	}}
-	lookupWorkType := bson.D{{
+	lookupCategory := bson.D{{
 		Key: "$lookup",
 		Value: bson.M{
 			"from":         collection.LabelsCollection,
 			"localField":   "work_type_id",
 			"foreignField": "_id",
-			"as":           "workTypeInfo",
-		},	
+			"as":           "categoryInfo",
+		},
 	}}
 
 	// Pipeline for data
@@ -107,7 +107,7 @@ func (r *goalRepo) GetGoals(ctx context.Context, req *personal_schedule.GetGoals
 		lookupStatus,
 		lookupPriority,
 		lookupDifficulty,
-		lookupWorkType,
+		lookupCategory,
 		{{Key: "$sort", Value: bson.M{"created_at": -1}}},
 		{{Key: "$skip", Value: pagination.Offset}},
 		{{Key: "$limit", Value: pagination.Limit}},
@@ -167,7 +167,7 @@ func (r *goalRepo) GetGoalByID(ctx context.Context, goalID bson.ObjectID) (*coll
 func (r *goalRepo) CreateGoal(ctx context.Context, goal *collection.Goal) (bson.ObjectID, error) {
 	coll := r.mongoConnector.GetCollection(collection.GoalsCollection)
 	goal.ID = bson.NewObjectID()
-	res, err := coll.InsertOne(ctx, goal) 
+	res, err := coll.InsertOne(ctx, goal)
 	if err != nil {
 		return bson.NilObjectID, err
 	}
@@ -187,7 +187,7 @@ func (r *goalRepo) GetTasksByGoalID(ctx context.Context, goalID bson.ObjectID) (
 		return nil, err
 	}
 	defer cursor.Close(ctx)
-	
+
 	var tasks []collection.GoalTask
 	if err = cursor.All(ctx, &tasks); err != nil {
 		return nil, err
@@ -202,7 +202,6 @@ func (r *goalRepo) BulkWriteTasks(ctx context.Context, operations []mongo.WriteM
 	coll := r.mongoConnector.GetCollection(collection.GoalTasksCollection)
 	return coll.BulkWrite(ctx, operations)
 }
-
 
 func (r *goalRepo) GetAggregatedGoalByID(ctx context.Context, goalID bson.ObjectID) (*AggregatedGoal, error) {
 	goalCollection := r.mongoConnector.GetCollection(collection.GoalsCollection)
@@ -234,14 +233,14 @@ func (r *goalRepo) GetAggregatedGoalByID(ctx context.Context, goalID bson.Object
 			"as":           "difficultyInfo",
 		},
 	}}
-	lookupWorkType := bson.D{{
+	lookupCategory := bson.D{{
 		Key: "$lookup",
 		Value: bson.M{
 			"from":         collection.LabelsCollection,
 			"localField":   "work_type_id",
 			"foreignField": "_id",
-			"as":           "workTypeInfo",
-		},	
+			"as":           "categoryInfo",
+		},
 	}}
 
 	pipeline := mongo.Pipeline{
@@ -249,8 +248,8 @@ func (r *goalRepo) GetAggregatedGoalByID(ctx context.Context, goalID bson.Object
 		lookupStatus,
 		lookupPriority,
 		lookupDifficulty,
-		lookupWorkType,
-		{{Key: "$limit", Value: 1}}, 
+		lookupCategory,
+		{{Key: "$limit", Value: 1}},
 	}
 
 	cursor, err := goalCollection.Aggregate(ctx, pipeline)
@@ -265,7 +264,7 @@ func (r *goalRepo) GetAggregatedGoalByID(ctx context.Context, goalID bson.Object
 		r.logger.Error("Failed to decode single goal", "err", zap.Error(err))
 		return nil, err
 	}
-	
+
 	if len(results) == 0 {
 		return nil, nil
 	}
