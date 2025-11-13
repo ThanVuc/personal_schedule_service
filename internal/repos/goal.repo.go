@@ -95,7 +95,7 @@ func (r *goalRepo) GetGoals(ctx context.Context, req *personal_schedule.GetGoals
 		Key: "$lookup",
 		Value: bson.M{
 			"from":         collection.LabelsCollection,
-			"localField":   "work_type_id",
+			"localField":   "category_id",
 			"foreignField": "_id",
 			"as":           "categoryInfo",
 		},
@@ -237,7 +237,7 @@ func (r *goalRepo) GetAggregatedGoalByID(ctx context.Context, goalID bson.Object
 		Key: "$lookup",
 		Value: bson.M{
 			"from":         collection.LabelsCollection,
-			"localField":   "work_type_id",
+			"localField":   "category_id",
 			"foreignField": "_id",
 			"as":           "categoryInfo",
 		},
