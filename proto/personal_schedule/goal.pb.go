@@ -170,7 +170,7 @@ type UpsertGoalRequest struct {
 	StatusId            string                 `protobuf:"bytes,8,opt,name=status_id,json=statusId,proto3" json:"status_id"`
 	DifficultyId        string                 `protobuf:"bytes,9,opt,name=difficulty_id,json=difficultyId,proto3" json:"difficulty_id"`
 	PriorityId          string                 `protobuf:"bytes,10,opt,name=priority_id,json=priorityId,proto3" json:"priority_id"`
-	WorkTypeId          string                 `protobuf:"bytes,11,opt,name=work_type_id,json=workTypeId,proto3" json:"work_type_id"`
+	CategoryId          string                 `protobuf:"bytes,11,opt,name=category_id,json=categoryId,proto3" json:"category_id"`
 	Tasks               []*GoalTaskPayload     `protobuf:"bytes,12,rep,name=tasks,proto3" json:"tasks"`
 	unknownFields       protoimpl.UnknownFields
 	sizeCache           protoimpl.SizeCache
@@ -276,9 +276,9 @@ func (x *UpsertGoalRequest) GetPriorityId() string {
 	return ""
 }
 
-func (x *UpsertGoalRequest) GetWorkTypeId() string {
+func (x *UpsertGoalRequest) GetCategoryId() string {
 	if x != nil {
-		return x.WorkTypeId
+		return x.CategoryId
 	}
 	return ""
 }
@@ -583,7 +583,7 @@ const file_personal_schedule_service_goal_proto_rawDesc = "" +
 	"\vtotal_goals\x18\x03 \x01(\x05R\n" +
 	"totalGoals\x12(\n" +
 	"\x05error\x18\x04 \x01(\v2\r.common.ErrorH\x00R\x05error\x88\x01\x01B\b\n" +
-	"\x06_error\"\x97\x04\n" +
+	"\x06_error\"\x96\x04\n" +
 	"\x11UpsertGoalRequest\x12\x17\n" +
 	"\auser_id\x18\x01 \x01(\tR\x06userId\x12\x13\n" +
 	"\x02id\x18\x02 \x01(\tH\x00R\x02id\x88\x01\x01\x12\x12\n" +
@@ -597,9 +597,9 @@ const file_personal_schedule_service_goal_proto_rawDesc = "" +
 	"\rdifficulty_id\x18\t \x01(\tR\fdifficultyId\x12\x1f\n" +
 	"\vpriority_id\x18\n" +
 	" \x01(\tR\n" +
-	"priorityId\x12 \n" +
-	"\fwork_type_id\x18\v \x01(\tR\n" +
-	"workTypeId\x128\n" +
+	"priorityId\x12\x1f\n" +
+	"\vcategory_id\x18\v \x01(\tR\n" +
+	"categoryId\x128\n" +
 	"\x05tasks\x18\f \x03(\v2\".personal_schedule.GoalTaskPayloadR\x05tasksB\x05\n" +
 	"\x03_idB\x15\n" +
 	"\x13_short_descriptionsB\x17\n" +
