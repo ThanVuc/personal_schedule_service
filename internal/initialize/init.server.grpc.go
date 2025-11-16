@@ -21,6 +21,7 @@ type PersonalScheduleServer struct {
 	config             *settings.Server
 	labelServiceServer *controller.LabelController
 	goalServiceServer  *controller.GoalController
+	workServiceServer  *controller.WorkController
 }
 
 func NewPersonalScheduleService() *PersonalScheduleServer {
@@ -29,6 +30,7 @@ func NewPersonalScheduleService() *PersonalScheduleServer {
 		config:             &global.Config.Server,
 		labelServiceServer: wire.InjectLabelController(),
 		goalServiceServer:  wire.InjectGoalController(),
+		workServiceServer:  wire.InjectWorkController(),
 	}
 }
 
@@ -43,6 +45,7 @@ func (ps *PersonalScheduleServer) createServer() *grpc.Server {
 
 	personal_schedule.RegisterLabelServiceServer(server, ps.labelServiceServer)
 	personal_schedule.RegisterGoalServiceServer(server, ps.goalServiceServer)
+	personal_schedule.RegisterWorkServiceServer(server, ps.workServiceServer)
 
 	return server
 }

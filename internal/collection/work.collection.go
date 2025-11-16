@@ -66,20 +66,11 @@ func createWorkCollection() error {
 					"bsonType":    "date",
 					"description": "End date, required",
 				},
-				"notifications": bson.M{
+				"notification_ids": bson.M{
 					"bsonType":    "array",
-					"description": "List of notifications",
+					"description": "List of notification_ids",
 					"items": bson.M{
-						"bsonType": "object",
-						"required": []string{"mode", "notify_at", "created_at", "last_modified_at"},
-						"properties": bson.M{
-							"_id":               bson.M{"bsonType": "objectId"},
-							"mode":              bson.M{"bsonType": "string"},
-							"notify_at":         bson.M{"bsonType": "date"},
-							"short_description": bson.M{"bsonType": []string{"string", "null"}},
-							"created_at":        bson.M{"bsonType": "date"},
-							"last_modified_at":  bson.M{"bsonType": "date"},
-						},
+						"bsonType": "objectId",
 					},
 				},
 				"status_id":        bson.M{"bsonType": "objectId"},

@@ -108,14 +108,14 @@ func (m *goalMapper) mapProtoGoalToDB(req *personal_schedule.UpsertGoalRequest) 
 
 	startDate := time.Unix(*req.StartDate, 0)
 
-	enđate := time.Unix(*req.EndDate, 0)
+	endate := time.Unix(*req.EndDate, 0)
 
 	return &collection.Goal{
 		Name:                req.Name,
 		ShortDescriptions:   req.ShortDescriptions,
 		DetailedDescription: req.DetailedDescription,
 		StartDate:           &startDate,
-		EndDate:             &enđate,
+		EndDate:             &endate,
 		UserID:              req.UserId,
 		StatusID:            statusID,
 		DifficultyID:        difficultyID,

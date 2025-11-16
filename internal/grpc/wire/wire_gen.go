@@ -11,6 +11,7 @@ import (
 	"personal_schedule_service/internal/grpc/controller"
 	"personal_schedule_service/internal/grpc/mapper"
 	"personal_schedule_service/internal/grpc/services"
+	"personal_schedule_service/internal/grpc/validation"
 	"personal_schedule_service/internal/repos"
 )
 
@@ -30,6 +31,15 @@ func InjectGoalController() *controller.GoalController {
 	goalService := services.NewGoalService(goalRepo, goalMapper)
 	goalController := controller.NewGoalController(goalService)
 	return goalController
+}
+
+func InjectWorkController() *controller.WorkController {
+	workRepo := repos.NewWorkRepo()
+	workMapper := mapper.NewWorkMapper()
+	workValidator := validation.NewWorkValidator(workRepo)
+	workService := services.NewWorkService(workRepo, workMapper, workValidator)
+	workController := controller.NewWorkController(workService)
+	return workController
 }
 
 // Injectors from handler.wire.go:

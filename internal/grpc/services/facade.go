@@ -5,6 +5,7 @@ import (
 	"personal_schedule_service/global"
 	"personal_schedule_service/internal/grpc/helper"
 	"personal_schedule_service/internal/grpc/mapper"
+	"personal_schedule_service/internal/grpc/validation"
 	"personal_schedule_service/internal/repos"
 	"personal_schedule_service/proto/common"
 	"personal_schedule_service/proto/personal_schedule"
@@ -22,6 +23,10 @@ type (
 		UpsertGoal(ctx context.Context, req *personal_schedule.UpsertGoalRequest) (*personal_schedule.UpsertGoalResponse, error)
 		GetGoal(ctx context.Context, req *personal_schedule.GetGoalRequest) (*personal_schedule.GetGoalResponse, error)
 		DeleteGoal(ctx context.Context, req *personal_schedule.DeleteGoalRequest) (*personal_schedule.DeleteGoalResponse, error)
+	}
+
+	WorkService interface {
+		UpsertWork(ctx context.Context, req *personal_schedule.UpsertWorkRequest) (*personal_schedule.UpsertWorkResponse, error)
 	}
 )
 
@@ -42,9 +47,23 @@ func NewGoalService(
 	goalMapper mapper.GoalMapper,
 ) GoalService {
 	return &goalService{
-		logger:     global.Logger,
-		goalRepo:   goalRepo,
-		goalMapper: goalMapper,
+		logger:         global.Logger,
+		goalRepo:       goalRepo,
+		goalMapper:     goalMapper,
 		mongoConnector: global.MongoDbConntector,
+	}
+}
+
+func NewWorkService(
+	workRepo repos.WorkRepo,
+	workMapper mapper.WorkMapper,
+	validator validation.WorkValidator,
+) WorkService {
+	return &workService{
+		logger:         global.Logger,
+		workRepo:       workRepo,
+		workMapper:     workMapper,
+		mongoConnector: global.MongoDbConntector,
+		validator:      validator,
 	}
 }
