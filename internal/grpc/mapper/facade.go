@@ -17,6 +17,10 @@ type (
 		MapUpsertProtoToModels(req *personal_schedule.UpsertGoalRequest) (*collection.Goal, []collection.GoalTask, error)
 		MapAggregatedToDetailProto(aggGoal repos.AggregatedGoal, dbTasks []collection.GoalTask) *personal_schedule.GoalDetail
 	}
+
+	WorkMapper interface {
+		MapUpsertProtoToModels(req *personal_schedule.UpsertWorkRequest) (*collection.Work, []collection.SubTask, error)
+	}
 )
 
 func NewLabelMapper() LabelMapper {
@@ -25,4 +29,8 @@ func NewLabelMapper() LabelMapper {
 
 func NewGoalMapper() GoalMapper {
 	return &goalMapper{}
+}
+
+func NewWorkMapper() WorkMapper {
+	return &workMapper{}
 }

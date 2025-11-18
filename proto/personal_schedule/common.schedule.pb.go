@@ -645,6 +645,66 @@ func (x *GoalDetail) GetTasks() []*GoalTaskPayload {
 	return nil
 }
 
+type SubTaskPayload struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            *string                `protobuf:"bytes,1,opt,name=id,proto3,oneof" json:"id"`
+	Name          string                 `protobuf:"bytes,2,opt,name=name,proto3" json:"name"`
+	IsCompleted   bool                   `protobuf:"varint,3,opt,name=is_completed,json=isCompleted,proto3" json:"is_completed"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *SubTaskPayload) Reset() {
+	*x = SubTaskPayload{}
+	mi := &file_personal_schedule_service_common_schedule_proto_msgTypes[8]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *SubTaskPayload) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SubTaskPayload) ProtoMessage() {}
+
+func (x *SubTaskPayload) ProtoReflect() protoreflect.Message {
+	mi := &file_personal_schedule_service_common_schedule_proto_msgTypes[8]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use SubTaskPayload.ProtoReflect.Descriptor instead.
+func (*SubTaskPayload) Descriptor() ([]byte, []int) {
+	return file_personal_schedule_service_common_schedule_proto_rawDescGZIP(), []int{8}
+}
+
+func (x *SubTaskPayload) GetId() string {
+	if x != nil && x.Id != nil {
+		return *x.Id
+	}
+	return ""
+}
+
+func (x *SubTaskPayload) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *SubTaskPayload) GetIsCompleted() bool {
+	if x != nil {
+		return x.IsCompleted
+	}
+	return false
+}
+
 var File_personal_schedule_service_common_schedule_proto protoreflect.FileDescriptor
 
 const file_personal_schedule_service_common_schedule_proto_rawDesc = "" +
@@ -715,7 +775,12 @@ const file_personal_schedule_service_common_schedule_proto_rawDesc = "" +
 	"goalLabels\x12\x17\n" +
 	"\auser_id\x18\t \x01(\tR\x06userId\x128\n" +
 	"\x05tasks\x18\n" +
-	" \x03(\v2\".personal_schedule.GoalTaskPayloadR\x05tasksB\x19Z\x17proto/personal_scheduleb\x06proto3"
+	" \x03(\v2\".personal_schedule.GoalTaskPayloadR\x05tasks\"c\n" +
+	"\x0eSubTaskPayload\x12\x13\n" +
+	"\x02id\x18\x01 \x01(\tH\x00R\x02id\x88\x01\x01\x12\x12\n" +
+	"\x04name\x18\x02 \x01(\tR\x04name\x12!\n" +
+	"\fis_completed\x18\x03 \x01(\bR\visCompletedB\x05\n" +
+	"\x03_idB\x19Z\x17proto/personal_scheduleb\x06proto3"
 
 var (
 	file_personal_schedule_service_common_schedule_proto_rawDescOnce sync.Once
@@ -729,7 +794,7 @@ func file_personal_schedule_service_common_schedule_proto_rawDescGZIP() []byte {
 	return file_personal_schedule_service_common_schedule_proto_rawDescData
 }
 
-var file_personal_schedule_service_common_schedule_proto_msgTypes = make([]protoimpl.MessageInfo, 8)
+var file_personal_schedule_service_common_schedule_proto_msgTypes = make([]protoimpl.MessageInfo, 9)
 var file_personal_schedule_service_common_schedule_proto_goTypes = []any{
 	(*Label)(nil),           // 0: personal_schedule.Label
 	(*LabelPerType)(nil),    // 1: personal_schedule.LabelPerType
@@ -739,6 +804,7 @@ var file_personal_schedule_service_common_schedule_proto_goTypes = []any{
 	(*GoalTaskPayload)(nil), // 5: personal_schedule.GoalTaskPayload
 	(*GoalLabel)(nil),       // 6: personal_schedule.GoalLabel
 	(*GoalDetail)(nil),      // 7: personal_schedule.GoalDetail
+	(*SubTaskPayload)(nil),  // 8: personal_schedule.SubTaskPayload
 }
 var file_personal_schedule_service_common_schedule_proto_depIdxs = []int32{
 	0,  // 0: personal_schedule.LabelPerType.labels:type_name -> personal_schedule.Label
@@ -766,13 +832,14 @@ func file_personal_schedule_service_common_schedule_proto_init() {
 		return
 	}
 	file_personal_schedule_service_common_schedule_proto_msgTypes[5].OneofWrappers = []any{}
+	file_personal_schedule_service_common_schedule_proto_msgTypes[8].OneofWrappers = []any{}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_personal_schedule_service_common_schedule_proto_rawDesc), len(file_personal_schedule_service_common_schedule_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   8,
+			NumMessages:   9,
 			NumExtensions: 0,
 			NumServices:   0,
 		},
