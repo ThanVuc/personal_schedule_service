@@ -34,6 +34,14 @@ type (
 		DeleteTasksByGoalID(ctx context.Context, goalID bson.ObjectID) error
 		DeleteGoal(ctx context.Context, goalID bson.ObjectID) error
 	}
+
+	WorkRepo interface {
+		GetWorkByID(ctx context.Context, workID bson.ObjectID) (*collection.Work, error)
+		CreateWork(ctx context.Context, work *collection.Work) (bson.ObjectID, error)
+		UpdateWork(ctx context.Context, workID bson.ObjectID, updates bson.M) error
+		GetSubTasksByWorkID(ctx context.Context, workID bson.ObjectID) ([]collection.SubTask, error)
+		BulkWriteSubTasks(ctx context.Context, operations []mongo.WriteModel) (*mongo.BulkWriteResult, error)
+	}
 )
 
 func NewUserRepo() UserRepo {
@@ -52,6 +60,13 @@ func NewLabelRepo() LabelRepo {
 
 func NewGoalRepo() GoalRepo {
 	return &goalRepo{
+		logger:         global.Logger,
+		mongoConnector: global.MongoDbConntector,
+	}
+}
+
+func NewWorkRepo() WorkRepo {
+	return &workRepo{
 		logger:         global.Logger,
 		mongoConnector: global.MongoDbConntector,
 	}

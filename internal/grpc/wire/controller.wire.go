@@ -6,6 +6,7 @@ import (
 	"personal_schedule_service/internal/grpc/controller"
 	"personal_schedule_service/internal/grpc/mapper"
 	"personal_schedule_service/internal/grpc/services"
+	"personal_schedule_service/internal/grpc/validation"
 	"personal_schedule_service/internal/repos"
 
 	"github.com/google/wire"
@@ -28,7 +29,18 @@ func InjectGoalController() *controller.GoalController {
 		mapper.NewGoalMapper,
 		services.NewGoalService,
 		controller.NewGoalController,
-	)	
-	
+	)
+
+	return nil
+}
+
+func InjectWorkController() *controller.WorkController {
+	wire.Build(
+		repos.NewWorkRepo,
+		mapper.NewWorkMapper,
+		services.NewWorkService,
+		controller.NewWorkController,
+		validation.NewWorkValidator,
+	)
 	return nil
 }
