@@ -21,6 +21,7 @@ type (
 		InsertLabels(ctx context.Context, labels *[]collection.Label) error
 		GetLabels(ctx context.Context) ([]collection.Label, error)
 		GetLabelsByTypeIDs(ctx context.Context, typeIDs int32) ([]collection.Label, error)
+		GetLabelIDByName(ctx context.Context, name string) (*bson.ObjectID, error)
 	}
 
 	GoalRepo interface {
@@ -41,6 +42,9 @@ type (
 		UpdateWork(ctx context.Context, workID bson.ObjectID, updates bson.M) error
 		GetSubTasksByWorkID(ctx context.Context, workID bson.ObjectID) ([]collection.SubTask, error)
 		BulkWriteSubTasks(ctx context.Context, operations []mongo.WriteModel) (*mongo.BulkWriteResult, error)
+		GetWorks(ctx context.Context, req *personal_schedule.GetWorksRequest) ([]AggregatedWork, error)
+		GetAggregatedWorkByID(ctx context.Context, workID bson.ObjectID) (*AggregatedWork, error)
+		CountOverlappingWorks(ctx context.Context, userID string, startDate, endDate int64, excludeWorkID *bson.ObjectID) (int64, error)
 	}
 )
 

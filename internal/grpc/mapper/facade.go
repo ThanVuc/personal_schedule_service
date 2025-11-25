@@ -20,6 +20,8 @@ type (
 
 	WorkMapper interface {
 		MapUpsertProtoToModels(req *personal_schedule.UpsertWorkRequest) (*collection.Work, []collection.SubTask, error)
+		ConvertAggregatedWorksToProto(aggWorks []repos.AggregatedWork) []*personal_schedule.Work
+		MapAggregatedToWorkDetailProto(aggWork repos.AggregatedWork, subTasks []collection.SubTask) *personal_schedule.WorkDetail
 	}
 )
 

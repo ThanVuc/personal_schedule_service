@@ -20,6 +20,8 @@ const _ = grpc.SupportPackageIsVersion9
 
 const (
 	WorkService_UpsertWork_FullMethodName = "/personal_schedule.WorkService/UpsertWork"
+	WorkService_GetWorks_FullMethodName   = "/personal_schedule.WorkService/GetWorks"
+	WorkService_GetWork_FullMethodName    = "/personal_schedule.WorkService/GetWork"
 )
 
 // WorkServiceClient is the client API for WorkService service.
@@ -27,6 +29,8 @@ const (
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type WorkServiceClient interface {
 	UpsertWork(ctx context.Context, in *UpsertWorkRequest, opts ...grpc.CallOption) (*UpsertWorkResponse, error)
+	GetWorks(ctx context.Context, in *GetWorksRequest, opts ...grpc.CallOption) (*GetWorksResponse, error)
+	GetWork(ctx context.Context, in *GetWorkRequest, opts ...grpc.CallOption) (*GetWorkResponse, error)
 }
 
 type workServiceClient struct {
@@ -47,11 +51,33 @@ func (c *workServiceClient) UpsertWork(ctx context.Context, in *UpsertWorkReques
 	return out, nil
 }
 
+func (c *workServiceClient) GetWorks(ctx context.Context, in *GetWorksRequest, opts ...grpc.CallOption) (*GetWorksResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetWorksResponse)
+	err := c.cc.Invoke(ctx, WorkService_GetWorks_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *workServiceClient) GetWork(ctx context.Context, in *GetWorkRequest, opts ...grpc.CallOption) (*GetWorkResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetWorkResponse)
+	err := c.cc.Invoke(ctx, WorkService_GetWork_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // WorkServiceServer is the server API for WorkService service.
 // All implementations must embed UnimplementedWorkServiceServer
 // for forward compatibility.
 type WorkServiceServer interface {
 	UpsertWork(context.Context, *UpsertWorkRequest) (*UpsertWorkResponse, error)
+	GetWorks(context.Context, *GetWorksRequest) (*GetWorksResponse, error)
+	GetWork(context.Context, *GetWorkRequest) (*GetWorkResponse, error)
 	mustEmbedUnimplementedWorkServiceServer()
 }
 
@@ -64,6 +90,12 @@ type UnimplementedWorkServiceServer struct{}
 
 func (UnimplementedWorkServiceServer) UpsertWork(context.Context, *UpsertWorkRequest) (*UpsertWorkResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UpsertWork not implemented")
+}
+func (UnimplementedWorkServiceServer) GetWorks(context.Context, *GetWorksRequest) (*GetWorksResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetWorks not implemented")
+}
+func (UnimplementedWorkServiceServer) GetWork(context.Context, *GetWorkRequest) (*GetWorkResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetWork not implemented")
 }
 func (UnimplementedWorkServiceServer) mustEmbedUnimplementedWorkServiceServer() {}
 func (UnimplementedWorkServiceServer) testEmbeddedByValue()                     {}
@@ -104,6 +136,42 @@ func _WorkService_UpsertWork_Handler(srv interface{}, ctx context.Context, dec f
 	return interceptor(ctx, in, info, handler)
 }
 
+func _WorkService_GetWorks_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetWorksRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(WorkServiceServer).GetWorks(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: WorkService_GetWorks_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(WorkServiceServer).GetWorks(ctx, req.(*GetWorksRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _WorkService_GetWork_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetWorkRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(WorkServiceServer).GetWork(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: WorkService_GetWork_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(WorkServiceServer).GetWork(ctx, req.(*GetWorkRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // WorkService_ServiceDesc is the grpc.ServiceDesc for WorkService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -114,6 +182,14 @@ var WorkService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "UpsertWork",
 			Handler:    _WorkService_UpsertWork_Handler,
+		},
+		{
+			MethodName: "GetWorks",
+			Handler:    _WorkService_GetWorks_Handler,
+		},
+		{
+			MethodName: "GetWork",
+			Handler:    _WorkService_GetWork_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
