@@ -221,10 +221,14 @@ func (wr *workRepo) GetWorks(ctx context.Context, req *personal_schedule.GetWork
 func (wr *workRepo) CountOverlappingWorks(ctx context.Context, userID string, startDate, endDate int64, excludeWorkID *bson.ObjectID) (int64, error) {
 	coll := wr.mongoConnector.GetCollection(collection.WorksCollection)
 
+	start := time.Unix(startDate, 0)
+	end := time.Unix(endDate, 0)
+
 	filter := bson.D{
 		{Key: "user_id", Value: userID},
-		{Key: "start_date", Value: bson.M{"$lt": endDate}},
-		{Key: "end_date", Value: bson.M{"$gt": startDate}},
+
+		{Key: "start_date", Value: bson.M{"$lt": end}},
+		{Key: "end_date", Value: bson.M{"$gt": start}},
 	}
 
 	if excludeWorkID != nil {
@@ -315,4 +319,22 @@ func (r workRepo) GetAggregatedWorkByID(ctx context.Context, workID bson.ObjectI
 		return nil, nil
 	}
 	return &result[0], nil
+}
+
+func (s *workRepo) DeleteSubTaskByWorkID(ctx context.Context, workID bson.ObjectID) error {
+	coll := s.mongoConnector.GetCollection(collection.SubTasksCollection)
+	_, err := coll.DeleteMany(ctx, bson.M{"work_id": workID})
+	return err
+}
+
+func (s *workRepo) DeleteWork(ctx context.Context, workID bson.ObjectID) error {
+	coll := s.mongoConnector.GetCollection(collection.WorksCollection)
+	result, err := coll.DeleteOne(ctx, bson.M{"_id": workID})
+	if err != nil {
+		return err
+	}
+	if result.DeletedCount == 0 {
+		return mongo.ErrNoDocuments
+	}
+	return nil
 }

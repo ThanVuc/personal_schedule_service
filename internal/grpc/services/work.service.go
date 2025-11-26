@@ -211,3 +211,56 @@ func (s *workService) GetWork(ctx context.Context, req *personal_schedule.GetWor
 		Error: nil,
 	}, nil
 }
+
+func (s *workService) DeleteWork(ctx context.Context, req *personal_schedule.DeleteWorkRequest) (*personal_schedule.DeleteWorkResponse, error) {
+	workID, err := bson.ObjectIDFromHex(req.WorkId)
+	if err != nil {
+		s.logger.Warn("Invalid work ID format", "", zap.String("work_id", req.WorkId), zap.Error(err))
+		return &personal_schedule.DeleteWorkResponse{
+			Success: false,
+			Error:   utils.InternalServerError(ctx, err),
+		}, nil
+	}
+
+	work, err := s.workRepo.GetWorkByID(ctx, workID)
+	if err != nil {
+		s.logger.Error("Error fetching work from repo", "err", zap.Error(err))
+		return &personal_schedule.DeleteWorkResponse{
+			Success: false,
+			Error:   utils.DatabaseError(ctx, err),
+		}, err
+	}
+	if work == nil {
+		s.logger.Info("Goal not found", "", zap.String("goal_id", req.WorkId))
+		return nil, nil
+	}
+
+	if work.UserID != req.UserId {
+		s.logger.Warn("Forbidden: user does not own this work", "", zap.String("work_id", req.WorkId), zap.String("user_id", req.UserId))
+		return &personal_schedule.DeleteWorkResponse{
+			Success: false,
+			Error:   utils.PermissionDeniedError(ctx, err),
+		}, nil
+	}
+
+	err = s.workRepo.DeleteSubTaskByWorkID(ctx, workID)
+	if err != nil {
+		s.logger.Error("Error deleting sub-tasks by work ID", "err", zap.Error(err))
+		return &personal_schedule.DeleteWorkResponse{
+			Success: false,
+			Error:   utils.DatabaseError(ctx, err),
+		}, err
+	}
+	err = s.workRepo.DeleteWork(ctx, workID)
+	if err != nil {
+		s.logger.Error("Error deleting work", "err", zap.Error(err))
+		return &personal_schedule.DeleteWorkResponse{
+			Success: false,
+			Error:   utils.DatabaseError(ctx, err),
+		}, err
+	}
+	return &personal_schedule.DeleteWorkResponse{
+		Success: true,
+	}, nil
+
+}

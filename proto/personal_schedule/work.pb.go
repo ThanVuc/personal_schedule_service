@@ -502,6 +502,118 @@ func (x *GetWorkResponse) GetError() *common.Error {
 	return nil
 }
 
+type DeleteWorkRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	UserId        string                 `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id"`
+	WorkId        string                 `protobuf:"bytes,2,opt,name=work_id,json=workId,proto3" json:"work_id"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *DeleteWorkRequest) Reset() {
+	*x = DeleteWorkRequest{}
+	mi := &file_personal_schedule_service_work_proto_msgTypes[6]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *DeleteWorkRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DeleteWorkRequest) ProtoMessage() {}
+
+func (x *DeleteWorkRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_personal_schedule_service_work_proto_msgTypes[6]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DeleteWorkRequest.ProtoReflect.Descriptor instead.
+func (*DeleteWorkRequest) Descriptor() ([]byte, []int) {
+	return file_personal_schedule_service_work_proto_rawDescGZIP(), []int{6}
+}
+
+func (x *DeleteWorkRequest) GetUserId() string {
+	if x != nil {
+		return x.UserId
+	}
+	return ""
+}
+
+func (x *DeleteWorkRequest) GetWorkId() string {
+	if x != nil {
+		return x.WorkId
+	}
+	return ""
+}
+
+type DeleteWorkResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Success       bool                   `protobuf:"varint,1,opt,name=success,proto3" json:"success"`
+	Error         *common.Error          `protobuf:"bytes,2,opt,name=error,proto3,oneof" json:"error"`
+	Message       *string                `protobuf:"bytes,3,opt,name=message,proto3,oneof" json:"message"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *DeleteWorkResponse) Reset() {
+	*x = DeleteWorkResponse{}
+	mi := &file_personal_schedule_service_work_proto_msgTypes[7]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *DeleteWorkResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DeleteWorkResponse) ProtoMessage() {}
+
+func (x *DeleteWorkResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_personal_schedule_service_work_proto_msgTypes[7]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DeleteWorkResponse.ProtoReflect.Descriptor instead.
+func (*DeleteWorkResponse) Descriptor() ([]byte, []int) {
+	return file_personal_schedule_service_work_proto_rawDescGZIP(), []int{7}
+}
+
+func (x *DeleteWorkResponse) GetSuccess() bool {
+	if x != nil {
+		return x.Success
+	}
+	return false
+}
+
+func (x *DeleteWorkResponse) GetError() *common.Error {
+	if x != nil {
+		return x.Error
+	}
+	return nil
+}
+
+func (x *DeleteWorkResponse) GetMessage() string {
+	if x != nil && x.Message != nil {
+		return *x.Message
+	}
+	return ""
+}
+
 var File_personal_schedule_service_work_proto protoreflect.FileDescriptor
 
 const file_personal_schedule_service_work_proto_rawDesc = "" +
@@ -572,12 +684,24 @@ const file_personal_schedule_service_work_proto_rawDesc = "" +
 	"\x0fGetWorkResponse\x121\n" +
 	"\x04work\x18\x01 \x01(\v2\x1d.personal_schedule.WorkDetailR\x04work\x12(\n" +
 	"\x05error\x18\x02 \x01(\v2\r.common.ErrorH\x00R\x05error\x88\x01\x01B\b\n" +
-	"\x06_error2\x8f\x02\n" +
+	"\x06_error\"E\n" +
+	"\x11DeleteWorkRequest\x12\x17\n" +
+	"\auser_id\x18\x01 \x01(\tR\x06userId\x12\x17\n" +
+	"\awork_id\x18\x02 \x01(\tR\x06workId\"\x8d\x01\n" +
+	"\x12DeleteWorkResponse\x12\x18\n" +
+	"\asuccess\x18\x01 \x01(\bR\asuccess\x12(\n" +
+	"\x05error\x18\x02 \x01(\v2\r.common.ErrorH\x00R\x05error\x88\x01\x01\x12\x1d\n" +
+	"\amessage\x18\x03 \x01(\tH\x01R\amessage\x88\x01\x01B\b\n" +
+	"\x06_errorB\n" +
+	"\n" +
+	"\b_message2\xea\x02\n" +
 	"\vWorkService\x12Y\n" +
 	"\n" +
 	"UpsertWork\x12$.personal_schedule.UpsertWorkRequest\x1a%.personal_schedule.UpsertWorkResponse\x12S\n" +
 	"\bGetWorks\x12\".personal_schedule.GetWorksRequest\x1a#.personal_schedule.GetWorksResponse\x12P\n" +
-	"\aGetWork\x12!.personal_schedule.GetWorkRequest\x1a\".personal_schedule.GetWorkResponseB\x19Z\x17proto/personal_scheduleb\x06proto3"
+	"\aGetWork\x12!.personal_schedule.GetWorkRequest\x1a\".personal_schedule.GetWorkResponse\x12Y\n" +
+	"\n" +
+	"DeleteWork\x12$.personal_schedule.DeleteWorkRequest\x1a%.personal_schedule.DeleteWorkResponseB\x19Z\x17proto/personal_scheduleb\x06proto3"
 
 var (
 	file_personal_schedule_service_work_proto_rawDescOnce sync.Once
@@ -591,7 +715,7 @@ func file_personal_schedule_service_work_proto_rawDescGZIP() []byte {
 	return file_personal_schedule_service_work_proto_rawDescData
 }
 
-var file_personal_schedule_service_work_proto_msgTypes = make([]protoimpl.MessageInfo, 6)
+var file_personal_schedule_service_work_proto_msgTypes = make([]protoimpl.MessageInfo, 8)
 var file_personal_schedule_service_work_proto_goTypes = []any{
 	(*UpsertWorkRequest)(nil),  // 0: personal_schedule.UpsertWorkRequest
 	(*UpsertWorkResponse)(nil), // 1: personal_schedule.UpsertWorkResponse
@@ -599,29 +723,34 @@ var file_personal_schedule_service_work_proto_goTypes = []any{
 	(*GetWorksResponse)(nil),   // 3: personal_schedule.GetWorksResponse
 	(*GetWorkRequest)(nil),     // 4: personal_schedule.GetWorkRequest
 	(*GetWorkResponse)(nil),    // 5: personal_schedule.GetWorkResponse
-	(*SubTaskPayload)(nil),     // 6: personal_schedule.SubTaskPayload
-	(*common.Error)(nil),       // 7: common.Error
-	(*Work)(nil),               // 8: personal_schedule.Work
-	(*WorkDetail)(nil),         // 9: personal_schedule.WorkDetail
+	(*DeleteWorkRequest)(nil),  // 6: personal_schedule.DeleteWorkRequest
+	(*DeleteWorkResponse)(nil), // 7: personal_schedule.DeleteWorkResponse
+	(*SubTaskPayload)(nil),     // 8: personal_schedule.SubTaskPayload
+	(*common.Error)(nil),       // 9: common.Error
+	(*Work)(nil),               // 10: personal_schedule.Work
+	(*WorkDetail)(nil),         // 11: personal_schedule.WorkDetail
 }
 var file_personal_schedule_service_work_proto_depIdxs = []int32{
-	6, // 0: personal_schedule.UpsertWorkRequest.sub_tasks:type_name -> personal_schedule.SubTaskPayload
-	7, // 1: personal_schedule.UpsertWorkResponse.error:type_name -> common.Error
-	8, // 2: personal_schedule.GetWorksResponse.works:type_name -> personal_schedule.Work
-	7, // 3: personal_schedule.GetWorksResponse.error:type_name -> common.Error
-	9, // 4: personal_schedule.GetWorkResponse.work:type_name -> personal_schedule.WorkDetail
-	7, // 5: personal_schedule.GetWorkResponse.error:type_name -> common.Error
-	0, // 6: personal_schedule.WorkService.UpsertWork:input_type -> personal_schedule.UpsertWorkRequest
-	2, // 7: personal_schedule.WorkService.GetWorks:input_type -> personal_schedule.GetWorksRequest
-	4, // 8: personal_schedule.WorkService.GetWork:input_type -> personal_schedule.GetWorkRequest
-	1, // 9: personal_schedule.WorkService.UpsertWork:output_type -> personal_schedule.UpsertWorkResponse
-	3, // 10: personal_schedule.WorkService.GetWorks:output_type -> personal_schedule.GetWorksResponse
-	5, // 11: personal_schedule.WorkService.GetWork:output_type -> personal_schedule.GetWorkResponse
-	9, // [9:12] is the sub-list for method output_type
-	6, // [6:9] is the sub-list for method input_type
-	6, // [6:6] is the sub-list for extension type_name
-	6, // [6:6] is the sub-list for extension extendee
-	0, // [0:6] is the sub-list for field type_name
+	8,  // 0: personal_schedule.UpsertWorkRequest.sub_tasks:type_name -> personal_schedule.SubTaskPayload
+	9,  // 1: personal_schedule.UpsertWorkResponse.error:type_name -> common.Error
+	10, // 2: personal_schedule.GetWorksResponse.works:type_name -> personal_schedule.Work
+	9,  // 3: personal_schedule.GetWorksResponse.error:type_name -> common.Error
+	11, // 4: personal_schedule.GetWorkResponse.work:type_name -> personal_schedule.WorkDetail
+	9,  // 5: personal_schedule.GetWorkResponse.error:type_name -> common.Error
+	9,  // 6: personal_schedule.DeleteWorkResponse.error:type_name -> common.Error
+	0,  // 7: personal_schedule.WorkService.UpsertWork:input_type -> personal_schedule.UpsertWorkRequest
+	2,  // 8: personal_schedule.WorkService.GetWorks:input_type -> personal_schedule.GetWorksRequest
+	4,  // 9: personal_schedule.WorkService.GetWork:input_type -> personal_schedule.GetWorkRequest
+	6,  // 10: personal_schedule.WorkService.DeleteWork:input_type -> personal_schedule.DeleteWorkRequest
+	1,  // 11: personal_schedule.WorkService.UpsertWork:output_type -> personal_schedule.UpsertWorkResponse
+	3,  // 12: personal_schedule.WorkService.GetWorks:output_type -> personal_schedule.GetWorksResponse
+	5,  // 13: personal_schedule.WorkService.GetWork:output_type -> personal_schedule.GetWorkResponse
+	7,  // 14: personal_schedule.WorkService.DeleteWork:output_type -> personal_schedule.DeleteWorkResponse
+	11, // [11:15] is the sub-list for method output_type
+	7,  // [7:11] is the sub-list for method input_type
+	7,  // [7:7] is the sub-list for extension type_name
+	7,  // [7:7] is the sub-list for extension extendee
+	0,  // [0:7] is the sub-list for field type_name
 }
 
 func init() { file_personal_schedule_service_work_proto_init() }
@@ -635,13 +764,14 @@ func file_personal_schedule_service_work_proto_init() {
 	file_personal_schedule_service_work_proto_msgTypes[2].OneofWrappers = []any{}
 	file_personal_schedule_service_work_proto_msgTypes[3].OneofWrappers = []any{}
 	file_personal_schedule_service_work_proto_msgTypes[5].OneofWrappers = []any{}
+	file_personal_schedule_service_work_proto_msgTypes[7].OneofWrappers = []any{}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_personal_schedule_service_work_proto_rawDesc), len(file_personal_schedule_service_work_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   6,
+			NumMessages:   8,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
