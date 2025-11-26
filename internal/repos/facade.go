@@ -45,6 +45,8 @@ type (
 		GetWorks(ctx context.Context, req *personal_schedule.GetWorksRequest) ([]AggregatedWork, error)
 		GetAggregatedWorkByID(ctx context.Context, workID bson.ObjectID) (*AggregatedWork, error)
 		CountOverlappingWorks(ctx context.Context, userID string, startDate, endDate int64, excludeWorkID *bson.ObjectID) (int64, error)
+		DeleteSubTaskByWorkID(ctx context.Context, workID bson.ObjectID) error
+		DeleteWork(ctx context.Context, workID bson.ObjectID) error
 	}
 )
 

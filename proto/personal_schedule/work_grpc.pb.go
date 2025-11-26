@@ -22,6 +22,7 @@ const (
 	WorkService_UpsertWork_FullMethodName = "/personal_schedule.WorkService/UpsertWork"
 	WorkService_GetWorks_FullMethodName   = "/personal_schedule.WorkService/GetWorks"
 	WorkService_GetWork_FullMethodName    = "/personal_schedule.WorkService/GetWork"
+	WorkService_DeleteWork_FullMethodName = "/personal_schedule.WorkService/DeleteWork"
 )
 
 // WorkServiceClient is the client API for WorkService service.
@@ -31,6 +32,7 @@ type WorkServiceClient interface {
 	UpsertWork(ctx context.Context, in *UpsertWorkRequest, opts ...grpc.CallOption) (*UpsertWorkResponse, error)
 	GetWorks(ctx context.Context, in *GetWorksRequest, opts ...grpc.CallOption) (*GetWorksResponse, error)
 	GetWork(ctx context.Context, in *GetWorkRequest, opts ...grpc.CallOption) (*GetWorkResponse, error)
+	DeleteWork(ctx context.Context, in *DeleteWorkRequest, opts ...grpc.CallOption) (*DeleteWorkResponse, error)
 }
 
 type workServiceClient struct {
@@ -71,6 +73,16 @@ func (c *workServiceClient) GetWork(ctx context.Context, in *GetWorkRequest, opt
 	return out, nil
 }
 
+func (c *workServiceClient) DeleteWork(ctx context.Context, in *DeleteWorkRequest, opts ...grpc.CallOption) (*DeleteWorkResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(DeleteWorkResponse)
+	err := c.cc.Invoke(ctx, WorkService_DeleteWork_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // WorkServiceServer is the server API for WorkService service.
 // All implementations must embed UnimplementedWorkServiceServer
 // for forward compatibility.
@@ -78,6 +90,7 @@ type WorkServiceServer interface {
 	UpsertWork(context.Context, *UpsertWorkRequest) (*UpsertWorkResponse, error)
 	GetWorks(context.Context, *GetWorksRequest) (*GetWorksResponse, error)
 	GetWork(context.Context, *GetWorkRequest) (*GetWorkResponse, error)
+	DeleteWork(context.Context, *DeleteWorkRequest) (*DeleteWorkResponse, error)
 	mustEmbedUnimplementedWorkServiceServer()
 }
 
@@ -96,6 +109,9 @@ func (UnimplementedWorkServiceServer) GetWorks(context.Context, *GetWorksRequest
 }
 func (UnimplementedWorkServiceServer) GetWork(context.Context, *GetWorkRequest) (*GetWorkResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetWork not implemented")
+}
+func (UnimplementedWorkServiceServer) DeleteWork(context.Context, *DeleteWorkRequest) (*DeleteWorkResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeleteWork not implemented")
 }
 func (UnimplementedWorkServiceServer) mustEmbedUnimplementedWorkServiceServer() {}
 func (UnimplementedWorkServiceServer) testEmbeddedByValue()                     {}
@@ -172,6 +188,24 @@ func _WorkService_GetWork_Handler(srv interface{}, ctx context.Context, dec func
 	return interceptor(ctx, in, info, handler)
 }
 
+func _WorkService_DeleteWork_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeleteWorkRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(WorkServiceServer).DeleteWork(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: WorkService_DeleteWork_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(WorkServiceServer).DeleteWork(ctx, req.(*DeleteWorkRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // WorkService_ServiceDesc is the grpc.ServiceDesc for WorkService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -190,6 +224,10 @@ var WorkService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetWork",
 			Handler:    _WorkService_GetWork_Handler,
+		},
+		{
+			MethodName: "DeleteWork",
+			Handler:    _WorkService_DeleteWork_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
