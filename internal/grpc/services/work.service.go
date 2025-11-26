@@ -44,7 +44,7 @@ func (s *workService) UpsertWork(ctx context.Context, req *personal_schedule.Ups
 	}
 
 	var workID bson.ObjectID
-	now := time.Now().Unix()
+	now := time.Now()
 	if req.Id == nil || *req.Id == "" {
 		workDB.UserID = req.UserId
 		workDB.CreatedAt = now

@@ -11,7 +11,7 @@ import (
 )
 
 type goalMapper struct{}
-//1
+
 func (m *goalMapper) ConvertAggregatedGoalsToProto(aggGoals []repos.AggregatedGoal) []*personal_schedule.Goal {
 	protoGoals := make([]*personal_schedule.Goal, 0, len(aggGoals))
 
@@ -21,7 +21,7 @@ func (m *goalMapper) ConvertAggregatedGoalsToProto(aggGoals []repos.AggregatedGo
 	}
 	return protoGoals
 }
-//2
+
 func (m *goalMapper) MapAggregatedGoalToProto(aggGoal repos.AggregatedGoal) *personal_schedule.Goal {
 	sd := ""
 	if aggGoal.ShortDescriptions != nil {
@@ -56,7 +56,7 @@ func (m *goalMapper) MapAggregatedGoalToProto(aggGoal repos.AggregatedGoal) *per
 		Category: m.mapLabelsToProto(aggGoal.Category),
 	}
 }
-//3
+
 func (m *goalMapper) mapLabelsToProto(labels []collection.Label) []*personal_schedule.LabelInfo {
 	protoLabels := make([]*personal_schedule.LabelInfo, 0, len(labels))
 	for _, label := range labels {
@@ -74,7 +74,7 @@ func (m *goalMapper) mapLabelsToProto(labels []collection.Label) []*personal_sch
 	}
 	return protoLabels
 }
-//4
+
 func (m *goalMapper) MapUpsertProtoToModels(req *personal_schedule.UpsertGoalRequest) (*collection.Goal, []collection.GoalTask, error) {
 	goalDB, err := m.mapProtoGoalToDB(req)
 	if err != nil {
@@ -86,7 +86,7 @@ func (m *goalMapper) MapUpsertProtoToModels(req *personal_schedule.UpsertGoalReq
 	}
 	return goalDB, tasksDB, nil
 }
-//5
+
 func (m *goalMapper) mapProtoGoalToDB(req *personal_schedule.UpsertGoalRequest) (*collection.Goal, error) {
 	statusID, err := bson.ObjectIDFromHex(req.StatusId)
 	if err != nil {
@@ -123,7 +123,7 @@ func (m *goalMapper) mapProtoGoalToDB(req *personal_schedule.UpsertGoalRequest) 
 		CategoryID:          categoryID,
 	}, nil
 }
-//6
+
 func (m *goalMapper) mapGoalTasktoDB(pt []*personal_schedule.GoalTaskPayload) ([]collection.GoalTask, error) {
 	taskDB := make([]collection.GoalTask, len(pt))
 

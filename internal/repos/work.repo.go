@@ -2,9 +2,9 @@ package repos
 
 import (
 	"context"
-	"fmt"
 	"personal_schedule_service/internal/collection"
 	"personal_schedule_service/proto/personal_schedule"
+	"time"
 
 	"github.com/thanvuc/go-core-lib/log"
 	"github.com/thanvuc/go-core-lib/mongolib"
@@ -23,8 +23,8 @@ type AggregatedWork struct {
 	Name                string             `bson:"name"`
 	ShortDescriptions   *string            `bson:"short_descriptions,omitempty"`
 	DetailedDescription *string            `bson:"detailed_description,omitempty"`
-	StartDate           *int64             `bson:"start_date,omitempty"`
-	EndDate             int64              `bson:"end_date"`
+	StartDate           *time.Time         `bson:"start_date,omitempty"`
+	EndDate             time.Time          `bson:"end_date"`
 	UserID              string             `bson:"user_id"`
 	Status              []collection.Label `bson:"statusInfo"`
 	Priority            []collection.Label `bson:"priorityInfo"`
@@ -88,20 +88,23 @@ func (wr *workRepo) BulkWriteSubTasks(ctx context.Context, operations []mongo.Wr
 func (wr *workRepo) GetWorks(ctx context.Context, req *personal_schedule.GetWorksRequest) ([]AggregatedWork, error) {
 	coll := wr.mongoConnector.GetCollection(collection.WorksCollection)
 
-	dateFilter := bson.M{}
+	var fromDate, toDate time.Time
 	if req.FromDate != nil {
-		dateFilter["$gte"] = *req.FromDate
+		fromDate = time.Unix(*req.FromDate, 0)
 	}
 	if req.ToDate != nil {
-		dateFilter["$lte"] = *req.ToDate
+		toDate = time.Unix(*req.ToDate, 0)
 	}
-
-	fmt.Println("startDate:", &req.FromDate)
-	fmt.Println("endDate:", &req.ToDate)
 
 	matchFilter := bson.D{
 		{Key: "user_id", Value: req.UserId},
-		{Key: "end_date", Value: dateFilter},
+		{Key: "$and", Value: bson.A{
+			bson.D{{Key: "$or", Value: bson.A{
+				bson.D{{Key: "start_date", Value: bson.M{"$lte": toDate}}},
+				bson.D{{Key: "start_date", Value: nil}},
+			}}},
+			bson.D{{Key: "end_date", Value: bson.M{"$gte": fromDate}}},
+		}},
 	}
 
 	if req.Search != nil && *req.Search != "" {

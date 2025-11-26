@@ -3,6 +3,7 @@ package collection
 import (
 	"context"
 	"personal_schedule_service/global"
+	"time"
 
 	"go.mongodb.org/mongo-driver/v2/bson"
 	"go.mongodb.org/mongo-driver/v2/mongo"
@@ -14,8 +15,8 @@ type Work struct {
 	Name                string          `bson:"name" json:"name"`
 	ShortDescriptions   *string         `bson:"short_descriptions,omitempty" json:"short_descriptions,omitempty"`
 	DetailedDescription *string         `bson:"detailed_description,omitempty" json:"detailed_description,omitempty"`
-	StartDate           *int64          `bson:"start_date,omitempty" json:"start_date,omitempty"`
-	EndDate             int64           `bson:"end_date" json:"end_date"`
+	StartDate           *time.Time      `bson:"start_date,omitempty" json:"start_date,omitempty"`
+	EndDate             time.Time       `bson:"end_date" json:"end_date"`
 	NotificationIds     []bson.ObjectID `bson:"notification_ids,omitempty" json:"notification_ids,omitempty"`
 	StatusID            bson.ObjectID   `bson:"status_id" json:"status_id"`
 	DifficultyID        bson.ObjectID   `bson:"difficulty_id" json:"difficulty_id"`
@@ -24,8 +25,8 @@ type Work struct {
 	CategoryID          bson.ObjectID   `bson:"category_id" json:"category_id"`
 	UserID              string          `bson:"user_id" json:"user_id"`
 	GoalID              bson.ObjectID   `bson:"goal_id" json:"goal_id"`
-	CreatedAt           int64           `bson:"created_at" json:"created_at"`
-	LastModifiedAt      int64           `bson:"last_modified_at" json:"last_modified_at"`
+	CreatedAt           time.Time       `bson:"created_at" json:"created_at"`
+	LastModifiedAt      time.Time       `bson:"last_modified_at" json:"last_modified_at"`
 }
 
 func (w *Work) CollectionName() string {
@@ -58,11 +59,11 @@ func createWorkCollection() error {
 					"description": "Detailed description, optional",
 				},
 				"start_date": bson.M{
-					"bsonType":    []string{"long", "null"},
+					"bsonType":    []string{"date", "null"},
 					"description": "Start date, optional",
 				},
 				"end_date": bson.M{
-					"bsonType":    "long",
+					"bsonType":    "date",
 					"description": "End date, required",
 				},
 				"notification_ids": bson.M{
@@ -79,8 +80,8 @@ func createWorkCollection() error {
 				"category_id":      bson.M{"bsonType": "objectId"},
 				"user_id":          bson.M{"bsonType": "string"},
 				"goal_id":          bson.M{"bsonType": "objectId"},
-				"created_at":       bson.M{"bsonType": "long"},
-				"last_modified_at": bson.M{"bsonType": "long"},
+				"created_at":       bson.M{"bsonType": "date"},
+				"last_modified_at": bson.M{"bsonType": "date"},
 			},
 		},
 	}

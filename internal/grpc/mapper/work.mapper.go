@@ -4,13 +4,13 @@ import (
 	"personal_schedule_service/internal/collection"
 	"personal_schedule_service/internal/repos"
 	"personal_schedule_service/proto/personal_schedule"
+	"time"
 
 	"go.mongodb.org/mongo-driver/v2/bson"
 )
 
 type workMapper struct{}
 
-// 4
 func (m *workMapper) MapUpsertProtoToModels(req *personal_schedule.UpsertWorkRequest) (*collection.Work, []collection.SubTask, error) {
 	goalDB, err := m.mapProtoWorkToDB(req)
 	if err != nil {
@@ -23,7 +23,6 @@ func (m *workMapper) MapUpsertProtoToModels(req *personal_schedule.UpsertWorkReq
 	return goalDB, tasksDB, nil
 }
 
-// 5
 func (m *workMapper) mapProtoWorkToDB(req *personal_schedule.UpsertWorkRequest) (*collection.Work, error) {
 	statusID, err := bson.ObjectIDFromHex(req.StatusId)
 	if err != nil {
@@ -59,12 +58,20 @@ func (m *workMapper) mapProtoWorkToDB(req *personal_schedule.UpsertWorkRequest) 
 		notificationIDs[i] = id
 	}
 
+	endDate := time.Unix(req.EndDate, 0)
+
+	var startDate *time.Time
+	if req.StartDate != nil {
+		t := time.Unix(*req.StartDate, 0)
+		startDate = &t
+	}
+
 	return &collection.Work{
 		Name:                req.Name,
 		ShortDescriptions:   req.ShortDescriptions,
 		DetailedDescription: req.DetailedDescription,
-		StartDate:           req.StartDate,
-		EndDate:             req.EndDate,
+		StartDate:           startDate,
+		EndDate:             endDate,
 		NotificationIds:     notificationIDs,
 		StatusID:            statusID,
 		DifficultyID:        difficultyID,
@@ -76,7 +83,6 @@ func (m *workMapper) mapProtoWorkToDB(req *personal_schedule.UpsertWorkRequest) 
 	}, nil
 }
 
-// 6
 func (m *workMapper) mapSubTaskToDB(payload []*personal_schedule.SubTaskPayload) ([]collection.SubTask, error) {
 	taskDB := make([]collection.SubTask, len(payload))
 	for i, task := range payload {
@@ -94,7 +100,6 @@ func (m *workMapper) mapSubTaskToDB(payload []*personal_schedule.SubTaskPayload)
 	return taskDB, nil
 }
 
-// 1
 func (m *workMapper) ConvertAggregatedWorksToProto(aggWorks []repos.AggregatedWork) []*personal_schedule.Work {
 	protoWorks := make([]*personal_schedule.Work, 0, len(aggWorks))
 	for _, aggWork := range aggWorks {
@@ -103,7 +108,6 @@ func (m *workMapper) ConvertAggregatedWorksToProto(aggWorks []repos.AggregatedWo
 	return protoWorks
 }
 
-// 2
 func (m *workMapper) MapAggregatedWorkToProto(aggWork repos.AggregatedWork) *personal_schedule.Work {
 	sd := ""
 	if aggWork.ShortDescriptions != nil {
@@ -114,13 +118,19 @@ func (m *workMapper) MapAggregatedWorkToProto(aggWork repos.AggregatedWork) *per
 		dd = *aggWork.DetailedDescription
 	}
 
+	var startdate, enddate int64
+	if aggWork.StartDate != nil {
+		startdate = aggWork.StartDate.Unix()
+	}
+	enddate = aggWork.EndDate.Unix()
+
 	return &personal_schedule.Work{
 		Id:                  aggWork.ID.Hex(),
 		Name:                aggWork.Name,
 		ShortDescriptions:   &sd,
 		DetailedDescription: &dd,
-		StartDate:           *aggWork.StartDate,
-		EndDate:             aggWork.EndDate,
+		StartDate:           startdate,
+		EndDate:             enddate,
 		Labels: &personal_schedule.WorkLabelGroup{
 			Status:     m.mapLabelsToProto(aggWork.Status),
 			Difficulty: m.mapLabelsToProto(aggWork.Difficulty),
@@ -131,7 +141,6 @@ func (m *workMapper) MapAggregatedWorkToProto(aggWork repos.AggregatedWork) *per
 	}
 }
 
-// 3
 func (m *workMapper) mapLabelsToProto(labels []collection.Label) []*personal_schedule.LabelInfo {
 	protoLabels := make([]*personal_schedule.LabelInfo, 0, len(labels))
 	for _, label := range labels {
