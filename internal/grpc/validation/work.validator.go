@@ -51,6 +51,24 @@ func (wv *workValidator) ValidateUpsertWork(ctx context.Context, req *personal_s
 		}
 	}
 
+	if req.StartDate != nil {
+		var excludeWorkID *bson.ObjectID
+		if req.Id != nil && *req.Id != "" {
+			workID, err := bson.ObjectIDFromHex(*req.Id)
+			if err != nil {
+				return fmt.Errorf("invalid Work Id %s: %v", *req.Id, err)
+			}
+			excludeWorkID = &workID
+		}
+		count, err := wv.workRepo.CountOverlappingWorks(ctx, req.UserId, *req.StartDate, req.EndDate, excludeWorkID)
+		if err != nil {
+			return fmt.Errorf("error checking overlapping works: %v", err)
+		}
+		if count > 0 {
+			return fmt.Errorf("work time overlaps with existing works")
+		}
+	}
+
 	if req.Id != nil && *req.Id != "" {
 		workID, err := bson.ObjectIDFromHex(*req.Id)
 		if err != nil {

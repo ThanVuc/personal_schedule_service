@@ -16,6 +16,7 @@ type (
 		SeedLabels(ctx context.Context) error
 		GetLabelPerTypes(ctx context.Context, req *common.EmptyRequest) (*personal_schedule.GetLabelPerTypesResponse, error)
 		GetLabelsByTypeIDs(ctx context.Context, req *common.IDRequest) (*personal_schedule.GetLabelsByTypeIDsResponse, error)
+		GetDefaultLabel(ctx context.Context, req *common.EmptyRequest) (*personal_schedule.GetDefaultLabelResponse, error)
 	}
 
 	GoalService interface {
@@ -27,6 +28,8 @@ type (
 
 	WorkService interface {
 		UpsertWork(ctx context.Context, req *personal_schedule.UpsertWorkRequest) (*personal_schedule.UpsertWorkResponse, error)
+		GetWorks(ctx context.Context, req *personal_schedule.GetWorksRequest) (*personal_schedule.GetWorksResponse, error)
+		GetWork(ctx context.Context, req *personal_schedule.GetWorkRequest) (*personal_schedule.GetWorkResponse, error)
 	}
 )
 

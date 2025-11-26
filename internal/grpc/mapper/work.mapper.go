@@ -1,8 +1,8 @@
-// (File: mapper/work.mapper.go)
 package mapper
 
 import (
 	"personal_schedule_service/internal/collection"
+	"personal_schedule_service/internal/repos"
 	"personal_schedule_service/proto/personal_schedule"
 	"time"
 
@@ -49,10 +49,6 @@ func (m *workMapper) mapProtoWorkToDB(req *personal_schedule.UpsertWorkRequest) 
 		return nil, err
 	}
 
-	startDate := time.Unix(*req.StartDate, 0)
-
-	endDate := time.Unix(req.EndDate, 0)
-
 	notificationIDs := make([]bson.ObjectID, len(req.NotificationIds))
 	for i, idStr := range req.NotificationIds {
 		id, err := bson.ObjectIDFromHex(idStr)
@@ -62,11 +58,19 @@ func (m *workMapper) mapProtoWorkToDB(req *personal_schedule.UpsertWorkRequest) 
 		notificationIDs[i] = id
 	}
 
+	endDate := time.Unix(req.EndDate, 0)
+
+	var startDate *time.Time
+	if req.StartDate != nil {
+		t := time.Unix(*req.StartDate, 0)
+		startDate = &t
+	}
+
 	return &collection.Work{
 		Name:                req.Name,
 		ShortDescriptions:   req.ShortDescriptions,
 		DetailedDescription: req.DetailedDescription,
-		StartDate:           &startDate,
+		StartDate:           startDate,
 		EndDate:             endDate,
 		NotificationIds:     notificationIDs,
 		StatusID:            statusID,
@@ -94,4 +98,97 @@ func (m *workMapper) mapSubTaskToDB(payload []*personal_schedule.SubTaskPayload)
 		}
 	}
 	return taskDB, nil
+}
+
+func (m *workMapper) ConvertAggregatedWorksToProto(aggWorks []repos.AggregatedWork) []*personal_schedule.Work {
+	protoWorks := make([]*personal_schedule.Work, 0, len(aggWorks))
+	for _, aggWork := range aggWorks {
+		protoWorks = append(protoWorks, m.MapAggregatedWorkToProto(aggWork))
+	}
+	return protoWorks
+}
+
+func (m *workMapper) MapAggregatedWorkToProto(aggWork repos.AggregatedWork) *personal_schedule.Work {
+	sd := ""
+	if aggWork.ShortDescriptions != nil {
+		sd = *aggWork.ShortDescriptions
+	}
+	dd := ""
+	if aggWork.DetailedDescription != nil {
+		dd = *aggWork.DetailedDescription
+	}
+
+	var startdate, enddate int64
+	if aggWork.StartDate != nil {
+		startdate = aggWork.StartDate.Unix()
+	}
+	enddate = aggWork.EndDate.Unix()
+
+	return &personal_schedule.Work{
+		Id:                  aggWork.ID.Hex(),
+		Name:                aggWork.Name,
+		ShortDescriptions:   &sd,
+		DetailedDescription: &dd,
+		StartDate:           startdate,
+		EndDate:             enddate,
+		Labels: &personal_schedule.WorkLabelGroup{
+			Status:     m.mapLabelsToProto(aggWork.Status),
+			Difficulty: m.mapLabelsToProto(aggWork.Difficulty),
+			Priority:   m.mapLabelsToProto(aggWork.Priority),
+			Type:       m.mapLabelsToProto(aggWork.Type),
+		},
+		Category: m.mapLabelsToProto(aggWork.Category),
+	}
+}
+
+func (m *workMapper) mapLabelsToProto(labels []collection.Label) []*personal_schedule.LabelInfo {
+	protoLabels := make([]*personal_schedule.LabelInfo, 0, len(labels))
+	for _, label := range labels {
+		lc := ""
+		if label.Color != nil {
+			lc = *label.Color
+		}
+		protoLabels = append(protoLabels, &personal_schedule.LabelInfo{
+			Id:        label.ID.Hex(),
+			Name:      label.Name,
+			Color:     lc,
+			Key:       label.Key,
+			LabelType: int32(label.LabelType),
+		})
+	}
+	return protoLabels
+}
+
+func (m *workMapper) MapSubTasksToProto(subTasks []collection.SubTask) []*personal_schedule.SubTaskPayload {
+	protoSubTasks := make([]*personal_schedule.SubTaskPayload, 0, len(subTasks))
+	for _, subTask := range subTasks {
+		idStr := subTask.ID.Hex()
+		protoSubTasks = append(protoSubTasks, &personal_schedule.SubTaskPayload{
+			Id:          &idStr,
+			Name:        subTask.Name,
+			IsCompleted: subTask.IsCompleted,
+		})
+	}
+	return protoSubTasks
+}
+
+func (m *workMapper) MapAggregatedToWorkDetailProto(aggWork repos.AggregatedWork, subTasks []collection.SubTask) *personal_schedule.WorkDetail {
+	workBaseProto := m.MapAggregatedWorkToProto(aggWork)
+	subTasksProto := m.MapSubTasksToProto(subTasks)
+	return &personal_schedule.WorkDetail{
+		Id:                  workBaseProto.Id,
+		Name:                workBaseProto.Name,
+		ShortDescriptions:   workBaseProto.ShortDescriptions,
+		DetailedDescription: workBaseProto.DetailedDescription,
+		StartDate:           workBaseProto.StartDate,
+		EndDate:             workBaseProto.EndDate,
+		Labels: &personal_schedule.WorkLabelGroupDetail{
+			Status:     workBaseProto.Labels.Status,
+			Difficulty: workBaseProto.Labels.Difficulty,
+			Priority:   workBaseProto.Labels.Priority,
+			Type:       workBaseProto.Labels.Type,
+			Category:   workBaseProto.Category,
+		},
+		SubTasks: subTasksProto,
+	}
 }

@@ -23,3 +23,11 @@ func NewWorkController(
 func (wc *WorkController) UpsertWork(ctx context.Context, req *personal_schedule.UpsertWorkRequest) (*personal_schedule.UpsertWorkResponse, error) {
 	return utils.WithSafePanic(ctx, req, wc.workService.UpsertWork)
 }
+
+func (wc *WorkController) GetWorks(ctx context.Context, req *personal_schedule.GetWorksRequest) (*personal_schedule.GetWorksResponse, error) {
+	return utils.WithSafePanic(ctx, req, wc.workService.GetWorks)
+}
+
+func (wc *WorkController) GetWork(ctx context.Context, req *personal_schedule.GetWorkRequest) (*personal_schedule.GetWorkResponse, error) {
+	return utils.WithSafePanic(ctx, req, wc.workService.GetWork)
+}

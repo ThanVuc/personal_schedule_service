@@ -45,10 +45,7 @@ func (s *workService) UpsertWork(ctx context.Context, req *personal_schedule.Ups
 
 	var workID bson.ObjectID
 	now := time.Now()
-
-	// --- BƯỚC 3: XỬ LÝ WORK CHÍNH (Đã được đơn giản hóa) ---
 	if req.Id == nil || *req.Id == "" {
-		// === TẠO MỚI (CREATE) WORK ===
 		workDB.UserID = req.UserId
 		workDB.CreatedAt = now
 		workDB.LastModifiedAt = now
@@ -95,7 +92,6 @@ func (s *workService) UpsertWork(ctx context.Context, req *personal_schedule.Ups
 		}, err
 	}
 
-	// --- BƯỚC 5: TRẢ VỀ ---
 	return &personal_schedule.UpsertWorkResponse{
 		IsSuccess: true,
 		Message:   "Work upserted successfully",
@@ -118,19 +114,16 @@ func (s *workService) syncSubTasks(ctx context.Context, workID bson.ObjectID, pa
 	now := time.Now()
 
 	for _, task := range payloadTasks {
-		task.WorkID = workID // Gán WorkID
-
+		task.WorkID = workID
 		if task.ID.IsZero() {
-			// CREATE
 			task.ID = bson.NewObjectID()
 			task.CreatedAt = now
 			task.LastModifiedAt = now
 			operations = append(operations, mongo.NewInsertOneModel().SetDocument(task))
 		} else {
-			// UPDATE
 			delete(existingTaskMap, task.ID)
 			operations = append(operations, mongo.NewUpdateOneModel().
-				SetFilter(bson.M{"_id": task.ID, "work_id": workID}). // Filter an toàn
+				SetFilter(bson.M{"_id": task.ID, "work_id": workID}).
 				SetUpdate(bson.M{"$set": bson.M{
 					"name":             task.Name,
 					"is_completed":     task.IsCompleted,
@@ -139,7 +132,6 @@ func (s *workService) syncSubTasks(ctx context.Context, workID bson.ObjectID, pa
 		}
 	}
 
-	// DELETE
 	for taskID := range existingTaskMap {
 		operations = append(operations, mongo.NewDeleteOneModel().SetFilter(bson.M{"_id": taskID, "work_id": workID}))
 	}
@@ -150,4 +142,72 @@ func (s *workService) syncSubTasks(ctx context.Context, workID bson.ObjectID, pa
 	}
 
 	return nil
+}
+
+func (s *workService) GetWorks(ctx context.Context, req *personal_schedule.GetWorksRequest) (*personal_schedule.GetWorksResponse, error) {
+	aggWorks, err := s.workRepo.GetWorks(ctx, req)
+	if err != nil {
+		s.logger.Error("Failed to get works", "", zap.Error(err))
+		return &personal_schedule.GetWorksResponse{
+			Works: []*personal_schedule.Work{},
+			Error: utils.InternalServerError(ctx, err),
+		}, nil
+	}
+	protoWorks := s.workMapper.ConvertAggregatedWorksToProto(aggWorks)
+
+	return &personal_schedule.GetWorksResponse{
+		Works: protoWorks,
+	}, nil
+}
+
+func (s *workService) GetWork(ctx context.Context, req *personal_schedule.GetWorkRequest) (*personal_schedule.GetWorkResponse, error) {
+	workID, err := bson.ObjectIDFromHex(req.WorkId)
+	if err != nil {
+		s.logger.Warn("Invalid work ID format", "", zap.String("work_id", req.WorkId), zap.Error(err))
+		return &personal_schedule.GetWorkResponse{
+			Work:  nil,
+			Error: utils.InternalServerError(ctx, err),
+		}, nil
+	}
+
+	work, err := s.workRepo.GetAggregatedWorkByID(ctx, workID)
+	if err != nil {
+		s.logger.Error("Error fetching work from repo", "err", zap.Error(err))
+		return &personal_schedule.GetWorkResponse{
+			Work:  nil,
+			Error: utils.DatabaseError(ctx, err),
+		}, err
+	}
+
+	if work == nil {
+		s.logger.Info("Work not found", "", zap.String("work_id", req.WorkId))
+		return &personal_schedule.GetWorkResponse{
+			Work:  nil,
+			Error: utils.NotFoundError(ctx, err),
+		}, nil
+	}
+
+	if work.UserID != req.UserId {
+		s.logger.Warn("Forbidden: user does not own this work", "", zap.String("work_id", req.WorkId), zap.String("user_id", req.UserId))
+		return &personal_schedule.GetWorkResponse{
+			Work:  nil,
+			Error: utils.PermissionDeniedError(ctx, err),
+		}, nil
+	}
+
+	subTasksDB, err := s.workRepo.GetSubTasksByWorkID(ctx, workID)
+	if err != nil {
+		s.logger.Error("Error fetching work sub-tasks from repo", "err", zap.Error(err))
+		return &personal_schedule.GetWorkResponse{
+			Work:  nil,
+			Error: utils.DatabaseError(ctx, err),
+		}, err
+	}
+
+	protoWork := s.workMapper.MapAggregatedToWorkDetailProto(*work, subTasksDB)
+
+	return &personal_schedule.GetWorkResponse{
+		Work:  protoWork,
+		Error: nil,
+	}, nil
 }
