@@ -15,7 +15,7 @@ func (h *labelHelper) GenerateLabel() []collection.Label {
 	labels := []collection.Label{
 		// Work Type
 		{
-			Name:           "Lặp lại",
+			Name:           "Lặp Lại",
 			Key:            labels_constant.LabelRepeated,
 			Meaning:        utils.ToStringPointer("Công việc được thực hiện định kỳ, lặp lại theo chu kỳ"),
 			Note:           utils.ToStringPointer("Thường dùng cho các công việc, hay những thói quen hằng ngày"),
@@ -57,7 +57,7 @@ func (h *labelHelper) GenerateLabel() []collection.Label {
 			LastModifiedAt: now,
 		},
 		{
-			Name:           "Đang làm",
+			Name:           "Đang Làm",
 			Key:            labels_constant.LabelInProgress,
 			Meaning:        utils.ToStringPointer("Công việc đang được thực hiện"),
 			Note:           utils.ToStringPointer("Đang trong quá trình xử lý, cần theo dõi tiến độ"),
@@ -87,7 +87,7 @@ func (h *labelHelper) GenerateLabel() []collection.Label {
 			LastModifiedAt: now,
 		},
 		{
-			Name:           "Bỏ cuộc",
+			Name:           "Bỏ Cuộc",
 			Key:            labels_constant.LabelGiveUp,
 			Meaning:        utils.ToStringPointer("Công việc đã hết ngày nhưng chưa hoàn thành"),
 			Note:           utils.ToStringPointer("Hệ thống tự động đánh dấu các công việc quá hạn và hết ngày"),
@@ -131,7 +131,7 @@ func (h *labelHelper) GenerateLabel() []collection.Label {
 
 		// Priority
 		{
-			Name:           "Quan trọng & Khẩn cấp",
+			Name:           "Quan Trọng & Khẩn Cấp",
 			Key:            labels_constant.LabelPriorityImportantUrgent,
 			Meaning:        utils.ToStringPointer("Ưu tiên cao nhất - cần xử lý ngay lập tức"),
 			Note:           utils.ToStringPointer("Thường là các vấn đề khẩn cấp, sự cố cần giải quyết ngay"),
@@ -141,7 +141,7 @@ func (h *labelHelper) GenerateLabel() []collection.Label {
 			LastModifiedAt: now,
 		},
 		{
-			Name:           "Quan trọng & Không khẩn cấp",
+			Name:           "Quan Trọng & Không Khẩn Cấp",
 			Key:            labels_constant.LabelPriorityImportantNotUrgent,
 			Meaning:        utils.ToStringPointer("Quan trọng nhưng có thể lên kế hoạch thực hiện"),
 			Note:           utils.ToStringPointer("Các mục tiêu dài hạn, phát triển chiến lược"),
@@ -151,7 +151,7 @@ func (h *labelHelper) GenerateLabel() []collection.Label {
 			LastModifiedAt: now,
 		},
 		{
-			Name:           "Không quan trọng & Khẩn cấp",
+			Name:           "Không Quan Trọng & Khẩn Cấp",
 			Key:            labels_constant.LabelPriorityNotImportantUrgent,
 			Meaning:        utils.ToStringPointer("Cần xử lý nhanh nhưng không ảnh hưởng lớn"),
 			Note:           utils.ToStringPointer("Có thể ủy quyền hoặc xử lý nhanh gọn"),
@@ -161,7 +161,7 @@ func (h *labelHelper) GenerateLabel() []collection.Label {
 			LastModifiedAt: now,
 		},
 		{
-			Name:           "Không quan trọng & Không Khẩn cấp",
+			Name:           "Không Quan Trọng & Không Khẩn Cấp",
 			Key:            labels_constant.LabelPriorityNotImportantNotUrgent,
 			Meaning:        utils.ToStringPointer("Ưu tiên thấp nhất - có thể hoãn lại"),
 			Note:           utils.ToStringPointer("Nên hạn chế thời gian dành cho loại công việc này"),
@@ -173,7 +173,7 @@ func (h *labelHelper) GenerateLabel() []collection.Label {
 
 		// Category
 		{
-			Name:           "Công việc",
+			Name:           "Công Việc",
 			Key:            labels_constant.LabelCategoryWork,
 			Meaning:        utils.ToStringPointer("Nhiệm vụ liên quan đến nghề nghiệp, công ty, kinh doanh hoặc dự án đang làm"),
 			Note:           utils.ToStringPointer("Bao gồm họp, dự án, báo cáo, và các hạn chót."),
@@ -183,7 +183,7 @@ func (h *labelHelper) GenerateLabel() []collection.Label {
 			LastModifiedAt: now,
 		},
 		{
-			Name:           "Cá nhân",
+			Name:           "Cá Nhân",
 			Key:            labels_constant.LabelCategoryPersonal,
 			Meaning:        utils.ToStringPointer("Hoạt động riêng tư ngoài công việc"),
 			Note:           utils.ToStringPointer("Sở thích, mục tiêu cá nhân, chăm sóc bản thân"),
@@ -193,7 +193,7 @@ func (h *labelHelper) GenerateLabel() []collection.Label {
 			LastModifiedAt: now,
 		},
 		{
-			Name:           "Học tập",
+			Name:           "Học Tập",
 			Key:            labels_constant.LabelCategoryStudy,
 			Meaning:        utils.ToStringPointer("Các hoạt động học hỏi, nghiên cứu, hoặc đào tạo."),
 			Note:           utils.ToStringPointer("Dành cho học sinh, sinh viên, khóa học chuyên môn, hoặc tự học."),
@@ -203,7 +203,7 @@ func (h *labelHelper) GenerateLabel() []collection.Label {
 			LastModifiedAt: now,
 		},
 		{
-			Name:           "Gia đình",
+			Name:           "Gia Đình",
 			Key:            labels_constant.LabelCategoryFamily,
 			Meaning:        utils.ToStringPointer("Công việc nhà và trách nhiệm trong gia đình"),
 			Note:           utils.ToStringPointer("Dọn dẹp, sửa chữa, mua sắm, nấu ăn, việc vặt hằng ngày"),
@@ -213,7 +213,7 @@ func (h *labelHelper) GenerateLabel() []collection.Label {
 			LastModifiedAt: now,
 		},
 		{
-			Name:           "Tài chính",
+			Name:           "Tài Chính",
 			Key:            labels_constant.LabelCategoryFinance,
 			Meaning:        utils.ToStringPointer("Quản lý tiền bạc và công việc hành chính"),
 			Note:           utils.ToStringPointer("Thanh toán hóa đơn, lập ngân sách, thuế/ giấy tờ"),
@@ -223,7 +223,7 @@ func (h *labelHelper) GenerateLabel() []collection.Label {
 			LastModifiedAt: now,
 		},
 		{
-			Name:           "Sức khỏe",
+			Name:           "Sức Khỏe",
 			Key:            labels_constant.LabelCategoryHealth,
 			Meaning:        utils.ToStringPointer("Các hoạt động chăm sóc thể chất và tinh thần"),
 			Note:           utils.ToStringPointer("Tập thể dục, khám bệnh, thiền, hoặc chăm sóc sức khỏe"),
@@ -233,7 +233,7 @@ func (h *labelHelper) GenerateLabel() []collection.Label {
 			LastModifiedAt: now,
 		},
 		{
-			Name:           "Xã hội",
+			Name:           "Xã Hội",
 			Key:            labels_constant.LabelCategorySocial,
 			Meaning:        utils.ToStringPointer("Các hoạt động chăm sóc thể chất và tinh thần"),
 			Note:           utils.ToStringPointer("Tập thể dục, khám bệnh, thiền, hoặc chăm sóc sức khỏe"),
@@ -243,7 +243,7 @@ func (h *labelHelper) GenerateLabel() []collection.Label {
 			LastModifiedAt: now,
 		},
 		{
-			Name:           "Di chuyển",
+			Name:           "Di Chuyển",
 			Key:            labels_constant.LabelCategoryTravel,
 			Meaning:        utils.ToStringPointer("Việc đi lại từ nơi này đến nơi khác"),
 			Note:           utils.ToStringPointer("Đi làm, công tác, du lịch, hoặc chạy việc vặt"),

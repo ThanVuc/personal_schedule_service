@@ -3,6 +3,7 @@ package services
 import (
 	"context"
 	"fmt"
+	labels_constant "personal_schedule_service/internal/constant/labels"
 	"personal_schedule_service/internal/grpc/helper"
 	"personal_schedule_service/internal/grpc/mapper"
 	"personal_schedule_service/internal/grpc/utils"
@@ -94,4 +95,42 @@ func (s *labelService) GetLabelsByTypeIDs(ctx context.Context, req *common.IDReq
 	}
 
 	return resp, nil
+}
+
+func (s *labelService) GetDefaultLabel(ctx context.Context, req *common.EmptyRequest) (*personal_schedule.GetDefaultLabelResponse, error) {
+	statusID, err := s.labelRepo.GetLabelIDByName(ctx, labels_constant.LabelInDay)
+	if err != nil {
+		return nil, err
+	}
+
+	difficultyID, err := s.labelRepo.GetLabelIDByName(ctx, labels_constant.LabelDifficultyEasy)
+	if err != nil {
+		return nil, err
+	}
+
+	priorityID, err := s.labelRepo.GetLabelIDByName(ctx, labels_constant.LabelPriorityImportantNotUrgent)
+	if err != nil {
+		return nil, err
+	}
+
+	typeID, err := s.labelRepo.GetLabelIDByName(ctx, labels_constant.LabelPending)
+	if err != nil {
+		return nil, err
+	}
+
+	categoryID, err := s.labelRepo.GetLabelIDByName(ctx, labels_constant.LabelCategoryPersonal)
+	if err != nil {
+		return nil, err
+	}
+
+	resp := &personal_schedule.GetDefaultLabelResponse{
+		StatusId:     statusID.Hex(),
+		DifficultyId: difficultyID.Hex(),
+		PriorityId:   priorityID.Hex(),
+		TypeId:       typeID.Hex(),
+		CategoryId:   categoryID.Hex(),
+		Error:        nil,
+	}
+	return resp, nil
+
 }

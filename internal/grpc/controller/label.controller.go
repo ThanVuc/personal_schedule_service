@@ -28,3 +28,7 @@ func (lc *LabelController) GetLabelPerTypes(ctx context.Context, req *common.Emp
 func (lc *LabelController) GetLabelsByTypeIDs(ctx context.Context, req *common.IDRequest) (*personal_schedule.GetLabelsByTypeIDsResponse, error) {
 	return utils.WithSafePanic(ctx, req, lc.labelService.GetLabelsByTypeIDs)
 }
+
+func (lc *LabelController) GetDefaultLabel(ctx context.Context, req *common.EmptyRequest) (*personal_schedule.GetDefaultLabelResponse, error) {
+	return utils.WithSafePanic(ctx, req, lc.labelService.GetDefaultLabel)
+}

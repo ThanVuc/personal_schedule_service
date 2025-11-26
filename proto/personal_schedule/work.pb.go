@@ -238,6 +238,270 @@ func (x *UpsertWorkResponse) GetError() *common.Error {
 	return nil
 }
 
+type GetWorksRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	UserId        string                 `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id"`
+	FromDate      *int64                 `protobuf:"varint,2,opt,name=from_date,json=fromDate,proto3,oneof" json:"from_date"`
+	ToDate        *int64                 `protobuf:"varint,3,opt,name=to_date,json=toDate,proto3,oneof" json:"to_date"`
+	Search        *string                `protobuf:"bytes,4,opt,name=search,proto3,oneof" json:"search"`
+	StatusId      *string                `protobuf:"bytes,6,opt,name=status_id,json=statusId,proto3,oneof" json:"status_id"`
+	DifficultyId  *string                `protobuf:"bytes,7,opt,name=difficulty_id,json=difficultyId,proto3,oneof" json:"difficulty_id"`
+	PriorityId    *string                `protobuf:"bytes,8,opt,name=priority_id,json=priorityId,proto3,oneof" json:"priority_id"`
+	TypeId        *string                `protobuf:"bytes,9,opt,name=type_id,json=typeId,proto3,oneof" json:"type_id"`
+	CategoryId    *string                `protobuf:"bytes,10,opt,name=category_id,json=categoryId,proto3,oneof" json:"category_id"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetWorksRequest) Reset() {
+	*x = GetWorksRequest{}
+	mi := &file_personal_schedule_service_work_proto_msgTypes[2]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetWorksRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetWorksRequest) ProtoMessage() {}
+
+func (x *GetWorksRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_personal_schedule_service_work_proto_msgTypes[2]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetWorksRequest.ProtoReflect.Descriptor instead.
+func (*GetWorksRequest) Descriptor() ([]byte, []int) {
+	return file_personal_schedule_service_work_proto_rawDescGZIP(), []int{2}
+}
+
+func (x *GetWorksRequest) GetUserId() string {
+	if x != nil {
+		return x.UserId
+	}
+	return ""
+}
+
+func (x *GetWorksRequest) GetFromDate() int64 {
+	if x != nil && x.FromDate != nil {
+		return *x.FromDate
+	}
+	return 0
+}
+
+func (x *GetWorksRequest) GetToDate() int64 {
+	if x != nil && x.ToDate != nil {
+		return *x.ToDate
+	}
+	return 0
+}
+
+func (x *GetWorksRequest) GetSearch() string {
+	if x != nil && x.Search != nil {
+		return *x.Search
+	}
+	return ""
+}
+
+func (x *GetWorksRequest) GetStatusId() string {
+	if x != nil && x.StatusId != nil {
+		return *x.StatusId
+	}
+	return ""
+}
+
+func (x *GetWorksRequest) GetDifficultyId() string {
+	if x != nil && x.DifficultyId != nil {
+		return *x.DifficultyId
+	}
+	return ""
+}
+
+func (x *GetWorksRequest) GetPriorityId() string {
+	if x != nil && x.PriorityId != nil {
+		return *x.PriorityId
+	}
+	return ""
+}
+
+func (x *GetWorksRequest) GetTypeId() string {
+	if x != nil && x.TypeId != nil {
+		return *x.TypeId
+	}
+	return ""
+}
+
+func (x *GetWorksRequest) GetCategoryId() string {
+	if x != nil && x.CategoryId != nil {
+		return *x.CategoryId
+	}
+	return ""
+}
+
+type GetWorksResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Works         []*Work                `protobuf:"bytes,1,rep,name=works,proto3" json:"works"`
+	Error         *common.Error          `protobuf:"bytes,2,opt,name=error,proto3,oneof" json:"error"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetWorksResponse) Reset() {
+	*x = GetWorksResponse{}
+	mi := &file_personal_schedule_service_work_proto_msgTypes[3]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetWorksResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetWorksResponse) ProtoMessage() {}
+
+func (x *GetWorksResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_personal_schedule_service_work_proto_msgTypes[3]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetWorksResponse.ProtoReflect.Descriptor instead.
+func (*GetWorksResponse) Descriptor() ([]byte, []int) {
+	return file_personal_schedule_service_work_proto_rawDescGZIP(), []int{3}
+}
+
+func (x *GetWorksResponse) GetWorks() []*Work {
+	if x != nil {
+		return x.Works
+	}
+	return nil
+}
+
+func (x *GetWorksResponse) GetError() *common.Error {
+	if x != nil {
+		return x.Error
+	}
+	return nil
+}
+
+type GetWorkRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	UserId        string                 `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id"`
+	WorkId        string                 `protobuf:"bytes,2,opt,name=work_id,json=workId,proto3" json:"work_id"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetWorkRequest) Reset() {
+	*x = GetWorkRequest{}
+	mi := &file_personal_schedule_service_work_proto_msgTypes[4]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetWorkRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetWorkRequest) ProtoMessage() {}
+
+func (x *GetWorkRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_personal_schedule_service_work_proto_msgTypes[4]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetWorkRequest.ProtoReflect.Descriptor instead.
+func (*GetWorkRequest) Descriptor() ([]byte, []int) {
+	return file_personal_schedule_service_work_proto_rawDescGZIP(), []int{4}
+}
+
+func (x *GetWorkRequest) GetUserId() string {
+	if x != nil {
+		return x.UserId
+	}
+	return ""
+}
+
+func (x *GetWorkRequest) GetWorkId() string {
+	if x != nil {
+		return x.WorkId
+	}
+	return ""
+}
+
+type GetWorkResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Work          *WorkDetail            `protobuf:"bytes,1,opt,name=work,proto3" json:"work"`
+	Error         *common.Error          `protobuf:"bytes,2,opt,name=error,proto3,oneof" json:"error"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetWorkResponse) Reset() {
+	*x = GetWorkResponse{}
+	mi := &file_personal_schedule_service_work_proto_msgTypes[5]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetWorkResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetWorkResponse) ProtoMessage() {}
+
+func (x *GetWorkResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_personal_schedule_service_work_proto_msgTypes[5]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetWorkResponse.ProtoReflect.Descriptor instead.
+func (*GetWorkResponse) Descriptor() ([]byte, []int) {
+	return file_personal_schedule_service_work_proto_rawDescGZIP(), []int{5}
+}
+
+func (x *GetWorkResponse) GetWork() *WorkDetail {
+	if x != nil {
+		return x.Work
+	}
+	return nil
+}
+
+func (x *GetWorkResponse) GetError() *common.Error {
+	if x != nil {
+		return x.Error
+	}
+	return nil
+}
+
 var File_personal_schedule_service_work_proto protoreflect.FileDescriptor
 
 const file_personal_schedule_service_work_proto_rawDesc = "" +
@@ -272,10 +536,48 @@ const file_personal_schedule_service_work_proto_rawDesc = "" +
 	"is_success\x18\x01 \x01(\bR\tisSuccess\x12\x18\n" +
 	"\amessage\x18\x02 \x01(\tR\amessage\x12(\n" +
 	"\x05error\x18\x04 \x01(\v2\r.common.ErrorH\x00R\x05error\x88\x01\x01B\b\n" +
-	"\x06_error2h\n" +
+	"\x06_error\"\xae\x03\n" +
+	"\x0fGetWorksRequest\x12\x17\n" +
+	"\auser_id\x18\x01 \x01(\tR\x06userId\x12 \n" +
+	"\tfrom_date\x18\x02 \x01(\x03H\x00R\bfromDate\x88\x01\x01\x12\x1c\n" +
+	"\ato_date\x18\x03 \x01(\x03H\x01R\x06toDate\x88\x01\x01\x12\x1b\n" +
+	"\x06search\x18\x04 \x01(\tH\x02R\x06search\x88\x01\x01\x12 \n" +
+	"\tstatus_id\x18\x06 \x01(\tH\x03R\bstatusId\x88\x01\x01\x12(\n" +
+	"\rdifficulty_id\x18\a \x01(\tH\x04R\fdifficultyId\x88\x01\x01\x12$\n" +
+	"\vpriority_id\x18\b \x01(\tH\x05R\n" +
+	"priorityId\x88\x01\x01\x12\x1c\n" +
+	"\atype_id\x18\t \x01(\tH\x06R\x06typeId\x88\x01\x01\x12$\n" +
+	"\vcategory_id\x18\n" +
+	" \x01(\tH\aR\n" +
+	"categoryId\x88\x01\x01B\f\n" +
+	"\n" +
+	"_from_dateB\n" +
+	"\n" +
+	"\b_to_dateB\t\n" +
+	"\a_searchB\f\n" +
+	"\n" +
+	"_status_idB\x10\n" +
+	"\x0e_difficulty_idB\x0e\n" +
+	"\f_priority_idB\n" +
+	"\n" +
+	"\b_type_idB\x0e\n" +
+	"\f_category_id\"u\n" +
+	"\x10GetWorksResponse\x12-\n" +
+	"\x05works\x18\x01 \x03(\v2\x17.personal_schedule.WorkR\x05works\x12(\n" +
+	"\x05error\x18\x02 \x01(\v2\r.common.ErrorH\x00R\x05error\x88\x01\x01B\b\n" +
+	"\x06_error\"B\n" +
+	"\x0eGetWorkRequest\x12\x17\n" +
+	"\auser_id\x18\x01 \x01(\tR\x06userId\x12\x17\n" +
+	"\awork_id\x18\x02 \x01(\tR\x06workId\"x\n" +
+	"\x0fGetWorkResponse\x121\n" +
+	"\x04work\x18\x01 \x01(\v2\x1d.personal_schedule.WorkDetailR\x04work\x12(\n" +
+	"\x05error\x18\x02 \x01(\v2\r.common.ErrorH\x00R\x05error\x88\x01\x01B\b\n" +
+	"\x06_error2\x8f\x02\n" +
 	"\vWorkService\x12Y\n" +
 	"\n" +
-	"UpsertWork\x12$.personal_schedule.UpsertWorkRequest\x1a%.personal_schedule.UpsertWorkResponseB\x19Z\x17proto/personal_scheduleb\x06proto3"
+	"UpsertWork\x12$.personal_schedule.UpsertWorkRequest\x1a%.personal_schedule.UpsertWorkResponse\x12S\n" +
+	"\bGetWorks\x12\".personal_schedule.GetWorksRequest\x1a#.personal_schedule.GetWorksResponse\x12P\n" +
+	"\aGetWork\x12!.personal_schedule.GetWorkRequest\x1a\".personal_schedule.GetWorkResponseB\x19Z\x17proto/personal_scheduleb\x06proto3"
 
 var (
 	file_personal_schedule_service_work_proto_rawDescOnce sync.Once
@@ -289,23 +591,37 @@ func file_personal_schedule_service_work_proto_rawDescGZIP() []byte {
 	return file_personal_schedule_service_work_proto_rawDescData
 }
 
-var file_personal_schedule_service_work_proto_msgTypes = make([]protoimpl.MessageInfo, 2)
+var file_personal_schedule_service_work_proto_msgTypes = make([]protoimpl.MessageInfo, 6)
 var file_personal_schedule_service_work_proto_goTypes = []any{
 	(*UpsertWorkRequest)(nil),  // 0: personal_schedule.UpsertWorkRequest
 	(*UpsertWorkResponse)(nil), // 1: personal_schedule.UpsertWorkResponse
-	(*SubTaskPayload)(nil),     // 2: personal_schedule.SubTaskPayload
-	(*common.Error)(nil),       // 3: common.Error
+	(*GetWorksRequest)(nil),    // 2: personal_schedule.GetWorksRequest
+	(*GetWorksResponse)(nil),   // 3: personal_schedule.GetWorksResponse
+	(*GetWorkRequest)(nil),     // 4: personal_schedule.GetWorkRequest
+	(*GetWorkResponse)(nil),    // 5: personal_schedule.GetWorkResponse
+	(*SubTaskPayload)(nil),     // 6: personal_schedule.SubTaskPayload
+	(*common.Error)(nil),       // 7: common.Error
+	(*Work)(nil),               // 8: personal_schedule.Work
+	(*WorkDetail)(nil),         // 9: personal_schedule.WorkDetail
 }
 var file_personal_schedule_service_work_proto_depIdxs = []int32{
-	2, // 0: personal_schedule.UpsertWorkRequest.sub_tasks:type_name -> personal_schedule.SubTaskPayload
-	3, // 1: personal_schedule.UpsertWorkResponse.error:type_name -> common.Error
-	0, // 2: personal_schedule.WorkService.UpsertWork:input_type -> personal_schedule.UpsertWorkRequest
-	1, // 3: personal_schedule.WorkService.UpsertWork:output_type -> personal_schedule.UpsertWorkResponse
-	3, // [3:4] is the sub-list for method output_type
-	2, // [2:3] is the sub-list for method input_type
-	2, // [2:2] is the sub-list for extension type_name
-	2, // [2:2] is the sub-list for extension extendee
-	0, // [0:2] is the sub-list for field type_name
+	6, // 0: personal_schedule.UpsertWorkRequest.sub_tasks:type_name -> personal_schedule.SubTaskPayload
+	7, // 1: personal_schedule.UpsertWorkResponse.error:type_name -> common.Error
+	8, // 2: personal_schedule.GetWorksResponse.works:type_name -> personal_schedule.Work
+	7, // 3: personal_schedule.GetWorksResponse.error:type_name -> common.Error
+	9, // 4: personal_schedule.GetWorkResponse.work:type_name -> personal_schedule.WorkDetail
+	7, // 5: personal_schedule.GetWorkResponse.error:type_name -> common.Error
+	0, // 6: personal_schedule.WorkService.UpsertWork:input_type -> personal_schedule.UpsertWorkRequest
+	2, // 7: personal_schedule.WorkService.GetWorks:input_type -> personal_schedule.GetWorksRequest
+	4, // 8: personal_schedule.WorkService.GetWork:input_type -> personal_schedule.GetWorkRequest
+	1, // 9: personal_schedule.WorkService.UpsertWork:output_type -> personal_schedule.UpsertWorkResponse
+	3, // 10: personal_schedule.WorkService.GetWorks:output_type -> personal_schedule.GetWorksResponse
+	5, // 11: personal_schedule.WorkService.GetWork:output_type -> personal_schedule.GetWorkResponse
+	9, // [9:12] is the sub-list for method output_type
+	6, // [6:9] is the sub-list for method input_type
+	6, // [6:6] is the sub-list for extension type_name
+	6, // [6:6] is the sub-list for extension extendee
+	0, // [0:6] is the sub-list for field type_name
 }
 
 func init() { file_personal_schedule_service_work_proto_init() }
@@ -316,13 +632,16 @@ func file_personal_schedule_service_work_proto_init() {
 	file_personal_schedule_service_common_schedule_proto_init()
 	file_personal_schedule_service_work_proto_msgTypes[0].OneofWrappers = []any{}
 	file_personal_schedule_service_work_proto_msgTypes[1].OneofWrappers = []any{}
+	file_personal_schedule_service_work_proto_msgTypes[2].OneofWrappers = []any{}
+	file_personal_schedule_service_work_proto_msgTypes[3].OneofWrappers = []any{}
+	file_personal_schedule_service_work_proto_msgTypes[5].OneofWrappers = []any{}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_personal_schedule_service_work_proto_rawDesc), len(file_personal_schedule_service_work_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   2,
+			NumMessages:   6,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

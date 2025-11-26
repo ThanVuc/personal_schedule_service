@@ -67,3 +67,13 @@ func (lr *labelRepo) GetLabelsByTypeIDs(ctx context.Context, typeID int32) ([]co
 	}
 	return labels, nil
 }
+
+func (lr *labelRepo) GetLabelIDByName(ctx context.Context, key string) (*bson.ObjectID, error) {
+	coll := lr.mongoConnector.GetCollection(collection.LabelsCollection)
+	var label collection.Label
+	err := coll.FindOne(ctx, bson.M{"key": key}).Decode(&label)
+	if err != nil {
+		return nil, err
+	}
+	return &label.ID, nil
+}

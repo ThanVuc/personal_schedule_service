@@ -22,6 +22,7 @@ const _ = grpc.SupportPackageIsVersion9
 const (
 	LabelService_GetLabelPerTypes_FullMethodName   = "/personal_schedule.LabelService/GetLabelPerTypes"
 	LabelService_GetLabelsByTypeIDs_FullMethodName = "/personal_schedule.LabelService/GetLabelsByTypeIDs"
+	LabelService_GetDefaultLabel_FullMethodName    = "/personal_schedule.LabelService/GetDefaultLabel"
 )
 
 // LabelServiceClient is the client API for LabelService service.
@@ -30,6 +31,7 @@ const (
 type LabelServiceClient interface {
 	GetLabelPerTypes(ctx context.Context, in *common.EmptyRequest, opts ...grpc.CallOption) (*GetLabelPerTypesResponse, error)
 	GetLabelsByTypeIDs(ctx context.Context, in *common.IDRequest, opts ...grpc.CallOption) (*GetLabelsByTypeIDsResponse, error)
+	GetDefaultLabel(ctx context.Context, in *common.EmptyRequest, opts ...grpc.CallOption) (*GetDefaultLabelResponse, error)
 }
 
 type labelServiceClient struct {
@@ -60,12 +62,23 @@ func (c *labelServiceClient) GetLabelsByTypeIDs(ctx context.Context, in *common.
 	return out, nil
 }
 
+func (c *labelServiceClient) GetDefaultLabel(ctx context.Context, in *common.EmptyRequest, opts ...grpc.CallOption) (*GetDefaultLabelResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetDefaultLabelResponse)
+	err := c.cc.Invoke(ctx, LabelService_GetDefaultLabel_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // LabelServiceServer is the server API for LabelService service.
 // All implementations must embed UnimplementedLabelServiceServer
 // for forward compatibility.
 type LabelServiceServer interface {
 	GetLabelPerTypes(context.Context, *common.EmptyRequest) (*GetLabelPerTypesResponse, error)
 	GetLabelsByTypeIDs(context.Context, *common.IDRequest) (*GetLabelsByTypeIDsResponse, error)
+	GetDefaultLabel(context.Context, *common.EmptyRequest) (*GetDefaultLabelResponse, error)
 	mustEmbedUnimplementedLabelServiceServer()
 }
 
@@ -81,6 +94,9 @@ func (UnimplementedLabelServiceServer) GetLabelPerTypes(context.Context, *common
 }
 func (UnimplementedLabelServiceServer) GetLabelsByTypeIDs(context.Context, *common.IDRequest) (*GetLabelsByTypeIDsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetLabelsByTypeIDs not implemented")
+}
+func (UnimplementedLabelServiceServer) GetDefaultLabel(context.Context, *common.EmptyRequest) (*GetDefaultLabelResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetDefaultLabel not implemented")
 }
 func (UnimplementedLabelServiceServer) mustEmbedUnimplementedLabelServiceServer() {}
 func (UnimplementedLabelServiceServer) testEmbeddedByValue()                      {}
@@ -139,6 +155,24 @@ func _LabelService_GetLabelsByTypeIDs_Handler(srv interface{}, ctx context.Conte
 	return interceptor(ctx, in, info, handler)
 }
 
+func _LabelService_GetDefaultLabel_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(common.EmptyRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(LabelServiceServer).GetDefaultLabel(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: LabelService_GetDefaultLabel_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(LabelServiceServer).GetDefaultLabel(ctx, req.(*common.EmptyRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // LabelService_ServiceDesc is the grpc.ServiceDesc for LabelService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -153,6 +187,10 @@ var LabelService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetLabelsByTypeIDs",
 			Handler:    _LabelService_GetLabelsByTypeIDs_Handler,
+		},
+		{
+			MethodName: "GetDefaultLabel",
+			Handler:    _LabelService_GetDefaultLabel_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
