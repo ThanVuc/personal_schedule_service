@@ -34,6 +34,7 @@ type (
 		GetAggregatedGoalByID(ctx context.Context, goalID bson.ObjectID) (*AggregatedGoal, error)
 		DeleteTasksByGoalID(ctx context.Context, goalID bson.ObjectID) error
 		DeleteGoal(ctx context.Context, goalID bson.ObjectID) error
+		GetGoalsForDialog(ctx context.Context, userID string) ([]collection.Goal, error)
 	}
 
 	WorkRepo interface {

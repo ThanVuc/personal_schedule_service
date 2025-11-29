@@ -35,3 +35,7 @@ func (g *GoalController) GetGoal(ctx context.Context, req *personal_schedule.Get
 func (g *GoalController) DeleteGoal(ctx context.Context, req *personal_schedule.DeleteGoalRequest) (*personal_schedule.DeleteGoalResponse, error) {
 	return utils.WithSafePanic(ctx, req, g.goalService.DeleteGoal)
 }
+
+func (g *GoalController) GetGoalForDiaglog(ctx context.Context, req *personal_schedule.GetGoalsForDialogRequest) (*personal_schedule.GetGoalForDialogResponse, error) {
+	return utils.WithSafePanic(ctx, req, g.goalService.GetGoalsForDialog)
+}

@@ -32,7 +32,7 @@ func (s *goalService) GetGoals(ctx context.Context, req *personal_schedule.GetGo
 	if err != nil {
 		s.logger.Error("Error fetching goals from repo", "err", zap.Error(err))
 		return &personal_schedule.GetGoalsResponse{
-			Error:    utils.DatabaseError(ctx, err),
+			Error:   utils.InternalServerError(ctx, err),
 			Goals:    nil,
 			PageInfo: utils.ToPageInfo(req.PageQuery.Page, req.PageQuery.PageSize, int32(totalGoals)),
 		}, err
@@ -294,5 +294,25 @@ func (s *goalService) DeleteGoal(ctx context.Context, req *personal_schedule.Del
 	return &personal_schedule.DeleteGoalResponse{
 		Success: true,
 		Error:   nil,
+	}, nil
+}
+
+func (s *goalService) GetGoalsForDialog(ctx context.Context, req *personal_schedule.GetGoalsForDialogRequest) (*personal_schedule.GetGoalForDialogResponse, error) {
+    goals, err := s.goalRepo.GetGoalsForDialog(ctx, req.UserId)
+	if err != nil {
+		s.logger.Error("Failed to get goals for dialog","", zap.Error(err))
+		return &personal_schedule.GetGoalForDialogResponse{}, err
+	}
+
+	respItems := make([]*personal_schedule.GoalOfWork, len(goals))
+	for i, g := range goals {
+		respItems[i] = &personal_schedule.GoalOfWork{
+			Id:   g.ID.Hex(),
+			Name: g.Name,
+		}
+	}
+
+	return &personal_schedule.GetGoalForDialogResponse{
+		Goals: respItems,
 	}, nil
 }

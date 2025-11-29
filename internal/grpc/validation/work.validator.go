@@ -33,10 +33,13 @@ func (wv *workValidator) ValidateUpsertWork(ctx context.Context, req *personal_s
 	if _, err := bson.ObjectIDFromHex(req.CategoryId); err != nil {
 		return fmt.Errorf("invalid CategoryId")
 	}
-	if _, err := bson.ObjectIDFromHex(req.GoalId); err != nil {
-		return fmt.Errorf("invalid GoalId")
+	if req.GoalId != nil && *req.GoalId != "" {
+		if _, err := bson.ObjectIDFromHex(*req.GoalId); err != nil {
+			return fmt.Errorf("invalid GoalId")
+		}
+	} else {
+		req.GoalId = nil
 	}
-
 	for _, notificationID := range req.NotificationIds {
 		if _, err := bson.ObjectIDFromHex(notificationID); err != nil {
 			return fmt.Errorf("invalid NotificationId %s: %v", notificationID, err)

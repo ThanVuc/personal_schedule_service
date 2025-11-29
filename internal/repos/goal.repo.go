@@ -9,6 +9,7 @@ import (
 
 	"go.mongodb.org/mongo-driver/v2/bson"
 	"go.mongodb.org/mongo-driver/v2/mongo"
+	"go.mongodb.org/mongo-driver/v2/mongo/options"
 	"go.uber.org/zap"
 
 	"github.com/thanvuc/go-core-lib/log"
@@ -288,4 +289,26 @@ func (r *goalRepo) DeleteTasksByGoalID(ctx context.Context, goalID bson.ObjectID
 	coll := r.mongoConnector.GetCollection(collection.GoalTasksCollection)
 	_, err := coll.DeleteMany(ctx, bson.M{"goal_id": goalID})
 	return err
+}
+
+func (r *goalRepo) GetGoalsForDialog(ctx context.Context, userID string) ([]collection.Goal, error) {
+	coll := r.mongoConnector.GetCollection(collection.GoalsCollection)
+
+	opts := options.Find().SetProjection(bson.M{
+		"_id":  1,
+		"name": 1,
+	})
+
+	cursor, err := coll.Find(ctx, bson.M{"user_id": userID}, opts)
+	if err != nil {
+		return nil, err
+	}
+	defer cursor.Close(ctx)
+
+	var goals []collection.Goal
+	if err = cursor.All(ctx, &goals); err != nil {
+		return nil, err
+	}
+
+	return goals, nil
 }
