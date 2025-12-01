@@ -773,6 +773,58 @@ func (x *WorkLabelGroup) GetType() []*LabelInfo {
 	return nil
 }
 
+type GoalOfWork struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id"`
+	Name          string                 `protobuf:"bytes,2,opt,name=name,proto3" json:"name"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GoalOfWork) Reset() {
+	*x = GoalOfWork{}
+	mi := &file_personal_schedule_service_common_schedule_proto_msgTypes[10]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GoalOfWork) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GoalOfWork) ProtoMessage() {}
+
+func (x *GoalOfWork) ProtoReflect() protoreflect.Message {
+	mi := &file_personal_schedule_service_common_schedule_proto_msgTypes[10]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GoalOfWork.ProtoReflect.Descriptor instead.
+func (*GoalOfWork) Descriptor() ([]byte, []int) {
+	return file_personal_schedule_service_common_schedule_proto_rawDescGZIP(), []int{10}
+}
+
+func (x *GoalOfWork) GetId() string {
+	if x != nil {
+		return x.Id
+	}
+	return ""
+}
+
+func (x *GoalOfWork) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
 type Work struct {
 	state               protoimpl.MessageState `protogen:"open.v1"`
 	Id                  string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id"`
@@ -781,6 +833,7 @@ type Work struct {
 	DetailedDescription *string                `protobuf:"bytes,4,opt,name=detailed_description,json=detailedDescription,proto3,oneof" json:"detailed_description"`
 	StartDate           int64                  `protobuf:"varint,5,opt,name=start_date,json=startDate,proto3" json:"start_date"`
 	EndDate             int64                  `protobuf:"varint,6,opt,name=end_date,json=endDate,proto3" json:"end_date"`
+	Goal                *GoalOfWork            `protobuf:"bytes,7,opt,name=goal,proto3" json:"goal"`
 	Labels              *WorkLabelGroup        `protobuf:"bytes,8,opt,name=labels,proto3" json:"labels"`
 	Category            []*LabelInfo           `protobuf:"bytes,9,rep,name=category,proto3" json:"category"`
 	unknownFields       protoimpl.UnknownFields
@@ -789,7 +842,7 @@ type Work struct {
 
 func (x *Work) Reset() {
 	*x = Work{}
-	mi := &file_personal_schedule_service_common_schedule_proto_msgTypes[10]
+	mi := &file_personal_schedule_service_common_schedule_proto_msgTypes[11]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -801,7 +854,7 @@ func (x *Work) String() string {
 func (*Work) ProtoMessage() {}
 
 func (x *Work) ProtoReflect() protoreflect.Message {
-	mi := &file_personal_schedule_service_common_schedule_proto_msgTypes[10]
+	mi := &file_personal_schedule_service_common_schedule_proto_msgTypes[11]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -814,7 +867,7 @@ func (x *Work) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Work.ProtoReflect.Descriptor instead.
 func (*Work) Descriptor() ([]byte, []int) {
-	return file_personal_schedule_service_common_schedule_proto_rawDescGZIP(), []int{10}
+	return file_personal_schedule_service_common_schedule_proto_rawDescGZIP(), []int{11}
 }
 
 func (x *Work) GetId() string {
@@ -859,6 +912,13 @@ func (x *Work) GetEndDate() int64 {
 	return 0
 }
 
+func (x *Work) GetGoal() *GoalOfWork {
+	if x != nil {
+		return x.Goal
+	}
+	return nil
+}
+
 func (x *Work) GetLabels() *WorkLabelGroup {
 	if x != nil {
 		return x.Labels
@@ -886,7 +946,7 @@ type WorkLabelGroupDetail struct {
 
 func (x *WorkLabelGroupDetail) Reset() {
 	*x = WorkLabelGroupDetail{}
-	mi := &file_personal_schedule_service_common_schedule_proto_msgTypes[11]
+	mi := &file_personal_schedule_service_common_schedule_proto_msgTypes[12]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -898,7 +958,7 @@ func (x *WorkLabelGroupDetail) String() string {
 func (*WorkLabelGroupDetail) ProtoMessage() {}
 
 func (x *WorkLabelGroupDetail) ProtoReflect() protoreflect.Message {
-	mi := &file_personal_schedule_service_common_schedule_proto_msgTypes[11]
+	mi := &file_personal_schedule_service_common_schedule_proto_msgTypes[12]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -911,7 +971,7 @@ func (x *WorkLabelGroupDetail) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use WorkLabelGroupDetail.ProtoReflect.Descriptor instead.
 func (*WorkLabelGroupDetail) Descriptor() ([]byte, []int) {
-	return file_personal_schedule_service_common_schedule_proto_rawDescGZIP(), []int{11}
+	return file_personal_schedule_service_common_schedule_proto_rawDescGZIP(), []int{12}
 }
 
 func (x *WorkLabelGroupDetail) GetStatus() []*LabelInfo {
@@ -957,6 +1017,7 @@ type WorkDetail struct {
 	DetailedDescription *string                `protobuf:"bytes,4,opt,name=detailed_description,json=detailedDescription,proto3,oneof" json:"detailed_description"`
 	StartDate           int64                  `protobuf:"varint,5,opt,name=start_date,json=startDate,proto3" json:"start_date"`
 	EndDate             int64                  `protobuf:"varint,6,opt,name=end_date,json=endDate,proto3" json:"end_date"`
+	Goal                *GoalOfWork            `protobuf:"bytes,7,opt,name=goal,proto3" json:"goal"`
 	Labels              *WorkLabelGroupDetail  `protobuf:"bytes,8,opt,name=labels,proto3" json:"labels"`
 	SubTasks            []*SubTaskPayload      `protobuf:"bytes,9,rep,name=sub_tasks,json=subTasks,proto3" json:"sub_tasks"`
 	unknownFields       protoimpl.UnknownFields
@@ -965,7 +1026,7 @@ type WorkDetail struct {
 
 func (x *WorkDetail) Reset() {
 	*x = WorkDetail{}
-	mi := &file_personal_schedule_service_common_schedule_proto_msgTypes[12]
+	mi := &file_personal_schedule_service_common_schedule_proto_msgTypes[13]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -977,7 +1038,7 @@ func (x *WorkDetail) String() string {
 func (*WorkDetail) ProtoMessage() {}
 
 func (x *WorkDetail) ProtoReflect() protoreflect.Message {
-	mi := &file_personal_schedule_service_common_schedule_proto_msgTypes[12]
+	mi := &file_personal_schedule_service_common_schedule_proto_msgTypes[13]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -990,7 +1051,7 @@ func (x *WorkDetail) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use WorkDetail.ProtoReflect.Descriptor instead.
 func (*WorkDetail) Descriptor() ([]byte, []int) {
-	return file_personal_schedule_service_common_schedule_proto_rawDescGZIP(), []int{12}
+	return file_personal_schedule_service_common_schedule_proto_rawDescGZIP(), []int{13}
 }
 
 func (x *WorkDetail) GetId() string {
@@ -1033,6 +1094,13 @@ func (x *WorkDetail) GetEndDate() int64 {
 		return x.EndDate
 	}
 	return 0
+}
+
+func (x *WorkDetail) GetGoal() *GoalOfWork {
+	if x != nil {
+		return x.Goal
+	}
+	return nil
 }
 
 func (x *WorkDetail) GetLabels() *WorkLabelGroupDetail {
@@ -1131,7 +1199,11 @@ const file_personal_schedule_service_common_schedule_proto_rawDesc = "" +
 	"difficulty\x18\x02 \x03(\v2\x1c.personal_schedule.LabelInfoR\n" +
 	"difficulty\x128\n" +
 	"\bpriority\x18\x03 \x03(\v2\x1c.personal_schedule.LabelInfoR\bpriority\x120\n" +
-	"\x04type\x18\x04 \x03(\v2\x1c.personal_schedule.LabelInfoR\x04type\"\xf5\x02\n" +
+	"\x04type\x18\x04 \x03(\v2\x1c.personal_schedule.LabelInfoR\x04type\"0\n" +
+	"\n" +
+	"GoalOfWork\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\x12\x12\n" +
+	"\x04name\x18\x02 \x01(\tR\x04name\"\xa8\x03\n" +
 	"\x04Work\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x12\n" +
 	"\x04name\x18\x02 \x01(\tR\x04name\x122\n" +
@@ -1139,7 +1211,8 @@ const file_personal_schedule_service_common_schedule_proto_rawDesc = "" +
 	"\x14detailed_description\x18\x04 \x01(\tH\x01R\x13detailedDescription\x88\x01\x01\x12\x1d\n" +
 	"\n" +
 	"start_date\x18\x05 \x01(\x03R\tstartDate\x12\x19\n" +
-	"\bend_date\x18\x06 \x01(\x03R\aendDate\x129\n" +
+	"\bend_date\x18\x06 \x01(\x03R\aendDate\x121\n" +
+	"\x04goal\x18\a \x01(\v2\x1d.personal_schedule.GoalOfWorkR\x04goal\x129\n" +
 	"\x06labels\x18\b \x01(\v2!.personal_schedule.WorkLabelGroupR\x06labels\x128\n" +
 	"\bcategory\x18\t \x03(\v2\x1c.personal_schedule.LabelInfoR\bcategoryB\x15\n" +
 	"\x13_short_descriptionsB\x17\n" +
@@ -1151,7 +1224,7 @@ const file_personal_schedule_service_common_schedule_proto_rawDesc = "" +
 	"difficulty\x128\n" +
 	"\bpriority\x18\x03 \x03(\v2\x1c.personal_schedule.LabelInfoR\bpriority\x120\n" +
 	"\x04type\x18\x04 \x03(\v2\x1c.personal_schedule.LabelInfoR\x04type\x128\n" +
-	"\bcategory\x18\x05 \x03(\v2\x1c.personal_schedule.LabelInfoR\bcategory\"\x87\x03\n" +
+	"\bcategory\x18\x05 \x03(\v2\x1c.personal_schedule.LabelInfoR\bcategory\"\xba\x03\n" +
 	"\n" +
 	"WorkDetail\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x12\n" +
@@ -1160,7 +1233,8 @@ const file_personal_schedule_service_common_schedule_proto_rawDesc = "" +
 	"\x14detailed_description\x18\x04 \x01(\tH\x01R\x13detailedDescription\x88\x01\x01\x12\x1d\n" +
 	"\n" +
 	"start_date\x18\x05 \x01(\x03R\tstartDate\x12\x19\n" +
-	"\bend_date\x18\x06 \x01(\x03R\aendDate\x12?\n" +
+	"\bend_date\x18\x06 \x01(\x03R\aendDate\x121\n" +
+	"\x04goal\x18\a \x01(\v2\x1d.personal_schedule.GoalOfWorkR\x04goal\x12?\n" +
 	"\x06labels\x18\b \x01(\v2'.personal_schedule.WorkLabelGroupDetailR\x06labels\x12>\n" +
 	"\tsub_tasks\x18\t \x03(\v2!.personal_schedule.SubTaskPayloadR\bsubTasksB\x15\n" +
 	"\x13_short_descriptionsB\x17\n" +
@@ -1178,7 +1252,7 @@ func file_personal_schedule_service_common_schedule_proto_rawDescGZIP() []byte {
 	return file_personal_schedule_service_common_schedule_proto_rawDescData
 }
 
-var file_personal_schedule_service_common_schedule_proto_msgTypes = make([]protoimpl.MessageInfo, 13)
+var file_personal_schedule_service_common_schedule_proto_msgTypes = make([]protoimpl.MessageInfo, 14)
 var file_personal_schedule_service_common_schedule_proto_goTypes = []any{
 	(*Label)(nil),                // 0: personal_schedule.Label
 	(*LabelPerType)(nil),         // 1: personal_schedule.LabelPerType
@@ -1190,9 +1264,10 @@ var file_personal_schedule_service_common_schedule_proto_goTypes = []any{
 	(*GoalDetail)(nil),           // 7: personal_schedule.GoalDetail
 	(*SubTaskPayload)(nil),       // 8: personal_schedule.SubTaskPayload
 	(*WorkLabelGroup)(nil),       // 9: personal_schedule.WorkLabelGroup
-	(*Work)(nil),                 // 10: personal_schedule.Work
-	(*WorkLabelGroupDetail)(nil), // 11: personal_schedule.WorkLabelGroupDetail
-	(*WorkDetail)(nil),           // 12: personal_schedule.WorkDetail
+	(*GoalOfWork)(nil),           // 10: personal_schedule.GoalOfWork
+	(*Work)(nil),                 // 11: personal_schedule.Work
+	(*WorkLabelGroupDetail)(nil), // 12: personal_schedule.WorkLabelGroupDetail
+	(*WorkDetail)(nil),           // 13: personal_schedule.WorkDetail
 }
 var file_personal_schedule_service_common_schedule_proto_depIdxs = []int32{
 	0,  // 0: personal_schedule.LabelPerType.labels:type_name -> personal_schedule.Label
@@ -1211,20 +1286,22 @@ var file_personal_schedule_service_common_schedule_proto_depIdxs = []int32{
 	2,  // 13: personal_schedule.WorkLabelGroup.difficulty:type_name -> personal_schedule.LabelInfo
 	2,  // 14: personal_schedule.WorkLabelGroup.priority:type_name -> personal_schedule.LabelInfo
 	2,  // 15: personal_schedule.WorkLabelGroup.type:type_name -> personal_schedule.LabelInfo
-	9,  // 16: personal_schedule.Work.labels:type_name -> personal_schedule.WorkLabelGroup
-	2,  // 17: personal_schedule.Work.category:type_name -> personal_schedule.LabelInfo
-	2,  // 18: personal_schedule.WorkLabelGroupDetail.status:type_name -> personal_schedule.LabelInfo
-	2,  // 19: personal_schedule.WorkLabelGroupDetail.difficulty:type_name -> personal_schedule.LabelInfo
-	2,  // 20: personal_schedule.WorkLabelGroupDetail.priority:type_name -> personal_schedule.LabelInfo
-	2,  // 21: personal_schedule.WorkLabelGroupDetail.type:type_name -> personal_schedule.LabelInfo
-	2,  // 22: personal_schedule.WorkLabelGroupDetail.category:type_name -> personal_schedule.LabelInfo
-	11, // 23: personal_schedule.WorkDetail.labels:type_name -> personal_schedule.WorkLabelGroupDetail
-	8,  // 24: personal_schedule.WorkDetail.sub_tasks:type_name -> personal_schedule.SubTaskPayload
-	25, // [25:25] is the sub-list for method output_type
-	25, // [25:25] is the sub-list for method input_type
-	25, // [25:25] is the sub-list for extension type_name
-	25, // [25:25] is the sub-list for extension extendee
-	0,  // [0:25] is the sub-list for field type_name
+	10, // 16: personal_schedule.Work.goal:type_name -> personal_schedule.GoalOfWork
+	9,  // 17: personal_schedule.Work.labels:type_name -> personal_schedule.WorkLabelGroup
+	2,  // 18: personal_schedule.Work.category:type_name -> personal_schedule.LabelInfo
+	2,  // 19: personal_schedule.WorkLabelGroupDetail.status:type_name -> personal_schedule.LabelInfo
+	2,  // 20: personal_schedule.WorkLabelGroupDetail.difficulty:type_name -> personal_schedule.LabelInfo
+	2,  // 21: personal_schedule.WorkLabelGroupDetail.priority:type_name -> personal_schedule.LabelInfo
+	2,  // 22: personal_schedule.WorkLabelGroupDetail.type:type_name -> personal_schedule.LabelInfo
+	2,  // 23: personal_schedule.WorkLabelGroupDetail.category:type_name -> personal_schedule.LabelInfo
+	10, // 24: personal_schedule.WorkDetail.goal:type_name -> personal_schedule.GoalOfWork
+	12, // 25: personal_schedule.WorkDetail.labels:type_name -> personal_schedule.WorkLabelGroupDetail
+	8,  // 26: personal_schedule.WorkDetail.sub_tasks:type_name -> personal_schedule.SubTaskPayload
+	27, // [27:27] is the sub-list for method output_type
+	27, // [27:27] is the sub-list for method input_type
+	27, // [27:27] is the sub-list for extension type_name
+	27, // [27:27] is the sub-list for extension extendee
+	0,  // [0:27] is the sub-list for field type_name
 }
 
 func init() { file_personal_schedule_service_common_schedule_proto_init() }
@@ -1234,15 +1311,15 @@ func file_personal_schedule_service_common_schedule_proto_init() {
 	}
 	file_personal_schedule_service_common_schedule_proto_msgTypes[5].OneofWrappers = []any{}
 	file_personal_schedule_service_common_schedule_proto_msgTypes[8].OneofWrappers = []any{}
-	file_personal_schedule_service_common_schedule_proto_msgTypes[10].OneofWrappers = []any{}
-	file_personal_schedule_service_common_schedule_proto_msgTypes[12].OneofWrappers = []any{}
+	file_personal_schedule_service_common_schedule_proto_msgTypes[11].OneofWrappers = []any{}
+	file_personal_schedule_service_common_schedule_proto_msgTypes[13].OneofWrappers = []any{}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_personal_schedule_service_common_schedule_proto_rawDesc), len(file_personal_schedule_service_common_schedule_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   13,
+			NumMessages:   14,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

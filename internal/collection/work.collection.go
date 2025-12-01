@@ -24,7 +24,7 @@ type Work struct {
 	TypeID              bson.ObjectID   `bson:"type_id" json:"type_id"`
 	CategoryID          bson.ObjectID   `bson:"category_id" json:"category_id"`
 	UserID              string          `bson:"user_id" json:"user_id"`
-	GoalID              bson.ObjectID   `bson:"goal_id" json:"goal_id"`
+	GoalID              *bson.ObjectID  `bson:"goal_id" json:"goal_id"`
 	CreatedAt           time.Time       `bson:"created_at" json:"created_at"`
 	LastModifiedAt      time.Time       `bson:"last_modified_at" json:"last_modified_at"`
 }
@@ -79,7 +79,7 @@ func createWorkCollection() error {
 				"type_id":          bson.M{"bsonType": "objectId"},
 				"category_id":      bson.M{"bsonType": "objectId"},
 				"user_id":          bson.M{"bsonType": "string"},
-				"goal_id":          bson.M{"bsonType": "objectId"},
+				"goal_id":          bson.M{"bsonType": []string{"objectId", "null"}},
 				"created_at":       bson.M{"bsonType": "date"},
 				"last_modified_at": bson.M{"bsonType": "date"},
 			},

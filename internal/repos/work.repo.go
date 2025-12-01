@@ -18,6 +18,11 @@ type workRepo struct {
 	mongoConnector *mongolib.MongoConnector
 }
 
+type GoalInfo struct {
+	ID   bson.ObjectID `bson:"_id"`
+	Name string        `bson:"name"`
+}
+
 type AggregatedWork struct {
 	ID                  bson.ObjectID      `bson:"_id"`
 	Name                string             `bson:"name"`
@@ -26,6 +31,7 @@ type AggregatedWork struct {
 	StartDate           *time.Time         `bson:"start_date,omitempty"`
 	EndDate             time.Time          `bson:"end_date"`
 	UserID              string             `bson:"user_id"`
+	GoalInfo            []GoalInfo         `bson:"goalInfo"`
 	Status              []collection.Label `bson:"statusInfo"`
 	Priority            []collection.Label `bson:"priorityInfo"`
 	Difficulty          []collection.Label `bson:"difficultyInfo"`
@@ -185,6 +191,18 @@ func (wr *workRepo) GetWorks(ctx context.Context, req *personal_schedule.GetWork
 			"as":           "typeInfo",
 		},
 	}}
+	lookupGoal := bson.D{{
+		Key: "$lookup",
+		Value: bson.M{
+			"from":         collection.GoalsCollection,
+			"localField":   "goal_id",
+			"foreignField": "_id",
+			"as":           "goalInfo",
+			"pipeline": bson.A{
+				bson.D{{Key: "$project", Value: bson.M{"name": 1}}},
+			},
+		},
+	}}
 
 	sortStage := bson.D{
 		{Key: "$sort", Value: bson.M{"end_date": 1}},
@@ -202,6 +220,7 @@ func (wr *workRepo) GetWorks(ctx context.Context, req *personal_schedule.GetWork
 		lookupCategory,
 		lookupType,
 		sortStage,
+		lookupGoal,
 	}
 
 	cursor, err := coll.Aggregate(ctx, pipeline)
@@ -292,6 +311,18 @@ func (r workRepo) GetAggregatedWorkByID(ctx context.Context, workID bson.ObjectI
 			"as":           "typeInfo",
 		},
 	}}
+	lookupGoal := bson.D{{
+		Key: "$lookup",
+		Value: bson.M{
+			"from":         collection.GoalsCollection,
+			"localField":   "goal_id",
+			"foreignField": "_id",
+			"as":           "goalInfo",
+			"pipeline": bson.A{
+				bson.D{{Key: "$project", Value: bson.M{"name": 1}}},
+			},
+		},
+	}}
 
 	pipeline := mongo.Pipeline{
 		{{Key: "$match", Value: matchStage}},
@@ -300,6 +331,7 @@ func (r workRepo) GetAggregatedWorkByID(ctx context.Context, workID bson.ObjectI
 		lookupDifficulty,
 		lookupCategory,
 		lookupType,
+		lookupGoal,
 		{{Key: "$limit", Value: 1}},
 	}
 

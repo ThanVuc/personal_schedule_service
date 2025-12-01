@@ -213,6 +213,162 @@ func (x *IDResponse) GetError() *Error {
 	return nil
 }
 
+type Notification struct {
+	state           protoimpl.MessageState `protogen:"open.v1"`
+	Id              *string                `protobuf:"bytes,1,opt,name=id,proto3,oneof" json:"id"`
+	Title           string                 `protobuf:"bytes,2,opt,name=title,proto3" json:"title"`
+	Message         string                 `protobuf:"bytes,3,opt,name=message,proto3" json:"message"`
+	SenderId        string                 `protobuf:"bytes,4,opt,name=sender_id,json=senderId,proto3" json:"sender_id"`
+	ReceiverIds     []string               `protobuf:"bytes,5,rep,name=receiver_ids,json=receiverIds,proto3" json:"receiver_ids"`
+	IsRead          bool                   `protobuf:"varint,6,opt,name=is_read,json=isRead,proto3" json:"is_read"`
+	Link            *string                `protobuf:"bytes,7,opt,name=link,proto3,oneof" json:"link"`
+	CreatedAt       int64                  `protobuf:"varint,8,opt,name=created_at,json=createdAt,proto3" json:"created_at"`
+	UpdateAt        int64                  `protobuf:"varint,9,opt,name=update_at,json=updateAt,proto3" json:"update_at"`
+	TriggerAt       *int64                 `protobuf:"varint,10,opt,name=trigger_at,json=triggerAt,proto3,oneof" json:"trigger_at"`
+	ImageUrl        *string                `protobuf:"bytes,11,opt,name=image_url,json=imageUrl,proto3,oneof" json:"image_url"`
+	IsEmailSent     bool                   `protobuf:"varint,12,opt,name=is_email_sent,json=isEmailSent,proto3" json:"is_email_sent"`
+	IsActive        bool                   `protobuf:"varint,13,opt,name=is_active,json=isActive,proto3" json:"is_active"`
+	CorrelationId   string                 `protobuf:"bytes,14,opt,name=correlation_id,json=correlationId,proto3" json:"correlation_id"`
+	CorrelationType int32                  `protobuf:"varint,15,opt,name=correlation_type,json=correlationType,proto3" json:"correlation_type"`
+	unknownFields   protoimpl.UnknownFields
+	sizeCache       protoimpl.SizeCache
+}
+
+func (x *Notification) Reset() {
+	*x = Notification{}
+	mi := &file_common_common_proto_msgTypes[4]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *Notification) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*Notification) ProtoMessage() {}
+
+func (x *Notification) ProtoReflect() protoreflect.Message {
+	mi := &file_common_common_proto_msgTypes[4]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use Notification.ProtoReflect.Descriptor instead.
+func (*Notification) Descriptor() ([]byte, []int) {
+	return file_common_common_proto_rawDescGZIP(), []int{4}
+}
+
+func (x *Notification) GetId() string {
+	if x != nil && x.Id != nil {
+		return *x.Id
+	}
+	return ""
+}
+
+func (x *Notification) GetTitle() string {
+	if x != nil {
+		return x.Title
+	}
+	return ""
+}
+
+func (x *Notification) GetMessage() string {
+	if x != nil {
+		return x.Message
+	}
+	return ""
+}
+
+func (x *Notification) GetSenderId() string {
+	if x != nil {
+		return x.SenderId
+	}
+	return ""
+}
+
+func (x *Notification) GetReceiverIds() []string {
+	if x != nil {
+		return x.ReceiverIds
+	}
+	return nil
+}
+
+func (x *Notification) GetIsRead() bool {
+	if x != nil {
+		return x.IsRead
+	}
+	return false
+}
+
+func (x *Notification) GetLink() string {
+	if x != nil && x.Link != nil {
+		return *x.Link
+	}
+	return ""
+}
+
+func (x *Notification) GetCreatedAt() int64 {
+	if x != nil {
+		return x.CreatedAt
+	}
+	return 0
+}
+
+func (x *Notification) GetUpdateAt() int64 {
+	if x != nil {
+		return x.UpdateAt
+	}
+	return 0
+}
+
+func (x *Notification) GetTriggerAt() int64 {
+	if x != nil && x.TriggerAt != nil {
+		return *x.TriggerAt
+	}
+	return 0
+}
+
+func (x *Notification) GetImageUrl() string {
+	if x != nil && x.ImageUrl != nil {
+		return *x.ImageUrl
+	}
+	return ""
+}
+
+func (x *Notification) GetIsEmailSent() bool {
+	if x != nil {
+		return x.IsEmailSent
+	}
+	return false
+}
+
+func (x *Notification) GetIsActive() bool {
+	if x != nil {
+		return x.IsActive
+	}
+	return false
+}
+
+func (x *Notification) GetCorrelationId() string {
+	if x != nil {
+		return x.CorrelationId
+	}
+	return ""
+}
+
+func (x *Notification) GetCorrelationType() int32 {
+	if x != nil {
+		return x.CorrelationType
+	}
+	return 0
+}
+
 var File_common_common_proto protoreflect.FileDescriptor
 
 const file_common_common_proto_rawDesc = "" +
@@ -234,7 +390,31 @@ const file_common_common_proto_rawDesc = "" +
 	"IDResponse\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12(\n" +
 	"\x05error\x18\x02 \x01(\v2\r.common.ErrorH\x00R\x05error\x88\x01\x01B\b\n" +
-	"\x06_errorB\x0eZ\fproto/commonb\x06proto3"
+	"\x06_error\"\x87\x04\n" +
+	"\fNotification\x12\x13\n" +
+	"\x02id\x18\x01 \x01(\tH\x00R\x02id\x88\x01\x01\x12\x14\n" +
+	"\x05title\x18\x02 \x01(\tR\x05title\x12\x18\n" +
+	"\amessage\x18\x03 \x01(\tR\amessage\x12\x1b\n" +
+	"\tsender_id\x18\x04 \x01(\tR\bsenderId\x12!\n" +
+	"\freceiver_ids\x18\x05 \x03(\tR\vreceiverIds\x12\x17\n" +
+	"\ais_read\x18\x06 \x01(\bR\x06isRead\x12\x17\n" +
+	"\x04link\x18\a \x01(\tH\x01R\x04link\x88\x01\x01\x12\x1d\n" +
+	"\n" +
+	"created_at\x18\b \x01(\x03R\tcreatedAt\x12\x1b\n" +
+	"\tupdate_at\x18\t \x01(\x03R\bupdateAt\x12\"\n" +
+	"\n" +
+	"trigger_at\x18\n" +
+	" \x01(\x03H\x02R\ttriggerAt\x88\x01\x01\x12 \n" +
+	"\timage_url\x18\v \x01(\tH\x03R\bimageUrl\x88\x01\x01\x12\"\n" +
+	"\ris_email_sent\x18\f \x01(\bR\visEmailSent\x12\x1b\n" +
+	"\tis_active\x18\r \x01(\bR\bisActive\x12%\n" +
+	"\x0ecorrelation_id\x18\x0e \x01(\tR\rcorrelationId\x12)\n" +
+	"\x10correlation_type\x18\x0f \x01(\x05R\x0fcorrelationTypeB\x05\n" +
+	"\x03_idB\a\n" +
+	"\x05_linkB\r\n" +
+	"\v_trigger_atB\f\n" +
+	"\n" +
+	"_image_urlB\x0eZ\fproto/commonb\x06proto3"
 
 var (
 	file_common_common_proto_rawDescOnce sync.Once
@@ -248,17 +428,18 @@ func file_common_common_proto_rawDescGZIP() []byte {
 	return file_common_common_proto_rawDescData
 }
 
-var file_common_common_proto_msgTypes = make([]protoimpl.MessageInfo, 4)
+var file_common_common_proto_msgTypes = make([]protoimpl.MessageInfo, 5)
 var file_common_common_proto_goTypes = []any{
 	(*EmptyResponse)(nil), // 0: common.EmptyResponse
 	(*EmptyRequest)(nil),  // 1: common.EmptyRequest
 	(*IDRequest)(nil),     // 2: common.IDRequest
 	(*IDResponse)(nil),    // 3: common.IDResponse
-	(*Error)(nil),         // 4: common.Error
+	(*Notification)(nil),  // 4: common.Notification
+	(*Error)(nil),         // 5: common.Error
 }
 var file_common_common_proto_depIdxs = []int32{
-	4, // 0: common.EmptyResponse.error:type_name -> common.Error
-	4, // 1: common.IDResponse.error:type_name -> common.Error
+	5, // 0: common.EmptyResponse.error:type_name -> common.Error
+	5, // 1: common.IDResponse.error:type_name -> common.Error
 	2, // [2:2] is the sub-list for method output_type
 	2, // [2:2] is the sub-list for method input_type
 	2, // [2:2] is the sub-list for extension type_name
@@ -274,13 +455,14 @@ func file_common_common_proto_init() {
 	file_common_error_proto_init()
 	file_common_common_proto_msgTypes[0].OneofWrappers = []any{}
 	file_common_common_proto_msgTypes[3].OneofWrappers = []any{}
+	file_common_common_proto_msgTypes[4].OneofWrappers = []any{}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_common_common_proto_rawDesc), len(file_common_common_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   4,
+			NumMessages:   5,
 			NumExtensions: 0,
 			NumServices:   0,
 		},
