@@ -566,6 +566,94 @@ func (x *DeleteGoalResponse) GetMessage() string {
 	return ""
 }
 
+type GetGoalsForDialogRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	UserId        string                 `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetGoalsForDialogRequest) Reset() {
+	*x = GetGoalsForDialogRequest{}
+	mi := &file_personal_schedule_service_goal_proto_msgTypes[8]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetGoalsForDialogRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetGoalsForDialogRequest) ProtoMessage() {}
+
+func (x *GetGoalsForDialogRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_personal_schedule_service_goal_proto_msgTypes[8]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetGoalsForDialogRequest.ProtoReflect.Descriptor instead.
+func (*GetGoalsForDialogRequest) Descriptor() ([]byte, []int) {
+	return file_personal_schedule_service_goal_proto_rawDescGZIP(), []int{8}
+}
+
+func (x *GetGoalsForDialogRequest) GetUserId() string {
+	if x != nil {
+		return x.UserId
+	}
+	return ""
+}
+
+type GetGoalForDialogResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Goals         []*GoalOfWork          `protobuf:"bytes,1,rep,name=goals,proto3" json:"goals"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetGoalForDialogResponse) Reset() {
+	*x = GetGoalForDialogResponse{}
+	mi := &file_personal_schedule_service_goal_proto_msgTypes[9]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetGoalForDialogResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetGoalForDialogResponse) ProtoMessage() {}
+
+func (x *GetGoalForDialogResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_personal_schedule_service_goal_proto_msgTypes[9]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetGoalForDialogResponse.ProtoReflect.Descriptor instead.
+func (*GetGoalForDialogResponse) Descriptor() ([]byte, []int) {
+	return file_personal_schedule_service_goal_proto_rawDescGZIP(), []int{9}
+}
+
+func (x *GetGoalForDialogResponse) GetGoals() []*GoalOfWork {
+	if x != nil {
+		return x.Goals
+	}
+	return nil
+}
+
 var File_personal_schedule_service_goal_proto protoreflect.FileDescriptor
 
 const file_personal_schedule_service_goal_proto_rawDesc = "" +
@@ -628,14 +716,19 @@ const file_personal_schedule_service_goal_proto_rawDesc = "" +
 	"\amessage\x18\x03 \x01(\tH\x01R\amessage\x88\x01\x01B\b\n" +
 	"\x06_errorB\n" +
 	"\n" +
-	"\b_message2\xea\x02\n" +
+	"\b_message\"3\n" +
+	"\x18GetGoalsForDialogRequest\x12\x17\n" +
+	"\auser_id\x18\x01 \x01(\tR\x06userId\"O\n" +
+	"\x18GetGoalForDialogResponse\x123\n" +
+	"\x05goals\x18\x01 \x03(\v2\x1d.personal_schedule.GoalOfWorkR\x05goals2\xd9\x03\n" +
 	"\vGoalService\x12S\n" +
 	"\bGetGoals\x12\".personal_schedule.GetGoalsRequest\x1a#.personal_schedule.GetGoalsResponse\x12Y\n" +
 	"\n" +
 	"UpsertGoal\x12$.personal_schedule.UpsertGoalRequest\x1a%.personal_schedule.UpsertGoalResponse\x12P\n" +
 	"\aGetGoal\x12!.personal_schedule.GetGoalRequest\x1a\".personal_schedule.GetGoalResponse\x12Y\n" +
 	"\n" +
-	"DeleteGoal\x12$.personal_schedule.DeleteGoalRequest\x1a%.personal_schedule.DeleteGoalResponseB\x19Z\x17proto/personal_scheduleb\x06proto3"
+	"DeleteGoal\x12$.personal_schedule.DeleteGoalRequest\x1a%.personal_schedule.DeleteGoalResponse\x12m\n" +
+	"\x11GetGoalForDiaglog\x12+.personal_schedule.GetGoalsForDialogRequest\x1a+.personal_schedule.GetGoalForDialogResponseB\x19Z\x17proto/personal_scheduleb\x06proto3"
 
 var (
 	file_personal_schedule_service_goal_proto_rawDescOnce sync.Once
@@ -649,46 +742,52 @@ func file_personal_schedule_service_goal_proto_rawDescGZIP() []byte {
 	return file_personal_schedule_service_goal_proto_rawDescData
 }
 
-var file_personal_schedule_service_goal_proto_msgTypes = make([]protoimpl.MessageInfo, 8)
+var file_personal_schedule_service_goal_proto_msgTypes = make([]protoimpl.MessageInfo, 10)
 var file_personal_schedule_service_goal_proto_goTypes = []any{
-	(*GetGoalsRequest)(nil),    // 0: personal_schedule.GetGoalsRequest
-	(*GetGoalsResponse)(nil),   // 1: personal_schedule.GetGoalsResponse
-	(*UpsertGoalRequest)(nil),  // 2: personal_schedule.UpsertGoalRequest
-	(*UpsertGoalResponse)(nil), // 3: personal_schedule.UpsertGoalResponse
-	(*GetGoalRequest)(nil),     // 4: personal_schedule.GetGoalRequest
-	(*GetGoalResponse)(nil),    // 5: personal_schedule.GetGoalResponse
-	(*DeleteGoalRequest)(nil),  // 6: personal_schedule.DeleteGoalRequest
-	(*DeleteGoalResponse)(nil), // 7: personal_schedule.DeleteGoalResponse
-	(*common.PageQuery)(nil),   // 8: common.PageQuery
-	(*Goal)(nil),               // 9: personal_schedule.Goal
-	(*common.PageInfo)(nil),    // 10: common.PageInfo
-	(*common.Error)(nil),       // 11: common.Error
-	(*GoalTaskPayload)(nil),    // 12: personal_schedule.GoalTaskPayload
-	(*GoalDetail)(nil),         // 13: personal_schedule.GoalDetail
+	(*GetGoalsRequest)(nil),          // 0: personal_schedule.GetGoalsRequest
+	(*GetGoalsResponse)(nil),         // 1: personal_schedule.GetGoalsResponse
+	(*UpsertGoalRequest)(nil),        // 2: personal_schedule.UpsertGoalRequest
+	(*UpsertGoalResponse)(nil),       // 3: personal_schedule.UpsertGoalResponse
+	(*GetGoalRequest)(nil),           // 4: personal_schedule.GetGoalRequest
+	(*GetGoalResponse)(nil),          // 5: personal_schedule.GetGoalResponse
+	(*DeleteGoalRequest)(nil),        // 6: personal_schedule.DeleteGoalRequest
+	(*DeleteGoalResponse)(nil),       // 7: personal_schedule.DeleteGoalResponse
+	(*GetGoalsForDialogRequest)(nil), // 8: personal_schedule.GetGoalsForDialogRequest
+	(*GetGoalForDialogResponse)(nil), // 9: personal_schedule.GetGoalForDialogResponse
+	(*common.PageQuery)(nil),         // 10: common.PageQuery
+	(*Goal)(nil),                     // 11: personal_schedule.Goal
+	(*common.PageInfo)(nil),          // 12: common.PageInfo
+	(*common.Error)(nil),             // 13: common.Error
+	(*GoalTaskPayload)(nil),          // 14: personal_schedule.GoalTaskPayload
+	(*GoalDetail)(nil),               // 15: personal_schedule.GoalDetail
+	(*GoalOfWork)(nil),               // 16: personal_schedule.GoalOfWork
 }
 var file_personal_schedule_service_goal_proto_depIdxs = []int32{
-	8,  // 0: personal_schedule.GetGoalsRequest.page_query:type_name -> common.PageQuery
-	9,  // 1: personal_schedule.GetGoalsResponse.goals:type_name -> personal_schedule.Goal
-	10, // 2: personal_schedule.GetGoalsResponse.page_info:type_name -> common.PageInfo
-	11, // 3: personal_schedule.GetGoalsResponse.error:type_name -> common.Error
-	12, // 4: personal_schedule.UpsertGoalRequest.tasks:type_name -> personal_schedule.GoalTaskPayload
-	11, // 5: personal_schedule.UpsertGoalResponse.error:type_name -> common.Error
-	13, // 6: personal_schedule.GetGoalResponse.goal:type_name -> personal_schedule.GoalDetail
-	11, // 7: personal_schedule.GetGoalResponse.error:type_name -> common.Error
-	11, // 8: personal_schedule.DeleteGoalResponse.error:type_name -> common.Error
-	0,  // 9: personal_schedule.GoalService.GetGoals:input_type -> personal_schedule.GetGoalsRequest
-	2,  // 10: personal_schedule.GoalService.UpsertGoal:input_type -> personal_schedule.UpsertGoalRequest
-	4,  // 11: personal_schedule.GoalService.GetGoal:input_type -> personal_schedule.GetGoalRequest
-	6,  // 12: personal_schedule.GoalService.DeleteGoal:input_type -> personal_schedule.DeleteGoalRequest
-	1,  // 13: personal_schedule.GoalService.GetGoals:output_type -> personal_schedule.GetGoalsResponse
-	3,  // 14: personal_schedule.GoalService.UpsertGoal:output_type -> personal_schedule.UpsertGoalResponse
-	5,  // 15: personal_schedule.GoalService.GetGoal:output_type -> personal_schedule.GetGoalResponse
-	7,  // 16: personal_schedule.GoalService.DeleteGoal:output_type -> personal_schedule.DeleteGoalResponse
-	13, // [13:17] is the sub-list for method output_type
-	9,  // [9:13] is the sub-list for method input_type
-	9,  // [9:9] is the sub-list for extension type_name
-	9,  // [9:9] is the sub-list for extension extendee
-	0,  // [0:9] is the sub-list for field type_name
+	10, // 0: personal_schedule.GetGoalsRequest.page_query:type_name -> common.PageQuery
+	11, // 1: personal_schedule.GetGoalsResponse.goals:type_name -> personal_schedule.Goal
+	12, // 2: personal_schedule.GetGoalsResponse.page_info:type_name -> common.PageInfo
+	13, // 3: personal_schedule.GetGoalsResponse.error:type_name -> common.Error
+	14, // 4: personal_schedule.UpsertGoalRequest.tasks:type_name -> personal_schedule.GoalTaskPayload
+	13, // 5: personal_schedule.UpsertGoalResponse.error:type_name -> common.Error
+	15, // 6: personal_schedule.GetGoalResponse.goal:type_name -> personal_schedule.GoalDetail
+	13, // 7: personal_schedule.GetGoalResponse.error:type_name -> common.Error
+	13, // 8: personal_schedule.DeleteGoalResponse.error:type_name -> common.Error
+	16, // 9: personal_schedule.GetGoalForDialogResponse.goals:type_name -> personal_schedule.GoalOfWork
+	0,  // 10: personal_schedule.GoalService.GetGoals:input_type -> personal_schedule.GetGoalsRequest
+	2,  // 11: personal_schedule.GoalService.UpsertGoal:input_type -> personal_schedule.UpsertGoalRequest
+	4,  // 12: personal_schedule.GoalService.GetGoal:input_type -> personal_schedule.GetGoalRequest
+	6,  // 13: personal_schedule.GoalService.DeleteGoal:input_type -> personal_schedule.DeleteGoalRequest
+	8,  // 14: personal_schedule.GoalService.GetGoalForDiaglog:input_type -> personal_schedule.GetGoalsForDialogRequest
+	1,  // 15: personal_schedule.GoalService.GetGoals:output_type -> personal_schedule.GetGoalsResponse
+	3,  // 16: personal_schedule.GoalService.UpsertGoal:output_type -> personal_schedule.UpsertGoalResponse
+	5,  // 17: personal_schedule.GoalService.GetGoal:output_type -> personal_schedule.GetGoalResponse
+	7,  // 18: personal_schedule.GoalService.DeleteGoal:output_type -> personal_schedule.DeleteGoalResponse
+	9,  // 19: personal_schedule.GoalService.GetGoalForDiaglog:output_type -> personal_schedule.GetGoalForDialogResponse
+	15, // [15:20] is the sub-list for method output_type
+	10, // [10:15] is the sub-list for method input_type
+	10, // [10:10] is the sub-list for extension type_name
+	10, // [10:10] is the sub-list for extension extendee
+	0,  // [0:10] is the sub-list for field type_name
 }
 
 func init() { file_personal_schedule_service_goal_proto_init() }
@@ -708,7 +807,7 @@ func file_personal_schedule_service_goal_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_personal_schedule_service_goal_proto_rawDesc), len(file_personal_schedule_service_goal_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   8,
+			NumMessages:   10,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

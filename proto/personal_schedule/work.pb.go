@@ -36,7 +36,7 @@ type UpsertWorkRequest struct {
 	PriorityId          string                 `protobuf:"bytes,10,opt,name=priority_id,json=priorityId,proto3" json:"priority_id"`
 	TypeId              string                 `protobuf:"bytes,11,opt,name=type_id,json=typeId,proto3" json:"type_id"`
 	CategoryId          string                 `protobuf:"bytes,12,opt,name=category_id,json=categoryId,proto3" json:"category_id"`
-	GoalId              string                 `protobuf:"bytes,13,opt,name=goal_id,json=goalId,proto3" json:"goal_id"`
+	GoalId              *string                `protobuf:"bytes,13,opt,name=goal_id,json=goalId,proto3,oneof" json:"goal_id"`
 	SubTasks            []*SubTaskPayload      `protobuf:"bytes,14,rep,name=sub_tasks,json=subTasks,proto3" json:"sub_tasks"`
 	NotificationIds     []string               `protobuf:"bytes,15,rep,name=notification_ids,json=notificationIds,proto3" json:"notification_ids"`
 	unknownFields       protoimpl.UnknownFields
@@ -158,8 +158,8 @@ func (x *UpsertWorkRequest) GetCategoryId() string {
 }
 
 func (x *UpsertWorkRequest) GetGoalId() string {
-	if x != nil {
-		return x.GoalId
+	if x != nil && x.GoalId != nil {
+		return *x.GoalId
 	}
 	return ""
 }
@@ -618,7 +618,7 @@ var File_personal_schedule_service_work_proto protoreflect.FileDescriptor
 
 const file_personal_schedule_service_work_proto_rawDesc = "" +
 	"\n" +
-	"$personal_schedule_service/work.proto\x12\x11personal_schedule\x1a/personal_schedule_service/common.schedule.proto\x1a\x12common/error.proto\x1a\x13common/common.proto\"\xe7\x04\n" +
+	"$personal_schedule_service/work.proto\x12\x11personal_schedule\x1a/personal_schedule_service/common.schedule.proto\x1a\x12common/error.proto\x1a\x13common/common.proto\"\xf8\x04\n" +
 	"\x11UpsertWorkRequest\x12\x17\n" +
 	"\auser_id\x18\x01 \x01(\tR\x06userId\x12\x13\n" +
 	"\x02id\x18\x02 \x01(\tH\x00R\x02id\x88\x01\x01\x12\x12\n" +
@@ -635,14 +635,16 @@ const file_personal_schedule_service_work_proto_rawDesc = "" +
 	"priorityId\x12\x17\n" +
 	"\atype_id\x18\v \x01(\tR\x06typeId\x12\x1f\n" +
 	"\vcategory_id\x18\f \x01(\tR\n" +
-	"categoryId\x12\x17\n" +
-	"\agoal_id\x18\r \x01(\tR\x06goalId\x12>\n" +
+	"categoryId\x12\x1c\n" +
+	"\agoal_id\x18\r \x01(\tH\x04R\x06goalId\x88\x01\x01\x12>\n" +
 	"\tsub_tasks\x18\x0e \x03(\v2!.personal_schedule.SubTaskPayloadR\bsubTasks\x12)\n" +
 	"\x10notification_ids\x18\x0f \x03(\tR\x0fnotificationIdsB\x05\n" +
 	"\x03_idB\x15\n" +
 	"\x13_short_descriptionsB\x17\n" +
 	"\x15_detailed_descriptionB\r\n" +
-	"\v_start_date\"\x81\x01\n" +
+	"\v_start_dateB\n" +
+	"\n" +
+	"\b_goal_id\"\x81\x01\n" +
 	"\x12UpsertWorkResponse\x12\x1d\n" +
 	"\n" +
 	"is_success\x18\x01 \x01(\bR\tisSuccess\x12\x18\n" +

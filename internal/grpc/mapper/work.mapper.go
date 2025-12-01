@@ -44,11 +44,15 @@ func (m *workMapper) mapProtoWorkToDB(req *personal_schedule.UpsertWorkRequest) 
 	if err != nil {
 		return nil, err
 	}
-	goalID, err := bson.ObjectIDFromHex(req.GoalId)
-	if err != nil {
-		return nil, err
-	}
 
+	var goalID *bson.ObjectID
+	if req.GoalId != nil && *req.GoalId != "" {
+		id, err := bson.ObjectIDFromHex(*req.GoalId)
+		if err != nil {
+			return nil, err
+		}
+		goalID = &id
+	}
 	notificationIDs := make([]bson.ObjectID, len(req.NotificationIds))
 	for i, idStr := range req.NotificationIds {
 		id, err := bson.ObjectIDFromHex(idStr)
@@ -124,6 +128,14 @@ func (m *workMapper) MapAggregatedWorkToProto(aggWork repos.AggregatedWork) *per
 	}
 	enddate = aggWork.EndDate.Unix()
 
+	var goalProto *personal_schedule.GoalOfWork
+	if len(aggWork.GoalInfo) > 0 {
+		goalProto = &personal_schedule.GoalOfWork{
+			Id:   aggWork.GoalInfo[0].ID.Hex(),
+			Name: aggWork.GoalInfo[0].Name,
+		}
+	}
+
 	return &personal_schedule.Work{
 		Id:                  aggWork.ID.Hex(),
 		Name:                aggWork.Name,
@@ -131,6 +143,7 @@ func (m *workMapper) MapAggregatedWorkToProto(aggWork repos.AggregatedWork) *per
 		DetailedDescription: &dd,
 		StartDate:           startdate,
 		EndDate:             enddate,
+		Goal:                goalProto,
 		Labels: &personal_schedule.WorkLabelGroup{
 			Status:     m.mapLabelsToProto(aggWork.Status),
 			Difficulty: m.mapLabelsToProto(aggWork.Difficulty),
@@ -182,6 +195,7 @@ func (m *workMapper) MapAggregatedToWorkDetailProto(aggWork repos.AggregatedWork
 		DetailedDescription: workBaseProto.DetailedDescription,
 		StartDate:           workBaseProto.StartDate,
 		EndDate:             workBaseProto.EndDate,
+		Goal:                workBaseProto.Goal,
 		Labels: &personal_schedule.WorkLabelGroupDetail{
 			Status:     workBaseProto.Labels.Status,
 			Difficulty: workBaseProto.Labels.Difficulty,
