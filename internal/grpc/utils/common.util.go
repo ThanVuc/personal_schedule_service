@@ -48,3 +48,14 @@ func StringToInt32(s string) int32 {
 	}
 	return result
 }
+
+func ToIint64Pointer(i int64) *int64 {
+	return &i
+}
+
+func Ternary[T any](condition bool, trueVal, falseVal T) T {
+	if condition {
+		return trueVal
+	}
+	return falseVal
+}

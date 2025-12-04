@@ -3,93 +3,95 @@ package services
 import (
 	"context"
 	"personal_schedule_service/internal/collection"
+	notifications_constant "personal_schedule_service/internal/constant/notifications"
 	"personal_schedule_service/internal/grpc/mapper"
 	"personal_schedule_service/internal/grpc/utils"
 	"personal_schedule_service/internal/grpc/validation"
 	"personal_schedule_service/internal/repos"
+	app_error "personal_schedule_service/pkg/settings/error"
+	"personal_schedule_service/proto/common"
 	"personal_schedule_service/proto/personal_schedule"
 	"time"
 
+	"github.com/thanvuc/go-core-lib/eventbus"
 	"github.com/thanvuc/go-core-lib/log"
 	"github.com/thanvuc/go-core-lib/mongolib"
 	"go.mongodb.org/mongo-driver/v2/bson"
 	"go.mongodb.org/mongo-driver/v2/mongo"
 	"go.uber.org/zap"
+	"google.golang.org/protobuf/proto"
 )
 
 type workService struct {
-	logger         log.Logger
-	workRepo       repos.WorkRepo
-	workMapper     mapper.WorkMapper
-	mongoConnector *mongolib.MongoConnector
-	validator      validation.WorkValidator
+	logger            log.Logger
+	workRepo          repos.WorkRepo
+	workMapper        mapper.WorkMapper
+	mongoConnector    *mongolib.MongoConnector
+	validator         validation.WorkValidator
+	eventbusConnector *eventbus.RabbitMQConnector
 }
 
 func (s *workService) UpsertWork(ctx context.Context, req *personal_schedule.UpsertWorkRequest) (*personal_schedule.UpsertWorkResponse, error) {
+	requestId := utils.GetRequestIDFromOutgoingContext(ctx)
 	if err := s.validator.ValidateUpsertWork(ctx, req); err != nil {
-		s.logger.Warn("UpsertWork validation failed", "", zap.Error(err))
+		s.logger.Error("UpsertWork validation failed", requestId, zap.Error(err))
 		return &personal_schedule.UpsertWorkResponse{
 			IsSuccess: false,
 			Error:     utils.InternalServerError(ctx, err),
 		}, nil
 	}
 
-	workDB, subTasksDB, err := s.workMapper.MapUpsertProtoToModels(req)
+	work, subTasksDB, err := s.workMapper.MapUpsertProtoToModels(req)
 	if err != nil {
-		s.logger.Error("Failed to map UpsertWorkRequest to models", "", zap.Error(err))
+		s.logger.Error("Failed to map UpsertWorkRequest to models", requestId, zap.Error(err))
 		return &personal_schedule.UpsertWorkResponse{
 			IsSuccess: false,
 			Error:     utils.InternalServerError(ctx, err),
 		}, nil
 	}
 
-	var workID bson.ObjectID
 	now := time.Now()
 	if req.Id == nil || *req.Id == "" {
-		workDB.UserID = req.UserId
-		workDB.CreatedAt = now
-		workDB.LastModifiedAt = now
+		work.UserID = req.UserId
+		work.CreatedAt = now
+		work.LastModifiedAt = now
 
-		newID, err := s.workRepo.CreateWork(ctx, workDB)
+		newID, err := s.workRepo.CreateWork(ctx, work)
 		if err != nil {
-			s.logger.Error("Failed to create work", "", zap.Error(err))
+			s.logger.Error("Failed to create work", requestId, zap.Error(err))
 			return &personal_schedule.UpsertWorkResponse{
 				IsSuccess: false, Message: "Failed to create work", Error: utils.DatabaseError(ctx, err),
 			}, err
 		}
-		workID = newID
+		work.ID = newID
 
 	} else {
-		workID, _ = bson.ObjectIDFromHex(*req.Id)
+		workID, _ := bson.ObjectIDFromHex(*req.Id)
 
-		updates := bson.M{
-			"name":                 workDB.Name,
-			"short_descriptions":   workDB.ShortDescriptions,
-			"detailed_description": workDB.DetailedDescription,
-			"start_date":           workDB.StartDate,
-			"end_date":             workDB.EndDate,
-			"notification_ids":     workDB.NotificationIds,
-			"status_id":            workDB.StatusID,
-			"difficulty_id":        workDB.DifficultyID,
-			"priority_id":          workDB.PriorityID,
-			"type_id":              workDB.TypeID,
-			"category_id":          workDB.CategoryID,
-			"goal_id":              workDB.GoalID,
-			"last_modified_at":     now,
-		}
-
-		if err := s.workRepo.UpdateWork(ctx, workID, updates); err != nil {
-			s.logger.Error("Failed to update work", "", zap.Error(err))
+		if err := s.workRepo.UpdateWork(ctx, workID, work); err != nil {
+			s.logger.Error("Failed to update work", requestId, zap.Error(err))
 			return &personal_schedule.UpsertWorkResponse{
 				IsSuccess: false, Message: "Failed to update work", Error: utils.DatabaseError(ctx, err),
 			}, err
 		}
+		work.ID = workID
 	}
-	if err := s.syncSubTasks(ctx, workID, subTasksDB); err != nil {
-		s.logger.Error("Failed to sync sub-tasks", "", zap.Error(err))
+	if err := s.syncSubTasks(ctx, work.ID, subTasksDB); err != nil {
+		s.logger.Error("Failed to sync sub-tasks", requestId, zap.Error(err))
 		return &personal_schedule.UpsertWorkResponse{
 			IsSuccess: false, Message: "Failed to sync sub-tasks (Work was upserted but tasks failed)", Error: utils.DatabaseError(ctx, err),
 		}, err
+	}
+
+	if len(req.Notifications) > 0 {
+		if err := s.sendNotificationEvent(ctx, req, work.ID.Hex()); err != nil {
+			s.logger.Error("Failed to send notification event", requestId, zap.Error(err))
+			return &personal_schedule.UpsertWorkResponse{
+				IsSuccess: false,
+				Message:   "Failed to send notification event (Work was upserted but notification failed)",
+				Error:     utils.CustomError(ctx, common.ErrorCode_ERROR_CODE_INTERNAL_ERROR, app_error.NotificationCannotBeSent, err),
+			}, err
+		}
 	}
 
 	return &personal_schedule.UpsertWorkResponse{
@@ -99,7 +101,6 @@ func (s *workService) UpsertWork(ctx context.Context, req *personal_schedule.Ups
 }
 
 func (s *workService) syncSubTasks(ctx context.Context, workID bson.ObjectID, payloadTasks []collection.SubTask) error {
-
 	existingTasks, err := s.workRepo.GetSubTasksByWorkID(ctx, workID)
 	if err != nil {
 		return err
@@ -138,6 +139,64 @@ func (s *workService) syncSubTasks(ctx context.Context, workID bson.ObjectID, pa
 
 	if len(operations) > 0 {
 		_, err = s.workRepo.BulkWriteSubTasks(ctx, operations)
+		return err
+	}
+
+	return nil
+}
+
+func (s *workService) sendNotificationEvent(ctx context.Context, req *personal_schedule.UpsertWorkRequest, workId string) error {
+	// Prepare event data
+	notifications := common.Notifications{}
+	for _, notification := range req.Notifications {
+		id := utils.Ternary(notification.Id != nil, *notification.Id, "")
+		notificationPayload := &common.Notification{
+			Id:              &id,
+			Title:           "",
+			Message:         "",
+			SenderId:        req.UserId,
+			ReceiverIds:     []string{req.UserId},
+			IsRead:          false,
+			Link:            notification.Link,
+			IsActive:        notification.IsActive,
+			TriggerAt:       &notification.TriggerAt,
+			IsEmailSent:     notification.IsEmailSent,
+			CorrelationId:   workId,
+			CorrelationType: common.NOTIFICATION_TYPE_SCHEDULED_NOTIFICATION.String(),
+			ImageUrl:        nil,
+		}
+		notifications.Notifications = append(notifications.Notifications, notificationPayload)
+	}
+	notificationsPayload, err := proto.Marshal(&notifications)
+	if err != nil {
+		s.logger.Error("Failed to marshal notifications payload", "", zap.Error(err))
+		return err
+	}
+
+	// Publish event to RabbitMQ
+	if err := s.publishNotifications(ctx, notificationsPayload); err != nil {
+		s.logger.Error("Failed to publish notifications event", "", zap.Error(err))
+		return err
+	}
+
+	return nil
+}
+
+func (s *workService) publishNotifications(ctx context.Context, payload []byte) error {
+	publisher := eventbus.NewPublisher(
+		s.eventbusConnector,
+		notifications_constant.NOTIFICATION_EXCHANGE,
+		eventbus.ExchangeTypeTopic,
+		nil,
+		nil,
+		false,
+	)
+
+	requestId := utils.GetRequestIDFromOutgoingContext(ctx)
+
+	err := publisher.Publish(ctx, requestId, []string{notifications_constant.NOTIFICATION_ROUTING_KEY}, payload, nil)
+	if err != nil {
+		s.logger.Error("Failed to publish notification event", "", zap.Error(err))
 		return err
 	}
 

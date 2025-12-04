@@ -62,8 +62,23 @@ func (wr *workRepo) CreateWork(ctx context.Context, work *collection.Work) (bson
 	return res.InsertedID.(bson.ObjectID), nil
 }
 
-func (wr *workRepo) UpdateWork(ctx context.Context, workID bson.ObjectID, updates bson.M) error {
+func (wr *workRepo) UpdateWork(ctx context.Context, workID bson.ObjectID, work *collection.Work) error {
 	coll := wr.mongoConnector.GetCollection(collection.WorksCollection)
+	now := time.Now()
+	updates := bson.M{
+		"name":                 work.Name,
+		"short_descriptions":   work.ShortDescriptions,
+		"detailed_description": work.DetailedDescription,
+		"start_date":           work.StartDate,
+		"end_date":             work.EndDate,
+		"status_id":            work.StatusID,
+		"difficulty_id":        work.DifficultyID,
+		"priority_id":          work.PriorityID,
+		"type_id":              work.TypeID,
+		"category_id":          work.CategoryID,
+		"goal_id":              work.GoalID,
+		"last_modified_at":     now,
+	}
 	_, err := coll.UpdateOne(ctx, bson.M{"_id": workID}, bson.M{"$set": updates})
 	return err
 }

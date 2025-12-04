@@ -53,14 +53,6 @@ func (m *workMapper) mapProtoWorkToDB(req *personal_schedule.UpsertWorkRequest) 
 		}
 		goalID = &id
 	}
-	notificationIDs := make([]bson.ObjectID, len(req.NotificationIds))
-	for i, idStr := range req.NotificationIds {
-		id, err := bson.ObjectIDFromHex(idStr)
-		if err != nil {
-			return nil, err
-		}
-		notificationIDs[i] = id
-	}
 
 	endDate := time.Unix(req.EndDate, 0)
 
@@ -76,7 +68,6 @@ func (m *workMapper) mapProtoWorkToDB(req *personal_schedule.UpsertWorkRequest) 
 		DetailedDescription: req.DetailedDescription,
 		StartDate:           startDate,
 		EndDate:             endDate,
-		NotificationIds:     notificationIDs,
 		StatusID:            statusID,
 		DifficultyID:        difficultyID,
 		PriorityID:          priorityID,
