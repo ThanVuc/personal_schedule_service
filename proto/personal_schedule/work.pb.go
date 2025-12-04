@@ -38,7 +38,7 @@ type UpsertWorkRequest struct {
 	CategoryId          string                 `protobuf:"bytes,12,opt,name=category_id,json=categoryId,proto3" json:"category_id"`
 	GoalId              *string                `protobuf:"bytes,13,opt,name=goal_id,json=goalId,proto3,oneof" json:"goal_id"`
 	SubTasks            []*SubTaskPayload      `protobuf:"bytes,14,rep,name=sub_tasks,json=subTasks,proto3" json:"sub_tasks"`
-	NotificationIds     []string               `protobuf:"bytes,15,rep,name=notification_ids,json=notificationIds,proto3" json:"notification_ids"`
+	Notifications       []*WorkNotification    `protobuf:"bytes,15,rep,name=notifications,proto3" json:"notifications"`
 	unknownFields       protoimpl.UnknownFields
 	sizeCache           protoimpl.SizeCache
 }
@@ -171,9 +171,9 @@ func (x *UpsertWorkRequest) GetSubTasks() []*SubTaskPayload {
 	return nil
 }
 
-func (x *UpsertWorkRequest) GetNotificationIds() []string {
+func (x *UpsertWorkRequest) GetNotifications() []*WorkNotification {
 	if x != nil {
-		return x.NotificationIds
+		return x.Notifications
 	}
 	return nil
 }
@@ -618,7 +618,7 @@ var File_personal_schedule_service_work_proto protoreflect.FileDescriptor
 
 const file_personal_schedule_service_work_proto_rawDesc = "" +
 	"\n" +
-	"$personal_schedule_service/work.proto\x12\x11personal_schedule\x1a/personal_schedule_service/common.schedule.proto\x1a\x12common/error.proto\x1a\x13common/common.proto\"\xf8\x04\n" +
+	"$personal_schedule_service/work.proto\x12\x11personal_schedule\x1a/personal_schedule_service/common.schedule.proto\x1a\x12common/error.proto\"\x98\x05\n" +
 	"\x11UpsertWorkRequest\x12\x17\n" +
 	"\auser_id\x18\x01 \x01(\tR\x06userId\x12\x13\n" +
 	"\x02id\x18\x02 \x01(\tH\x00R\x02id\x88\x01\x01\x12\x12\n" +
@@ -637,8 +637,8 @@ const file_personal_schedule_service_work_proto_rawDesc = "" +
 	"\vcategory_id\x18\f \x01(\tR\n" +
 	"categoryId\x12\x1c\n" +
 	"\agoal_id\x18\r \x01(\tH\x04R\x06goalId\x88\x01\x01\x12>\n" +
-	"\tsub_tasks\x18\x0e \x03(\v2!.personal_schedule.SubTaskPayloadR\bsubTasks\x12)\n" +
-	"\x10notification_ids\x18\x0f \x03(\tR\x0fnotificationIdsB\x05\n" +
+	"\tsub_tasks\x18\x0e \x03(\v2!.personal_schedule.SubTaskPayloadR\bsubTasks\x12I\n" +
+	"\rnotifications\x18\x0f \x03(\v2#.personal_schedule.WorkNotificationR\rnotificationsB\x05\n" +
 	"\x03_idB\x15\n" +
 	"\x13_short_descriptionsB\x17\n" +
 	"\x15_detailed_descriptionB\r\n" +
@@ -728,31 +728,33 @@ var file_personal_schedule_service_work_proto_goTypes = []any{
 	(*DeleteWorkRequest)(nil),  // 6: personal_schedule.DeleteWorkRequest
 	(*DeleteWorkResponse)(nil), // 7: personal_schedule.DeleteWorkResponse
 	(*SubTaskPayload)(nil),     // 8: personal_schedule.SubTaskPayload
-	(*common.Error)(nil),       // 9: common.Error
-	(*Work)(nil),               // 10: personal_schedule.Work
-	(*WorkDetail)(nil),         // 11: personal_schedule.WorkDetail
+	(*WorkNotification)(nil),   // 9: personal_schedule.WorkNotification
+	(*common.Error)(nil),       // 10: common.Error
+	(*Work)(nil),               // 11: personal_schedule.Work
+	(*WorkDetail)(nil),         // 12: personal_schedule.WorkDetail
 }
 var file_personal_schedule_service_work_proto_depIdxs = []int32{
 	8,  // 0: personal_schedule.UpsertWorkRequest.sub_tasks:type_name -> personal_schedule.SubTaskPayload
-	9,  // 1: personal_schedule.UpsertWorkResponse.error:type_name -> common.Error
-	10, // 2: personal_schedule.GetWorksResponse.works:type_name -> personal_schedule.Work
-	9,  // 3: personal_schedule.GetWorksResponse.error:type_name -> common.Error
-	11, // 4: personal_schedule.GetWorkResponse.work:type_name -> personal_schedule.WorkDetail
-	9,  // 5: personal_schedule.GetWorkResponse.error:type_name -> common.Error
-	9,  // 6: personal_schedule.DeleteWorkResponse.error:type_name -> common.Error
-	0,  // 7: personal_schedule.WorkService.UpsertWork:input_type -> personal_schedule.UpsertWorkRequest
-	2,  // 8: personal_schedule.WorkService.GetWorks:input_type -> personal_schedule.GetWorksRequest
-	4,  // 9: personal_schedule.WorkService.GetWork:input_type -> personal_schedule.GetWorkRequest
-	6,  // 10: personal_schedule.WorkService.DeleteWork:input_type -> personal_schedule.DeleteWorkRequest
-	1,  // 11: personal_schedule.WorkService.UpsertWork:output_type -> personal_schedule.UpsertWorkResponse
-	3,  // 12: personal_schedule.WorkService.GetWorks:output_type -> personal_schedule.GetWorksResponse
-	5,  // 13: personal_schedule.WorkService.GetWork:output_type -> personal_schedule.GetWorkResponse
-	7,  // 14: personal_schedule.WorkService.DeleteWork:output_type -> personal_schedule.DeleteWorkResponse
-	11, // [11:15] is the sub-list for method output_type
-	7,  // [7:11] is the sub-list for method input_type
-	7,  // [7:7] is the sub-list for extension type_name
-	7,  // [7:7] is the sub-list for extension extendee
-	0,  // [0:7] is the sub-list for field type_name
+	9,  // 1: personal_schedule.UpsertWorkRequest.notifications:type_name -> personal_schedule.WorkNotification
+	10, // 2: personal_schedule.UpsertWorkResponse.error:type_name -> common.Error
+	11, // 3: personal_schedule.GetWorksResponse.works:type_name -> personal_schedule.Work
+	10, // 4: personal_schedule.GetWorksResponse.error:type_name -> common.Error
+	12, // 5: personal_schedule.GetWorkResponse.work:type_name -> personal_schedule.WorkDetail
+	10, // 6: personal_schedule.GetWorkResponse.error:type_name -> common.Error
+	10, // 7: personal_schedule.DeleteWorkResponse.error:type_name -> common.Error
+	0,  // 8: personal_schedule.WorkService.UpsertWork:input_type -> personal_schedule.UpsertWorkRequest
+	2,  // 9: personal_schedule.WorkService.GetWorks:input_type -> personal_schedule.GetWorksRequest
+	4,  // 10: personal_schedule.WorkService.GetWork:input_type -> personal_schedule.GetWorkRequest
+	6,  // 11: personal_schedule.WorkService.DeleteWork:input_type -> personal_schedule.DeleteWorkRequest
+	1,  // 12: personal_schedule.WorkService.UpsertWork:output_type -> personal_schedule.UpsertWorkResponse
+	3,  // 13: personal_schedule.WorkService.GetWorks:output_type -> personal_schedule.GetWorksResponse
+	5,  // 14: personal_schedule.WorkService.GetWork:output_type -> personal_schedule.GetWorkResponse
+	7,  // 15: personal_schedule.WorkService.DeleteWork:output_type -> personal_schedule.DeleteWorkResponse
+	12, // [12:16] is the sub-list for method output_type
+	8,  // [8:12] is the sub-list for method input_type
+	8,  // [8:8] is the sub-list for extension type_name
+	8,  // [8:8] is the sub-list for extension extendee
+	0,  // [0:8] is the sub-list for field type_name
 }
 
 func init() { file_personal_schedule_service_work_proto_init() }

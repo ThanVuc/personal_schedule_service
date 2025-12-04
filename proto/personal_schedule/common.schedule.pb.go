@@ -1117,6 +1117,82 @@ func (x *WorkDetail) GetSubTasks() []*SubTaskPayload {
 	return nil
 }
 
+type WorkNotification struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            *string                `protobuf:"bytes,1,opt,name=id,proto3,oneof" json:"id"`
+	TriggerAt     int64                  `protobuf:"varint,2,opt,name=trigger_at,json=triggerAt,proto3" json:"trigger_at"`
+	IsEmailSent   bool                   `protobuf:"varint,3,opt,name=is_email_sent,json=isEmailSent,proto3" json:"is_email_sent"`
+	IsActive      bool                   `protobuf:"varint,4,opt,name=is_active,json=isActive,proto3" json:"is_active"`
+	Link          *string                `protobuf:"bytes,5,opt,name=link,proto3,oneof" json:"link"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *WorkNotification) Reset() {
+	*x = WorkNotification{}
+	mi := &file_personal_schedule_service_common_schedule_proto_msgTypes[14]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *WorkNotification) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*WorkNotification) ProtoMessage() {}
+
+func (x *WorkNotification) ProtoReflect() protoreflect.Message {
+	mi := &file_personal_schedule_service_common_schedule_proto_msgTypes[14]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use WorkNotification.ProtoReflect.Descriptor instead.
+func (*WorkNotification) Descriptor() ([]byte, []int) {
+	return file_personal_schedule_service_common_schedule_proto_rawDescGZIP(), []int{14}
+}
+
+func (x *WorkNotification) GetId() string {
+	if x != nil && x.Id != nil {
+		return *x.Id
+	}
+	return ""
+}
+
+func (x *WorkNotification) GetTriggerAt() int64 {
+	if x != nil {
+		return x.TriggerAt
+	}
+	return 0
+}
+
+func (x *WorkNotification) GetIsEmailSent() bool {
+	if x != nil {
+		return x.IsEmailSent
+	}
+	return false
+}
+
+func (x *WorkNotification) GetIsActive() bool {
+	if x != nil {
+		return x.IsActive
+	}
+	return false
+}
+
+func (x *WorkNotification) GetLink() string {
+	if x != nil && x.Link != nil {
+		return *x.Link
+	}
+	return ""
+}
+
 var File_personal_schedule_service_common_schedule_proto protoreflect.FileDescriptor
 
 const file_personal_schedule_service_common_schedule_proto_rawDesc = "" +
@@ -1238,7 +1314,16 @@ const file_personal_schedule_service_common_schedule_proto_rawDesc = "" +
 	"\x06labels\x18\b \x01(\v2'.personal_schedule.WorkLabelGroupDetailR\x06labels\x12>\n" +
 	"\tsub_tasks\x18\t \x03(\v2!.personal_schedule.SubTaskPayloadR\bsubTasksB\x15\n" +
 	"\x13_short_descriptionsB\x17\n" +
-	"\x15_detailed_descriptionB\x19Z\x17proto/personal_scheduleb\x06proto3"
+	"\x15_detailed_description\"\xb0\x01\n" +
+	"\x10WorkNotification\x12\x13\n" +
+	"\x02id\x18\x01 \x01(\tH\x00R\x02id\x88\x01\x01\x12\x1d\n" +
+	"\n" +
+	"trigger_at\x18\x02 \x01(\x03R\ttriggerAt\x12\"\n" +
+	"\ris_email_sent\x18\x03 \x01(\bR\visEmailSent\x12\x1b\n" +
+	"\tis_active\x18\x04 \x01(\bR\bisActive\x12\x17\n" +
+	"\x04link\x18\x05 \x01(\tH\x01R\x04link\x88\x01\x01B\x05\n" +
+	"\x03_idB\a\n" +
+	"\x05_linkB\x19Z\x17proto/personal_scheduleb\x06proto3"
 
 var (
 	file_personal_schedule_service_common_schedule_proto_rawDescOnce sync.Once
@@ -1252,7 +1337,7 @@ func file_personal_schedule_service_common_schedule_proto_rawDescGZIP() []byte {
 	return file_personal_schedule_service_common_schedule_proto_rawDescData
 }
 
-var file_personal_schedule_service_common_schedule_proto_msgTypes = make([]protoimpl.MessageInfo, 14)
+var file_personal_schedule_service_common_schedule_proto_msgTypes = make([]protoimpl.MessageInfo, 15)
 var file_personal_schedule_service_common_schedule_proto_goTypes = []any{
 	(*Label)(nil),                // 0: personal_schedule.Label
 	(*LabelPerType)(nil),         // 1: personal_schedule.LabelPerType
@@ -1268,6 +1353,7 @@ var file_personal_schedule_service_common_schedule_proto_goTypes = []any{
 	(*Work)(nil),                 // 11: personal_schedule.Work
 	(*WorkLabelGroupDetail)(nil), // 12: personal_schedule.WorkLabelGroupDetail
 	(*WorkDetail)(nil),           // 13: personal_schedule.WorkDetail
+	(*WorkNotification)(nil),     // 14: personal_schedule.WorkNotification
 }
 var file_personal_schedule_service_common_schedule_proto_depIdxs = []int32{
 	0,  // 0: personal_schedule.LabelPerType.labels:type_name -> personal_schedule.Label
@@ -1313,13 +1399,14 @@ func file_personal_schedule_service_common_schedule_proto_init() {
 	file_personal_schedule_service_common_schedule_proto_msgTypes[8].OneofWrappers = []any{}
 	file_personal_schedule_service_common_schedule_proto_msgTypes[11].OneofWrappers = []any{}
 	file_personal_schedule_service_common_schedule_proto_msgTypes[13].OneofWrappers = []any{}
+	file_personal_schedule_service_common_schedule_proto_msgTypes[14].OneofWrappers = []any{}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_personal_schedule_service_common_schedule_proto_rawDesc), len(file_personal_schedule_service_common_schedule_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   14,
+			NumMessages:   15,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

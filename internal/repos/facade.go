@@ -40,7 +40,7 @@ type (
 	WorkRepo interface {
 		GetWorkByID(ctx context.Context, workID bson.ObjectID) (*collection.Work, error)
 		CreateWork(ctx context.Context, work *collection.Work) (bson.ObjectID, error)
-		UpdateWork(ctx context.Context, workID bson.ObjectID, updates bson.M) error
+		UpdateWork(ctx context.Context, workID bson.ObjectID, work *collection.Work) error
 		GetSubTasksByWorkID(ctx context.Context, workID bson.ObjectID) ([]collection.SubTask, error)
 		BulkWriteSubTasks(ctx context.Context, operations []mongo.WriteModel) (*mongo.BulkWriteResult, error)
 		GetWorks(ctx context.Context, req *personal_schedule.GetWorksRequest) ([]AggregatedWork, error)
