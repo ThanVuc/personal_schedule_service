@@ -65,10 +65,11 @@ func NewWorkService(
 	validator validation.WorkValidator,
 ) WorkService {
 	return &workService{
-		logger:         global.Logger,
-		workRepo:       workRepo,
-		workMapper:     workMapper,
-		mongoConnector: global.MongoDbConntector,
-		validator:      validator,
+		logger:            global.Logger,
+		workRepo:          workRepo,
+		workMapper:        workMapper,
+		mongoConnector:    global.MongoDbConntector,
+		validator:         validator,
+		eventbusConnector: global.EventBusConnector,
 	}
 }

@@ -40,11 +40,6 @@ func (wv *workValidator) ValidateUpsertWork(ctx context.Context, req *personal_s
 	} else {
 		req.GoalId = nil
 	}
-	for _, notificationID := range req.NotificationIds {
-		if _, err := bson.ObjectIDFromHex(notificationID); err != nil {
-			return fmt.Errorf("invalid NotificationId %s: %v", notificationID, err)
-		}
-	}
 
 	for _, task := range req.SubTasks {
 		if task.Id != nil && *task.Id != "" {
