@@ -150,14 +150,17 @@ func (s *workService) sendNotificationEvent(ctx context.Context, req *personal_s
 	notifications := common.Notifications{}
 	for _, notification := range req.Notifications {
 		id := utils.Ternary(notification.Id != nil, *notification.Id, "")
+		title := "Nhắc nhở công việc: " + req.Name
+		message := utils.Ternary(req.ShortDescriptions != nil, *req.ShortDescriptions, "Bạn có công việc cần hoàn thành: "+req.Name)
+		link := utils.Ternary(notification.Link != nil, *notification.Link+workId, "")
 		notificationPayload := &common.Notification{
 			Id:              &id,
-			Title:           "",
-			Message:         "",
+			Title:           title,
+			Message:         message,
 			SenderId:        req.UserId,
 			ReceiverIds:     []string{req.UserId},
 			IsRead:          false,
-			Link:            notification.Link,
+			Link:            &link,
 			IsActive:        notification.IsActive,
 			TriggerAt:       &notification.TriggerAt,
 			IsEmailSent:     notification.IsEmailSent,
