@@ -145,22 +145,22 @@ func (m *workMapper) MapAggregatedWorkToProto(aggWork repos.AggregatedWork) *per
 	}
 }
 
-func (m *workMapper) mapLabelsToProto(labels []collection.Label) []*personal_schedule.LabelInfo {
-	protoLabels := make([]*personal_schedule.LabelInfo, 0, len(labels))
-	for _, label := range labels {
-		lc := ""
-		if label.Color != nil {
-			lc = *label.Color
-		}
-		protoLabels = append(protoLabels, &personal_schedule.LabelInfo{
-			Id:        label.ID.Hex(),
-			Name:      label.Name,
-			Color:     lc,
-			Key:       label.Key,
-			LabelType: int32(label.LabelType),
-		})
+func (m *workMapper) mapLabelsToProto(labels []collection.Label) *personal_schedule.LabelInfo {
+	if len(labels) == 0 {
+		return nil
 	}
-	return protoLabels
+	label := labels[0]
+	lc := ""
+	if label.Color != nil {
+		lc = *label.Color
+	}
+	return &personal_schedule.LabelInfo{
+		Id:        label.ID.Hex(),
+		Name:      label.Name,
+		Color:     lc,
+		Key:       label.Key,
+		LabelType: int32(label.LabelType),
+	}
 }
 
 func (m *workMapper) MapSubTasksToProto(subTasks []collection.SubTask) []*personal_schedule.SubTaskPayload {
