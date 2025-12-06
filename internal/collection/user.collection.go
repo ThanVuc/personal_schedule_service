@@ -25,7 +25,7 @@ func createUserCollection() error {
 	userValidator := bson.M{
 		"$jsonSchema": bson.M{
 			"bsonType": "object",
-			"required": []string{"_id", "turn_on_app_notification", "turn_on_email_notification", "created_at", "last_modified_at"},
+			"required": []string{"_id", "created_at", "last_modified_at"},
 			"properties": bson.M{
 				"_id": bson.M{
 					"bsonType":    "string",
