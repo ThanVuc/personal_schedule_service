@@ -24,12 +24,10 @@ func (r *userRepo) UpsertSyncUser(ctx context.Context, payload models.UserOutbox
 
 	update := bson.M{
 		"$set": bson.M{
-			"_id":                        payload.UserID,
-			"email":                      payload.Email,
-			"turn_on_app_notification":   true,
-			"turn_on_email_notification": true,
-			"created_at":                 time.Unix(payload.CreatedAt, 0),
-			"last_modified_at":           time.Now(),
+			"_id":              payload.UserID,
+			"email":            payload.Email,
+			"created_at":       time.Unix(payload.CreatedAt, 0),
+			"last_modified_at": time.Now(),
 		},
 	}
 
