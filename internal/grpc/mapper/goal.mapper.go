@@ -47,7 +47,6 @@ func (m *goalMapper) MapAggregatedGoalToProto(aggGoal repos.AggregatedGoal) *per
 		DetailedDescription: dd,
 		StartDate:           stDate,
 		EndDate:             enDate,
-		UserId:              aggGoal.UserID,
 		GoalLabels: &personal_schedule.GoalLabels{
 			Status:     m.mapLabelsToProto(aggGoal.Status),
 			Difficulty: m.mapLabelsToProto(aggGoal.Difficulty),
@@ -57,22 +56,22 @@ func (m *goalMapper) MapAggregatedGoalToProto(aggGoal repos.AggregatedGoal) *per
 	}
 }
 
-func (m *goalMapper) mapLabelsToProto(labels []collection.Label) []*personal_schedule.LabelInfo {
-	protoLabels := make([]*personal_schedule.LabelInfo, 0, len(labels))
-	for _, label := range labels {
-		lc := ""
-		if label.Color != nil {
-			lc = *label.Color
-		}
-		protoLabels = append(protoLabels, &personal_schedule.LabelInfo{
-			Id:        label.ID.Hex(),
-			Name:      label.Name,
-			Color:     lc,
-			Key:       label.Key,
-			LabelType: int32(label.LabelType),
-		})
+func (m *goalMapper) mapLabelsToProto(labels []collection.Label) *personal_schedule.LabelInfo {
+	if len(labels) == 0 {
+		return nil
 	}
-	return protoLabels
+	label := labels[0]
+	lc := ""
+	if label.Color != nil {
+		lc = *label.Color
+	}
+	return &personal_schedule.LabelInfo{
+		Id:        label.ID.Hex(),
+		Name:      label.Name,
+		Color:     lc,
+		Key:       label.Key,
+		LabelType: int32(label.LabelType),
+	}
 }
 
 func (m *goalMapper) MapUpsertProtoToModels(req *personal_schedule.UpsertGoalRequest) (*collection.Goal, []collection.GoalTask, error) {
@@ -170,7 +169,6 @@ func (m *goalMapper) MapAggregatedToDetailProto(aggGoal repos.AggregatedGoal, db
 			Priority:   goalBaseProto.GoalLabels.Priority,
 			Category:   goalBaseProto.Category,
 		},
-		UserId: goalBaseProto.UserId,
 		Tasks:  tasksProto,
 	}
 }

@@ -243,9 +243,9 @@ func (x *LabelInfo) GetLabelType() int32 {
 
 type GoalLabels struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Status        []*LabelInfo           `protobuf:"bytes,1,rep,name=status,proto3" json:"status"`
-	Difficulty    []*LabelInfo           `protobuf:"bytes,2,rep,name=difficulty,proto3" json:"difficulty"`
-	Priority      []*LabelInfo           `protobuf:"bytes,3,rep,name=priority,proto3" json:"priority"`
+	Status        *LabelInfo             `protobuf:"bytes,1,opt,name=status,proto3" json:"status"`
+	Difficulty    *LabelInfo             `protobuf:"bytes,2,opt,name=difficulty,proto3" json:"difficulty"`
+	Priority      *LabelInfo             `protobuf:"bytes,3,opt,name=priority,proto3" json:"priority"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -280,21 +280,21 @@ func (*GoalLabels) Descriptor() ([]byte, []int) {
 	return file_personal_schedule_service_common_schedule_proto_rawDescGZIP(), []int{3}
 }
 
-func (x *GoalLabels) GetStatus() []*LabelInfo {
+func (x *GoalLabels) GetStatus() *LabelInfo {
 	if x != nil {
 		return x.Status
 	}
 	return nil
 }
 
-func (x *GoalLabels) GetDifficulty() []*LabelInfo {
+func (x *GoalLabels) GetDifficulty() *LabelInfo {
 	if x != nil {
 		return x.Difficulty
 	}
 	return nil
 }
 
-func (x *GoalLabels) GetPriority() []*LabelInfo {
+func (x *GoalLabels) GetPriority() *LabelInfo {
 	if x != nil {
 		return x.Priority
 	}
@@ -310,7 +310,7 @@ type Goal struct {
 	StartDate           int64                  `protobuf:"varint,5,opt,name=start_date,json=startDate,proto3" json:"start_date"`
 	EndDate             int64                  `protobuf:"varint,6,opt,name=end_date,json=endDate,proto3" json:"end_date"`
 	GoalLabels          *GoalLabels            `protobuf:"bytes,7,opt,name=goalLabels,proto3" json:"goalLabels"`
-	Category            []*LabelInfo           `protobuf:"bytes,8,rep,name=category,proto3" json:"category"`
+	Category            *LabelInfo             `protobuf:"bytes,8,opt,name=category,proto3" json:"category"`
 	UserId              string                 `protobuf:"bytes,9,opt,name=user_id,json=userId,proto3" json:"user_id"`
 	unknownFields       protoimpl.UnknownFields
 	sizeCache           protoimpl.SizeCache
@@ -395,7 +395,7 @@ func (x *Goal) GetGoalLabels() *GoalLabels {
 	return nil
 }
 
-func (x *Goal) GetCategory() []*LabelInfo {
+func (x *Goal) GetCategory() *LabelInfo {
 	if x != nil {
 		return x.Category
 	}
@@ -471,10 +471,10 @@ func (x *GoalTaskPayload) GetIsCompleted() bool {
 
 type GoalLabel struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Status        []*LabelInfo           `protobuf:"bytes,1,rep,name=status,proto3" json:"status"`
-	Difficulty    []*LabelInfo           `protobuf:"bytes,2,rep,name=difficulty,proto3" json:"difficulty"`
-	Priority      []*LabelInfo           `protobuf:"bytes,3,rep,name=priority,proto3" json:"priority"`
-	Category      []*LabelInfo           `protobuf:"bytes,4,rep,name=category,proto3" json:"category"`
+	Status        *LabelInfo             `protobuf:"bytes,1,opt,name=status,proto3" json:"status"`
+	Difficulty    *LabelInfo             `protobuf:"bytes,2,opt,name=difficulty,proto3" json:"difficulty"`
+	Priority      *LabelInfo             `protobuf:"bytes,3,opt,name=priority,proto3" json:"priority"`
+	Category      *LabelInfo             `protobuf:"bytes,4,opt,name=category,proto3" json:"category"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -509,28 +509,28 @@ func (*GoalLabel) Descriptor() ([]byte, []int) {
 	return file_personal_schedule_service_common_schedule_proto_rawDescGZIP(), []int{6}
 }
 
-func (x *GoalLabel) GetStatus() []*LabelInfo {
+func (x *GoalLabel) GetStatus() *LabelInfo {
 	if x != nil {
 		return x.Status
 	}
 	return nil
 }
 
-func (x *GoalLabel) GetDifficulty() []*LabelInfo {
+func (x *GoalLabel) GetDifficulty() *LabelInfo {
 	if x != nil {
 		return x.Difficulty
 	}
 	return nil
 }
 
-func (x *GoalLabel) GetPriority() []*LabelInfo {
+func (x *GoalLabel) GetPriority() *LabelInfo {
 	if x != nil {
 		return x.Priority
 	}
 	return nil
 }
 
-func (x *GoalLabel) GetCategory() []*LabelInfo {
+func (x *GoalLabel) GetCategory() *LabelInfo {
 	if x != nil {
 		return x.Category
 	}
@@ -546,8 +546,7 @@ type GoalDetail struct {
 	StartDate           int64                  `protobuf:"varint,5,opt,name=start_date,json=startDate,proto3" json:"start_date"`
 	EndDate             int64                  `protobuf:"varint,6,opt,name=end_date,json=endDate,proto3" json:"end_date"`
 	GoalLabels          *GoalLabel             `protobuf:"bytes,7,opt,name=goalLabels,proto3" json:"goalLabels"`
-	UserId              string                 `protobuf:"bytes,9,opt,name=user_id,json=userId,proto3" json:"user_id"`
-	Tasks               []*GoalTaskPayload     `protobuf:"bytes,10,rep,name=tasks,proto3" json:"tasks"`
+	Tasks               []*GoalTaskPayload     `protobuf:"bytes,8,rep,name=tasks,proto3" json:"tasks"`
 	unknownFields       protoimpl.UnknownFields
 	sizeCache           protoimpl.SizeCache
 }
@@ -631,13 +630,6 @@ func (x *GoalDetail) GetGoalLabels() *GoalLabel {
 	return nil
 }
 
-func (x *GoalDetail) GetUserId() string {
-	if x != nil {
-		return x.UserId
-	}
-	return ""
-}
-
 func (x *GoalDetail) GetTasks() []*GoalTaskPayload {
 	if x != nil {
 		return x.Tasks
@@ -707,10 +699,10 @@ func (x *SubTaskPayload) GetIsCompleted() bool {
 
 type WorkLabelGroup struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Status        []*LabelInfo           `protobuf:"bytes,1,rep,name=status,proto3" json:"status"`
-	Difficulty    []*LabelInfo           `protobuf:"bytes,2,rep,name=difficulty,proto3" json:"difficulty"`
-	Priority      []*LabelInfo           `protobuf:"bytes,3,rep,name=priority,proto3" json:"priority"`
-	Type          []*LabelInfo           `protobuf:"bytes,4,rep,name=type,proto3" json:"type"`
+	Status        *LabelInfo             `protobuf:"bytes,1,opt,name=status,proto3" json:"status"`
+	Difficulty    *LabelInfo             `protobuf:"bytes,2,opt,name=difficulty,proto3" json:"difficulty"`
+	Priority      *LabelInfo             `protobuf:"bytes,3,opt,name=priority,proto3" json:"priority"`
+	Type          *LabelInfo             `protobuf:"bytes,4,opt,name=type,proto3" json:"type"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -745,28 +737,28 @@ func (*WorkLabelGroup) Descriptor() ([]byte, []int) {
 	return file_personal_schedule_service_common_schedule_proto_rawDescGZIP(), []int{9}
 }
 
-func (x *WorkLabelGroup) GetStatus() []*LabelInfo {
+func (x *WorkLabelGroup) GetStatus() *LabelInfo {
 	if x != nil {
 		return x.Status
 	}
 	return nil
 }
 
-func (x *WorkLabelGroup) GetDifficulty() []*LabelInfo {
+func (x *WorkLabelGroup) GetDifficulty() *LabelInfo {
 	if x != nil {
 		return x.Difficulty
 	}
 	return nil
 }
 
-func (x *WorkLabelGroup) GetPriority() []*LabelInfo {
+func (x *WorkLabelGroup) GetPriority() *LabelInfo {
 	if x != nil {
 		return x.Priority
 	}
 	return nil
 }
 
-func (x *WorkLabelGroup) GetType() []*LabelInfo {
+func (x *WorkLabelGroup) GetType() *LabelInfo {
 	if x != nil {
 		return x.Type
 	}
@@ -835,7 +827,7 @@ type Work struct {
 	EndDate             int64                  `protobuf:"varint,6,opt,name=end_date,json=endDate,proto3" json:"end_date"`
 	Goal                *GoalOfWork            `protobuf:"bytes,7,opt,name=goal,proto3" json:"goal"`
 	Labels              *WorkLabelGroup        `protobuf:"bytes,8,opt,name=labels,proto3" json:"labels"`
-	Category            []*LabelInfo           `protobuf:"bytes,9,rep,name=category,proto3" json:"category"`
+	Category            *LabelInfo             `protobuf:"bytes,9,opt,name=category,proto3" json:"category"`
 	unknownFields       protoimpl.UnknownFields
 	sizeCache           protoimpl.SizeCache
 }
@@ -926,7 +918,7 @@ func (x *Work) GetLabels() *WorkLabelGroup {
 	return nil
 }
 
-func (x *Work) GetCategory() []*LabelInfo {
+func (x *Work) GetCategory() *LabelInfo {
 	if x != nil {
 		return x.Category
 	}
@@ -935,11 +927,11 @@ func (x *Work) GetCategory() []*LabelInfo {
 
 type WorkLabelGroupDetail struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Status        []*LabelInfo           `protobuf:"bytes,1,rep,name=status,proto3" json:"status"`
-	Difficulty    []*LabelInfo           `protobuf:"bytes,2,rep,name=difficulty,proto3" json:"difficulty"`
-	Priority      []*LabelInfo           `protobuf:"bytes,3,rep,name=priority,proto3" json:"priority"`
-	Type          []*LabelInfo           `protobuf:"bytes,4,rep,name=type,proto3" json:"type"`
-	Category      []*LabelInfo           `protobuf:"bytes,5,rep,name=category,proto3" json:"category"`
+	Status        *LabelInfo             `protobuf:"bytes,1,opt,name=status,proto3" json:"status"`
+	Difficulty    *LabelInfo             `protobuf:"bytes,2,opt,name=difficulty,proto3" json:"difficulty"`
+	Priority      *LabelInfo             `protobuf:"bytes,3,opt,name=priority,proto3" json:"priority"`
+	Type          *LabelInfo             `protobuf:"bytes,4,opt,name=type,proto3" json:"type"`
+	Category      *LabelInfo             `protobuf:"bytes,5,opt,name=category,proto3" json:"category"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -974,35 +966,35 @@ func (*WorkLabelGroupDetail) Descriptor() ([]byte, []int) {
 	return file_personal_schedule_service_common_schedule_proto_rawDescGZIP(), []int{12}
 }
 
-func (x *WorkLabelGroupDetail) GetStatus() []*LabelInfo {
+func (x *WorkLabelGroupDetail) GetStatus() *LabelInfo {
 	if x != nil {
 		return x.Status
 	}
 	return nil
 }
 
-func (x *WorkLabelGroupDetail) GetDifficulty() []*LabelInfo {
+func (x *WorkLabelGroupDetail) GetDifficulty() *LabelInfo {
 	if x != nil {
 		return x.Difficulty
 	}
 	return nil
 }
 
-func (x *WorkLabelGroupDetail) GetPriority() []*LabelInfo {
+func (x *WorkLabelGroupDetail) GetPriority() *LabelInfo {
 	if x != nil {
 		return x.Priority
 	}
 	return nil
 }
 
-func (x *WorkLabelGroupDetail) GetType() []*LabelInfo {
+func (x *WorkLabelGroupDetail) GetType() *LabelInfo {
 	if x != nil {
 		return x.Type
 	}
 	return nil
 }
 
-func (x *WorkLabelGroupDetail) GetCategory() []*LabelInfo {
+func (x *WorkLabelGroupDetail) GetCategory() *LabelInfo {
 	if x != nil {
 		return x.Category
 	}
@@ -1219,11 +1211,11 @@ const file_personal_schedule_service_common_schedule_proto_rawDesc = "" +
 	"label_type\x18\x05 \x01(\x05R\tlabelType\"\xba\x01\n" +
 	"\n" +
 	"GoalLabels\x124\n" +
-	"\x06status\x18\x01 \x03(\v2\x1c.personal_schedule.LabelInfoR\x06status\x12<\n" +
+	"\x06status\x18\x01 \x01(\v2\x1c.personal_schedule.LabelInfoR\x06status\x12<\n" +
 	"\n" +
-	"difficulty\x18\x02 \x03(\v2\x1c.personal_schedule.LabelInfoR\n" +
+	"difficulty\x18\x02 \x01(\v2\x1c.personal_schedule.LabelInfoR\n" +
 	"difficulty\x128\n" +
-	"\bpriority\x18\x03 \x03(\v2\x1c.personal_schedule.LabelInfoR\bpriority\"\xd8\x02\n" +
+	"\bpriority\x18\x03 \x01(\v2\x1c.personal_schedule.LabelInfoR\bpriority\"\xd8\x02\n" +
 	"\x04Goal\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x12\n" +
 	"\x04name\x18\x02 \x01(\tR\x04name\x12-\n" +
@@ -1235,7 +1227,7 @@ const file_personal_schedule_service_common_schedule_proto_rawDesc = "" +
 	"\n" +
 	"goalLabels\x18\a \x01(\v2\x1d.personal_schedule.GoalLabelsR\n" +
 	"goalLabels\x128\n" +
-	"\bcategory\x18\b \x03(\v2\x1c.personal_schedule.LabelInfoR\bcategory\x12\x17\n" +
+	"\bcategory\x18\b \x01(\v2\x1c.personal_schedule.LabelInfoR\bcategory\x12\x17\n" +
 	"\auser_id\x18\t \x01(\tR\x06userId\"d\n" +
 	"\x0fGoalTaskPayload\x12\x13\n" +
 	"\x02id\x18\x01 \x01(\tH\x00R\x02id\x88\x01\x01\x12\x12\n" +
@@ -1243,12 +1235,12 @@ const file_personal_schedule_service_common_schedule_proto_rawDesc = "" +
 	"\fis_completed\x18\x03 \x01(\bR\visCompletedB\x05\n" +
 	"\x03_id\"\xf3\x01\n" +
 	"\tGoalLabel\x124\n" +
-	"\x06status\x18\x01 \x03(\v2\x1c.personal_schedule.LabelInfoR\x06status\x12<\n" +
+	"\x06status\x18\x01 \x01(\v2\x1c.personal_schedule.LabelInfoR\x06status\x12<\n" +
 	"\n" +
-	"difficulty\x18\x02 \x03(\v2\x1c.personal_schedule.LabelInfoR\n" +
+	"difficulty\x18\x02 \x01(\v2\x1c.personal_schedule.LabelInfoR\n" +
 	"difficulty\x128\n" +
-	"\bpriority\x18\x03 \x03(\v2\x1c.personal_schedule.LabelInfoR\bpriority\x128\n" +
-	"\bcategory\x18\x04 \x03(\v2\x1c.personal_schedule.LabelInfoR\bcategory\"\xdd\x02\n" +
+	"\bpriority\x18\x03 \x01(\v2\x1c.personal_schedule.LabelInfoR\bpriority\x128\n" +
+	"\bcategory\x18\x04 \x01(\v2\x1c.personal_schedule.LabelInfoR\bcategory\"\xc4\x02\n" +
 	"\n" +
 	"GoalDetail\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x12\n" +
@@ -1260,22 +1252,20 @@ const file_personal_schedule_service_common_schedule_proto_rawDesc = "" +
 	"\bend_date\x18\x06 \x01(\x03R\aendDate\x12<\n" +
 	"\n" +
 	"goalLabels\x18\a \x01(\v2\x1c.personal_schedule.GoalLabelR\n" +
-	"goalLabels\x12\x17\n" +
-	"\auser_id\x18\t \x01(\tR\x06userId\x128\n" +
-	"\x05tasks\x18\n" +
-	" \x03(\v2\".personal_schedule.GoalTaskPayloadR\x05tasks\"c\n" +
+	"goalLabels\x128\n" +
+	"\x05tasks\x18\b \x03(\v2\".personal_schedule.GoalTaskPayloadR\x05tasks\"c\n" +
 	"\x0eSubTaskPayload\x12\x13\n" +
 	"\x02id\x18\x01 \x01(\tH\x00R\x02id\x88\x01\x01\x12\x12\n" +
 	"\x04name\x18\x02 \x01(\tR\x04name\x12!\n" +
 	"\fis_completed\x18\x03 \x01(\bR\visCompletedB\x05\n" +
 	"\x03_id\"\xf0\x01\n" +
 	"\x0eWorkLabelGroup\x124\n" +
-	"\x06status\x18\x01 \x03(\v2\x1c.personal_schedule.LabelInfoR\x06status\x12<\n" +
+	"\x06status\x18\x01 \x01(\v2\x1c.personal_schedule.LabelInfoR\x06status\x12<\n" +
 	"\n" +
-	"difficulty\x18\x02 \x03(\v2\x1c.personal_schedule.LabelInfoR\n" +
+	"difficulty\x18\x02 \x01(\v2\x1c.personal_schedule.LabelInfoR\n" +
 	"difficulty\x128\n" +
-	"\bpriority\x18\x03 \x03(\v2\x1c.personal_schedule.LabelInfoR\bpriority\x120\n" +
-	"\x04type\x18\x04 \x03(\v2\x1c.personal_schedule.LabelInfoR\x04type\"0\n" +
+	"\bpriority\x18\x03 \x01(\v2\x1c.personal_schedule.LabelInfoR\bpriority\x120\n" +
+	"\x04type\x18\x04 \x01(\v2\x1c.personal_schedule.LabelInfoR\x04type\"0\n" +
 	"\n" +
 	"GoalOfWork\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x12\n" +
@@ -1290,17 +1280,17 @@ const file_personal_schedule_service_common_schedule_proto_rawDesc = "" +
 	"\bend_date\x18\x06 \x01(\x03R\aendDate\x121\n" +
 	"\x04goal\x18\a \x01(\v2\x1d.personal_schedule.GoalOfWorkR\x04goal\x129\n" +
 	"\x06labels\x18\b \x01(\v2!.personal_schedule.WorkLabelGroupR\x06labels\x128\n" +
-	"\bcategory\x18\t \x03(\v2\x1c.personal_schedule.LabelInfoR\bcategoryB\x15\n" +
+	"\bcategory\x18\t \x01(\v2\x1c.personal_schedule.LabelInfoR\bcategoryB\x15\n" +
 	"\x13_short_descriptionsB\x17\n" +
 	"\x15_detailed_description\"\xb0\x02\n" +
 	"\x14WorkLabelGroupDetail\x124\n" +
-	"\x06status\x18\x01 \x03(\v2\x1c.personal_schedule.LabelInfoR\x06status\x12<\n" +
+	"\x06status\x18\x01 \x01(\v2\x1c.personal_schedule.LabelInfoR\x06status\x12<\n" +
 	"\n" +
-	"difficulty\x18\x02 \x03(\v2\x1c.personal_schedule.LabelInfoR\n" +
+	"difficulty\x18\x02 \x01(\v2\x1c.personal_schedule.LabelInfoR\n" +
 	"difficulty\x128\n" +
-	"\bpriority\x18\x03 \x03(\v2\x1c.personal_schedule.LabelInfoR\bpriority\x120\n" +
-	"\x04type\x18\x04 \x03(\v2\x1c.personal_schedule.LabelInfoR\x04type\x128\n" +
-	"\bcategory\x18\x05 \x03(\v2\x1c.personal_schedule.LabelInfoR\bcategory\"\xba\x03\n" +
+	"\bpriority\x18\x03 \x01(\v2\x1c.personal_schedule.LabelInfoR\bpriority\x120\n" +
+	"\x04type\x18\x04 \x01(\v2\x1c.personal_schedule.LabelInfoR\x04type\x128\n" +
+	"\bcategory\x18\x05 \x01(\v2\x1c.personal_schedule.LabelInfoR\bcategory\"\xba\x03\n" +
 	"\n" +
 	"WorkDetail\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x12\n" +
