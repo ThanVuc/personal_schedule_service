@@ -26,7 +26,7 @@ func (c *SyncAuthDBConsumer) ConsumeUserDB(ctx context.Context) {
 		eventbus.SyncDatabaseExchange,
 		eventbus.ExchangeTypeTopic,
 		"sync.auth.user",
-		"sync_user_queue_personal_schedule",
+		"sync_user_queue",
 		1,
 	)
 
