@@ -163,7 +163,7 @@ func (s *workService) sendNotificationEvent(ctx context.Context, req *personal_s
 			Link:            &link,
 			IsActive:        notification.IsActive,
 			TriggerAt:       &notification.TriggerAt,
-			IsEmailSent:     notification.IsEmailSent,
+			IsSendMail:      notification.IsSendMail,
 			CorrelationId:   workId,
 			CorrelationType: common.NOTIFICATION_TYPE_SCHEDULED_NOTIFICATION.String(),
 			ImageUrl:        nil,

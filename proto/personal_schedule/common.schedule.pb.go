@@ -1113,7 +1113,7 @@ type WorkNotification struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Id            *string                `protobuf:"bytes,1,opt,name=id,proto3,oneof" json:"id"`
 	TriggerAt     int64                  `protobuf:"varint,2,opt,name=trigger_at,json=triggerAt,proto3" json:"trigger_at"`
-	IsEmailSent   bool                   `protobuf:"varint,3,opt,name=is_email_sent,json=isEmailSent,proto3" json:"is_email_sent"`
+	IsSendMail    bool                   `protobuf:"varint,3,opt,name=is_send_mail,json=isSendMail,proto3" json:"is_send_mail"`
 	IsActive      bool                   `protobuf:"varint,4,opt,name=is_active,json=isActive,proto3" json:"is_active"`
 	Link          *string                `protobuf:"bytes,5,opt,name=link,proto3,oneof" json:"link"`
 	unknownFields protoimpl.UnknownFields
@@ -1164,9 +1164,9 @@ func (x *WorkNotification) GetTriggerAt() int64 {
 	return 0
 }
 
-func (x *WorkNotification) GetIsEmailSent() bool {
+func (x *WorkNotification) GetIsSendMail() bool {
 	if x != nil {
-		return x.IsEmailSent
+		return x.IsSendMail
 	}
 	return false
 }
@@ -1304,12 +1304,13 @@ const file_personal_schedule_service_common_schedule_proto_rawDesc = "" +
 	"\x06labels\x18\b \x01(\v2'.personal_schedule.WorkLabelGroupDetailR\x06labels\x12>\n" +
 	"\tsub_tasks\x18\t \x03(\v2!.personal_schedule.SubTaskPayloadR\bsubTasksB\x15\n" +
 	"\x13_short_descriptionsB\x17\n" +
-	"\x15_detailed_description\"\xb0\x01\n" +
+	"\x15_detailed_description\"\xae\x01\n" +
 	"\x10WorkNotification\x12\x13\n" +
 	"\x02id\x18\x01 \x01(\tH\x00R\x02id\x88\x01\x01\x12\x1d\n" +
 	"\n" +
-	"trigger_at\x18\x02 \x01(\x03R\ttriggerAt\x12\"\n" +
-	"\ris_email_sent\x18\x03 \x01(\bR\visEmailSent\x12\x1b\n" +
+	"trigger_at\x18\x02 \x01(\x03R\ttriggerAt\x12 \n" +
+	"\fis_send_mail\x18\x03 \x01(\bR\n" +
+	"isSendMail\x12\x1b\n" +
 	"\tis_active\x18\x04 \x01(\bR\bisActive\x12\x17\n" +
 	"\x04link\x18\x05 \x01(\tH\x01R\x04link\x88\x01\x01B\x05\n" +
 	"\x03_idB\a\n" +
