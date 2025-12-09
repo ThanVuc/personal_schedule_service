@@ -19,10 +19,11 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	WorkService_UpsertWork_FullMethodName = "/personal_schedule.WorkService/UpsertWork"
-	WorkService_GetWorks_FullMethodName   = "/personal_schedule.WorkService/GetWorks"
-	WorkService_GetWork_FullMethodName    = "/personal_schedule.WorkService/GetWork"
-	WorkService_DeleteWork_FullMethodName = "/personal_schedule.WorkService/DeleteWork"
+	WorkService_UpsertWork_FullMethodName       = "/personal_schedule.WorkService/UpsertWork"
+	WorkService_GetWorks_FullMethodName         = "/personal_schedule.WorkService/GetWorks"
+	WorkService_GetWork_FullMethodName          = "/personal_schedule.WorkService/GetWork"
+	WorkService_DeleteWork_FullMethodName       = "/personal_schedule.WorkService/DeleteWork"
+	WorkService_GetRecoveryWorks_FullMethodName = "/personal_schedule.WorkService/GetRecoveryWorks"
 )
 
 // WorkServiceClient is the client API for WorkService service.
@@ -33,6 +34,7 @@ type WorkServiceClient interface {
 	GetWorks(ctx context.Context, in *GetWorksRequest, opts ...grpc.CallOption) (*GetWorksResponse, error)
 	GetWork(ctx context.Context, in *GetWorkRequest, opts ...grpc.CallOption) (*GetWorkResponse, error)
 	DeleteWork(ctx context.Context, in *DeleteWorkRequest, opts ...grpc.CallOption) (*DeleteWorkResponse, error)
+	GetRecoveryWorks(ctx context.Context, in *GetRecoveryWorksRequest, opts ...grpc.CallOption) (*GetRecoveryWorksResponse, error)
 }
 
 type workServiceClient struct {
@@ -83,6 +85,16 @@ func (c *workServiceClient) DeleteWork(ctx context.Context, in *DeleteWorkReques
 	return out, nil
 }
 
+func (c *workServiceClient) GetRecoveryWorks(ctx context.Context, in *GetRecoveryWorksRequest, opts ...grpc.CallOption) (*GetRecoveryWorksResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetRecoveryWorksResponse)
+	err := c.cc.Invoke(ctx, WorkService_GetRecoveryWorks_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // WorkServiceServer is the server API for WorkService service.
 // All implementations must embed UnimplementedWorkServiceServer
 // for forward compatibility.
@@ -91,6 +103,7 @@ type WorkServiceServer interface {
 	GetWorks(context.Context, *GetWorksRequest) (*GetWorksResponse, error)
 	GetWork(context.Context, *GetWorkRequest) (*GetWorkResponse, error)
 	DeleteWork(context.Context, *DeleteWorkRequest) (*DeleteWorkResponse, error)
+	GetRecoveryWorks(context.Context, *GetRecoveryWorksRequest) (*GetRecoveryWorksResponse, error)
 	mustEmbedUnimplementedWorkServiceServer()
 }
 
@@ -112,6 +125,9 @@ func (UnimplementedWorkServiceServer) GetWork(context.Context, *GetWorkRequest) 
 }
 func (UnimplementedWorkServiceServer) DeleteWork(context.Context, *DeleteWorkRequest) (*DeleteWorkResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeleteWork not implemented")
+}
+func (UnimplementedWorkServiceServer) GetRecoveryWorks(context.Context, *GetRecoveryWorksRequest) (*GetRecoveryWorksResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetRecoveryWorks not implemented")
 }
 func (UnimplementedWorkServiceServer) mustEmbedUnimplementedWorkServiceServer() {}
 func (UnimplementedWorkServiceServer) testEmbeddedByValue()                     {}
@@ -206,6 +222,24 @@ func _WorkService_DeleteWork_Handler(srv interface{}, ctx context.Context, dec f
 	return interceptor(ctx, in, info, handler)
 }
 
+func _WorkService_GetRecoveryWorks_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetRecoveryWorksRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(WorkServiceServer).GetRecoveryWorks(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: WorkService_GetRecoveryWorks_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(WorkServiceServer).GetRecoveryWorks(ctx, req.(*GetRecoveryWorksRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // WorkService_ServiceDesc is the grpc.ServiceDesc for WorkService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -228,6 +262,10 @@ var WorkService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "DeleteWork",
 			Handler:    _WorkService_DeleteWork_Handler,
+		},
+		{
+			MethodName: "GetRecoveryWorks",
+			Handler:    _WorkService_GetRecoveryWorks_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

@@ -140,6 +140,7 @@ func (m *workMapper) MapAggregatedWorkToProto(aggWork repos.AggregatedWork) *per
 			Difficulty: m.mapLabelsToProto(aggWork.Difficulty),
 			Priority:   m.mapLabelsToProto(aggWork.Priority),
 			Type:       m.mapLabelsToProto(aggWork.Type),
+			Draft:      m.mapLabelsToProto(aggWork.Draft),
 		},
 		Category: m.mapLabelsToProto(aggWork.Category),
 	}
