@@ -3,6 +3,7 @@ package utils
 import (
 	"encoding/json"
 	"math"
+	"time"
 )
 
 func RoundToTwoDecimal(val float64) float64 {
@@ -58,4 +59,8 @@ func Ternary[T any](condition bool, trueVal, falseVal T) T {
 		return trueVal
 	}
 	return falseVal
+}
+
+func EndOfDay(t time.Time) time.Time {
+	return time.Date(t.Year(), t.Month(), t.Day(), 23, 59, 59, int(time.Second-time.Nanosecond), t.Location())
 }

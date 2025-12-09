@@ -22,6 +22,7 @@ type Work struct {
 	PriorityID          bson.ObjectID  `bson:"priority_id" json:"priority_id"`
 	TypeID              bson.ObjectID  `bson:"type_id" json:"type_id"`
 	CategoryID          bson.ObjectID  `bson:"category_id" json:"category_id"`
+	DraftID             *bson.ObjectID `bson:"draft_id,omitempty" json:"draft_id,omitempty"`
 	UserID              string         `bson:"user_id" json:"user_id"`
 	GoalID              *bson.ObjectID `bson:"goal_id" json:"goal_id"`
 	CreatedAt           time.Time      `bson:"created_at" json:"created_at"`
@@ -70,6 +71,7 @@ func createWorkCollection() error {
 				"priority_id":      bson.M{"bsonType": "objectId"},
 				"type_id":          bson.M{"bsonType": "objectId"},
 				"category_id":      bson.M{"bsonType": "objectId"},
+				"draft_id":         bson.M{"bsonType": []string{"objectId", "null"}},
 				"user_id":          bson.M{"bsonType": "string"},
 				"goal_id":          bson.M{"bsonType": []string{"objectId", "null"}},
 				"created_at":       bson.M{"bsonType": "date"},
@@ -106,6 +108,7 @@ func createWorkCollection() error {
 		{Keys: bson.D{{Key: "priority_id", Value: 1}}, Options: options.Index().SetName("idx_priority")},
 		{Keys: bson.D{{Key: "type_id", Value: 1}}, Options: options.Index().SetName("idx_type")},
 		{Keys: bson.D{{Key: "category_id", Value: 1}}, Options: options.Index().SetName("idx_category")},
+		{Keys: bson.D{{Key: "draft_id", Value: 1}}, Options: options.Index().SetName("idx_draft")},
 		{Keys: bson.D{{Key: "goal_id", Value: 1}}, Options: options.Index().SetName("idx_goal")},
 	}
 

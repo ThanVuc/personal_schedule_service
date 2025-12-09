@@ -50,6 +50,10 @@ func (wv *workValidator) ValidateUpsertWork(ctx context.Context, req *personal_s
 	}
 
 	if req.StartDate != nil {
+		if req.EndDate <= *req.StartDate {
+			return fmt.Errorf("EndDate must be greater than StartDate")
+		}
+
 		var excludeWorkID *bson.ObjectID
 		if req.Id != nil && *req.Id != "" {
 			workID, err := bson.ObjectIDFromHex(*req.Id)
