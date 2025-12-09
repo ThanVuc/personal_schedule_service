@@ -10,6 +10,7 @@ import (
 	"github.com/thanvuc/go-core-lib/mongolib"
 	"go.mongodb.org/mongo-driver/v2/bson"
 	"go.mongodb.org/mongo-driver/v2/mongo"
+	"go.mongodb.org/mongo-driver/v2/mongo/options"
 	"go.uber.org/zap"
 )
 
@@ -24,19 +25,20 @@ type GoalInfo struct {
 }
 
 type AggregatedWork struct {
-	ID                  bson.ObjectID      `bson:"_id"`
-	Name                string             `bson:"name"`
-	ShortDescriptions   *string            `bson:"short_descriptions,omitempty"`
-	DetailedDescription *string            `bson:"detailed_description,omitempty"`
-	StartDate           *time.Time         `bson:"start_date,omitempty"`
-	EndDate             time.Time          `bson:"end_date"`
-	UserID              string             `bson:"user_id"`
-	GoalInfo            []GoalInfo         `bson:"goalInfo"`
-	Status              []collection.Label `bson:"statusInfo"`
-	Priority            []collection.Label `bson:"priorityInfo"`
-	Difficulty          []collection.Label `bson:"difficultyInfo"`
-	Type                []collection.Label `bson:"typeInfo"`
-	Category            []collection.Label `bson:"categoryInfo"`
+	ID                  bson.ObjectID       `bson:"_id"`
+	Name                string              `bson:"name"`
+	ShortDescriptions   *string             `bson:"short_descriptions,omitempty"`
+	DetailedDescription *string             `bson:"detailed_description,omitempty"`
+	StartDate           *time.Time          `bson:"start_date,omitempty"`
+	EndDate             time.Time           `bson:"end_date"`
+	UserID              string              `bson:"user_id"`
+	GoalInfo            []GoalInfo          `bson:"goalInfo"`
+	Status              []collection.Label  `bson:"statusInfo"`
+	Priority            []collection.Label  `bson:"priorityInfo"`
+	Difficulty          []collection.Label  `bson:"difficultyInfo"`
+	Type                []collection.Label  `bson:"typeInfo"`
+	Category            []collection.Label  `bson:"categoryInfo"`
+	Draft               []collection.Label `bson:"draft,omitempty"`
 }
 
 func (wr *workRepo) GetWorkByID(ctx context.Context, workID bson.ObjectID) (*collection.Work, error) {
@@ -278,8 +280,8 @@ func (wr *workRepo) CountOverlappingWorks(ctx context.Context, userID string, st
 	return count, nil
 }
 
-func (r workRepo) GetAggregatedWorkByID(ctx context.Context, workID bson.ObjectID) (*AggregatedWork, error) {
-	workCollection := r.mongoConnector.GetCollection(collection.WorksCollection)
+func (wr *workRepo) GetAggregatedWorkByID(ctx context.Context, workID bson.ObjectID) (*AggregatedWork, error) {
+	workCollection := wr.mongoConnector.GetCollection(collection.WorksCollection)
 	matchStage := bson.M{"_id": workID}
 	lookupStatus := bson.D{{
 		Key: "$lookup",
@@ -352,14 +354,14 @@ func (r workRepo) GetAggregatedWorkByID(ctx context.Context, workID bson.ObjectI
 
 	cursor, err := workCollection.Aggregate(ctx, pipeline)
 	if err != nil {
-		r.logger.Error("Failed to aggregate single work", "err", zap.Error(err), zap.String("work_id", workID.Hex()))
+		wr.logger.Error("Failed to aggregate single work", "err", zap.Error(err), zap.String("work_id", workID.Hex()))
 		return nil, err
 	}
 	defer cursor.Close(ctx)
 
 	var result []AggregatedWork
 	if err = cursor.All(ctx, &result); err != nil {
-		r.logger.Error("Failed to decode single work", "err", zap.Error(err))
+		wr.logger.Error("Failed to decode single work", "err", zap.Error(err))
 		return nil, err
 	}
 	if len(result) == 0 {
@@ -368,14 +370,14 @@ func (r workRepo) GetAggregatedWorkByID(ctx context.Context, workID bson.ObjectI
 	return &result[0], nil
 }
 
-func (s *workRepo) DeleteSubTaskByWorkID(ctx context.Context, workID bson.ObjectID) error {
-	coll := s.mongoConnector.GetCollection(collection.SubTasksCollection)
+func (wr *workRepo) DeleteSubTaskByWorkID(ctx context.Context, workID bson.ObjectID) error {
+	coll := wr.mongoConnector.GetCollection(collection.SubTasksCollection)
 	_, err := coll.DeleteMany(ctx, bson.M{"work_id": workID})
 	return err
 }
 
-func (s *workRepo) DeleteWork(ctx context.Context, workID bson.ObjectID) error {
-	coll := s.mongoConnector.GetCollection(collection.WorksCollection)
+func (wr *workRepo) DeleteWork(ctx context.Context, workID bson.ObjectID) error {
+	coll := wr.mongoConnector.GetCollection(collection.WorksCollection)
 	result, err := coll.DeleteOne(ctx, bson.M{"_id": workID})
 	if err != nil {
 		return err
@@ -384,4 +386,176 @@ func (s *workRepo) DeleteWork(ctx context.Context, workID bson.ObjectID) error {
 		return mongo.ErrNoDocuments
 	}
 	return nil
+}
+
+func (wr *workRepo) DeleteDraftsByDate(ctx context.Context, userID string, startDate, endDate time.Time) error {
+	coll := wr.mongoConnector.GetCollection(collection.WorksCollection)
+
+	filter := bson.D{
+		{Key: "user_id", Value: userID},
+		{Key: "draft_id", Value: bson.M{
+			"$exists": true,
+			"$ne":     nil,
+		}},
+		{Key: "$and", Value: bson.A{
+			bson.D{{Key: "start_date", Value: bson.M{"$lte": endDate}}},
+			bson.D{{Key: "end_date", Value: bson.M{"$gte": startDate}}},
+		}},
+	}
+	_, err := coll.DeleteMany(ctx, filter)
+	return err
+}
+
+func (wr *workRepo) GetAggregatedWorksByDateRangeMs(ctx context.Context, userID string, startMs, endMs int64) ([]AggregatedWork, error) {
+	coll := wr.mongoConnector.GetCollection(collection.WorksCollection)
+
+	// convert milliseconds to time.Time before comparing with BSON date fields
+	start := time.UnixMilli(startMs)
+	end := time.UnixMilli(endMs)
+
+	matchStage := bson.D{
+		{Key: "user_id", Value: userID},
+		{Key: "$and", Value: bson.A{
+			bson.D{{Key: "$or", Value: bson.A{
+				bson.D{{Key: "start_date", Value: bson.M{"$lte": end}}},
+				bson.D{{Key: "start_date", Value: nil}},
+			}}},
+			bson.D{{Key: "end_date", Value: bson.M{"$gte": start}}},
+		}},
+	}
+
+	lookupStatus := bson.D{{
+		Key: "$lookup",
+		Value: bson.M{
+			"from":         collection.LabelsCollection,
+			"localField":   "status_id",
+			"foreignField": "_id",
+			"as":           "statusInfo",
+		},
+	}}
+	lookupPriority := bson.D{{
+		Key: "$lookup",
+		Value: bson.M{
+			"from":         collection.LabelsCollection,
+			"localField":   "priority_id",
+			"foreignField": "_id",
+			"as":           "priorityInfo",
+		},
+	}}
+	lookupDifficulty := bson.D{{
+		Key: "$lookup",
+		Value: bson.M{
+			"from":         collection.LabelsCollection,
+			"localField":   "difficulty_id",
+			"foreignField": "_id",
+			"as":           "difficultyInfo",
+		},
+	}}
+	lookupCategory := bson.D{{
+		Key: "$lookup",
+		Value: bson.M{
+			"from":         collection.LabelsCollection,
+			"localField":   "category_id",
+			"foreignField": "_id",
+			"as":           "categoryInfo",
+		},
+	}}
+	lookupType := bson.D{{
+		Key: "$lookup",
+		Value: bson.M{
+			"from":         collection.LabelsCollection,
+			"localField":   "type_id",
+			"foreignField": "_id",
+			"as":           "typeInfo",
+		},
+	}}
+	lookupGoal := bson.D{{
+		Key: "$lookup",
+		Value: bson.M{
+			"from":         collection.GoalsCollection,
+			"localField":   "goal_id",
+			"foreignField": "_id",
+			"as":           "goalInfo",
+			"pipeline": bson.A{
+				bson.D{{Key: "$project", Value: bson.M{"name": 1}}},
+			},
+		},
+	}}
+
+	pipeline := mongo.Pipeline{
+		{{Key: "$match", Value: matchStage}},
+		lookupStatus, lookupPriority, lookupDifficulty, lookupCategory, lookupType, lookupGoal,
+		{{Key: "$sort", Value: bson.M{"start_date": 1}}},
+	}
+
+	cursor, err := coll.Aggregate(ctx, pipeline)
+	if err != nil {
+		return nil, err
+	}
+	defer cursor.Close(ctx)
+	var works []AggregatedWork
+	if err = cursor.All(ctx, &works); err != nil {
+		return nil, err
+	}
+	return works, nil
+}
+
+func (wr *workRepo) GetWorksByDateRangeMs(ctx context.Context, userID string, startMs, endMs int64) ([]collection.Work, error) {
+	coll := wr.mongoConnector.GetCollection(collection.WorksCollection)
+	start := time.UnixMilli(startMs)
+	end := time.UnixMilli(endMs)
+	filter := bson.D{
+		{Key: "user_id", Value: userID},
+		{Key: "draft_id", Value: nil},
+		{Key: "$and", Value: bson.A{
+			bson.D{{Key: "$or", Value: bson.A{
+				bson.D{{Key: "start_date", Value: bson.M{"$lte": end}}},
+				bson.D{{Key: "start_date", Value: nil}},
+			}}},
+			bson.D{{Key: "end_date", Value: bson.M{"$gte": start}}},
+		}},
+	}
+
+	cursor, err := coll.Find(ctx, filter)
+	if err != nil {
+		return nil, err
+	}
+	var works []collection.Work
+	if err = cursor.All(ctx, &works); err != nil {
+		return nil, err
+	}
+	return works, nil
+}
+
+func (wr *workRepo) BulkInsertWorks(ctx context.Context, works []interface{}) error {
+	if len(works) == 0 {
+		return nil
+	}
+	coll := wr.mongoConnector.GetCollection(collection.WorksCollection)
+	_, err := coll.InsertMany(ctx, works)
+	return err
+}
+func (wr *workRepo) BulkInsertSubTasks(ctx context.Context, subTasks []interface{}) error {
+	if len(subTasks) == 0 {
+		return nil
+	}
+	coll := wr.mongoConnector.GetCollection(collection.SubTasksCollection)
+	_, err := coll.InsertMany(ctx, subTasks)
+	return err
+}
+
+func (wr *workRepo) GetLabelsByTypeIDs(ctx context.Context, typeID int32) ([]collection.Label, error) {
+	var labels []collection.Label
+	collection := wr.mongoConnector.GetCollection(collection.LabelsCollection)
+	println("typeID:", typeID)
+	filter := bson.M{"label_type": typeID}
+	options := options.Find().SetSort(bson.D{{Key: "color", Value: 1}})
+	cursor, err := collection.Find(ctx, filter, options)
+	if err != nil {
+		return nil, err
+	}
+	if err = cursor.All(ctx, &labels); err != nil {
+		return nil, err
+	}
+	return labels, nil
 }

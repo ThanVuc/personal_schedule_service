@@ -43,8 +43,8 @@ func (m *goalMapper) MapAggregatedGoalToProto(aggGoal repos.AggregatedGoal) *per
 	return &personal_schedule.Goal{
 		Id:                  aggGoal.ID.Hex(),
 		Name:                aggGoal.Name,
-		ShortDescriptions:   sd,
-		DetailedDescription: dd,
+		ShortDescriptions:   &sd,
+		DetailedDescription: &dd,
 		StartDate:           stDate,
 		EndDate:             enDate,
 		GoalLabels: &personal_schedule.GoalLabels{
@@ -159,8 +159,8 @@ func (m *goalMapper) MapAggregatedToDetailProto(aggGoal repos.AggregatedGoal, db
 	return &personal_schedule.GoalDetail{
 		Id:                  goalBaseProto.Id,
 		Name:                goalBaseProto.Name,
-		ShortDescriptions:   goalBaseProto.ShortDescriptions,
-		DetailedDescription: goalBaseProto.DetailedDescription,
+		ShortDescriptions:   *goalBaseProto.ShortDescriptions,
+		DetailedDescription: *goalBaseProto.DetailedDescription,
 		StartDate:           goalBaseProto.StartDate,
 		EndDate:             goalBaseProto.EndDate,
 		GoalLabels: &personal_schedule.GoalLabel{
@@ -169,6 +169,6 @@ func (m *goalMapper) MapAggregatedToDetailProto(aggGoal repos.AggregatedGoal, db
 			Priority:   goalBaseProto.GoalLabels.Priority,
 			Category:   goalBaseProto.Category,
 		},
-		Tasks:  tasksProto,
+		Tasks: tasksProto,
 	}
 }

@@ -35,3 +35,7 @@ func (wc *WorkController) GetWork(ctx context.Context, req *personal_schedule.Ge
 func (wc *WorkController) DeleteWork(ctx context.Context, req *personal_schedule.DeleteWorkRequest) (*personal_schedule.DeleteWorkResponse, error) {
 	return utils.WithSafePanic(ctx, req, wc.workService.DeleteWork)
 }
+
+func (wc *WorkController) GetRecoveryWorks(ctx context.Context, req *personal_schedule.GetRecoveryWorksRequest) (*personal_schedule.GetRecoveryWorksResponse, error) {
+	return utils.WithSafePanic(ctx, req, wc.workService.RecoverWorks)
+}

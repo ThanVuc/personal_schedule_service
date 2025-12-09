@@ -6,6 +6,7 @@ import (
 	"personal_schedule_service/internal/collection"
 	"personal_schedule_service/internal/grpc/models"
 	"personal_schedule_service/proto/personal_schedule"
+	"time"
 
 	"go.mongodb.org/mongo-driver/v2/bson"
 	"go.mongodb.org/mongo-driver/v2/mongo"
@@ -48,6 +49,12 @@ type (
 		CountOverlappingWorks(ctx context.Context, userID string, startDate, endDate int64, excludeWorkID *bson.ObjectID) (int64, error)
 		DeleteSubTaskByWorkID(ctx context.Context, workID bson.ObjectID) error
 		DeleteWork(ctx context.Context, workID bson.ObjectID) error
+		DeleteDraftsByDate(ctx context.Context, userID string, startDate, endDate time.Time) error
+		GetAggregatedWorksByDateRangeMs(ctx context.Context, userID string, startMs, endMs int64) ([]AggregatedWork, error)
+		GetWorksByDateRangeMs(ctx context.Context, userID string, startMs, endMs int64) ([]collection.Work, error)
+		BulkInsertWorks(ctx context.Context, works []interface{}) error
+		BulkInsertSubTasks(ctx context.Context, subTasks []interface{}) error
+		GetLabelsByTypeIDs(ctx context.Context, typeID int32) ([]collection.Label, error)
 	}
 )
 
