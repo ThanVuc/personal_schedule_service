@@ -36,10 +36,12 @@ func (s *workService) UpsertWork(ctx context.Context, req *personal_schedule.Ups
 	requestId := utils.GetRequestIDFromOutgoingContext(ctx)
 	if err := s.validator.ValidateUpsertWork(ctx, req); err != nil {
 		s.logger.Error("UpsertWork validation failed", requestId, zap.Error(err))
-		return &personal_schedule.UpsertWorkResponse{
-			IsSuccess: false,
-			Error:     utils.InternalServerError(ctx, err),
-		}, nil
+		if ve, ok := err.(*validation.ValidationError); ok {
+			return &personal_schedule.UpsertWorkResponse{
+				IsSuccess: false,
+				Error:     utils.CustomError(ctx, ve.Category, ve.Code, err),
+			}, nil
+		}
 	}
 
 	work, subTasksDB, err := s.workMapper.MapUpsertProtoToModels(req)
@@ -483,5 +485,78 @@ func (s *workService) RecoverWorks(ctx context.Context, req *personal_schedule.G
 
 	return &personal_schedule.GetRecoveryWorksResponse{
 		Works: responseItems,
+	}, nil
+}
+
+func (s *workService) UpdateWorkLabel(ctx context.Context, req *personal_schedule.UpdateWorkLabelRequest) (*personal_schedule.UpdateWorkLabelResponse, error) {
+	workID, err := bson.ObjectIDFromHex(req.WorkId)
+	if err != nil {
+		s.logger.Warn("Invalid work ID format", "", zap.String("work_id", req.WorkId), zap.Error(err))
+		return &personal_schedule.UpdateWorkLabelResponse{
+			Error: utils.InternalServerError(ctx, err),
+		}, nil
+	}
+
+	labelID, err := bson.ObjectIDFromHex(req.LabelId)
+	if err != nil {
+		s.logger.Warn("Invalid label ID format", "", zap.String("label_id", req.LabelId), zap.Error(err))
+		return &personal_schedule.UpdateWorkLabelResponse{
+			Error: utils.InternalServerError(ctx, err),
+		}, nil
+	}
+
+	work, err := s.workRepo.GetWorkByID(ctx, workID)
+	if err != nil {
+		s.logger.Error("Error fetching work from repo", "err", zap.Error(err))
+		return &personal_schedule.UpdateWorkLabelResponse{
+			Error: utils.DatabaseError(ctx, err),
+		}, nil
+	}
+	if work == nil {
+		errMsg := "work not found"
+		s.logger.Info(errMsg, "", zap.String("work_id", req.WorkId))
+		return &personal_schedule.UpdateWorkLabelResponse{
+			Error: utils.NotFoundError(ctx, err),
+		}, nil
+	}
+	if work.UserID != req.UserId {
+		errMsg := "forbidden: user does not own this work"
+		s.logger.Warn(errMsg, "", zap.String("work_id", req.WorkId), zap.String("user_id", req.UserId))
+		return &personal_schedule.UpdateWorkLabelResponse{
+			Error: utils.PermissionDeniedError(ctx, err),
+		}, nil
+	}
+
+	var fieldName string
+	switch req.LabelType {
+	case 1:
+		fieldName = "type_id"
+	case 2:
+		fieldName = "status_id"
+	case 3:
+		fieldName = "difficulty_id"
+	case 4:
+		fieldName = "priority_id"
+	case 5:
+		fieldName = "category_id"
+	default:
+		errMsg := "invalid label type"
+		s.logger.Warn(errMsg, "", zap.Int32("label_type", req.LabelType))
+		return &personal_schedule.UpdateWorkLabelResponse{
+			Error: utils.InternalServerError(ctx, err),
+		}, nil
+	}
+	fmt.Println("Updating work", workID.Hex(), "field", fieldName, "to label", labelID.Hex())
+
+	if err := s.workRepo.UpdateWorkField(ctx, workID, fieldName, labelID); err != nil {
+		s.logger.Error("Failed to update work label", "", zap.Error(err))
+		return &personal_schedule.UpdateWorkLabelResponse{
+			Error: utils.DatabaseError(ctx, err),
+		}, nil
+	}
+
+	return &personal_schedule.UpdateWorkLabelResponse{
+		IsSuccess: true,
+		Message:   "Label updated successfully",
 	}, nil
 }

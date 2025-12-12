@@ -24,6 +24,7 @@ const (
 	WorkService_GetWork_FullMethodName          = "/personal_schedule.WorkService/GetWork"
 	WorkService_DeleteWork_FullMethodName       = "/personal_schedule.WorkService/DeleteWork"
 	WorkService_GetRecoveryWorks_FullMethodName = "/personal_schedule.WorkService/GetRecoveryWorks"
+	WorkService_UpdateWorkLabel_FullMethodName  = "/personal_schedule.WorkService/UpdateWorkLabel"
 )
 
 // WorkServiceClient is the client API for WorkService service.
@@ -35,6 +36,7 @@ type WorkServiceClient interface {
 	GetWork(ctx context.Context, in *GetWorkRequest, opts ...grpc.CallOption) (*GetWorkResponse, error)
 	DeleteWork(ctx context.Context, in *DeleteWorkRequest, opts ...grpc.CallOption) (*DeleteWorkResponse, error)
 	GetRecoveryWorks(ctx context.Context, in *GetRecoveryWorksRequest, opts ...grpc.CallOption) (*GetRecoveryWorksResponse, error)
+	UpdateWorkLabel(ctx context.Context, in *UpdateWorkLabelRequest, opts ...grpc.CallOption) (*UpdateWorkLabelResponse, error)
 }
 
 type workServiceClient struct {
@@ -95,6 +97,16 @@ func (c *workServiceClient) GetRecoveryWorks(ctx context.Context, in *GetRecover
 	return out, nil
 }
 
+func (c *workServiceClient) UpdateWorkLabel(ctx context.Context, in *UpdateWorkLabelRequest, opts ...grpc.CallOption) (*UpdateWorkLabelResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(UpdateWorkLabelResponse)
+	err := c.cc.Invoke(ctx, WorkService_UpdateWorkLabel_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // WorkServiceServer is the server API for WorkService service.
 // All implementations must embed UnimplementedWorkServiceServer
 // for forward compatibility.
@@ -104,6 +116,7 @@ type WorkServiceServer interface {
 	GetWork(context.Context, *GetWorkRequest) (*GetWorkResponse, error)
 	DeleteWork(context.Context, *DeleteWorkRequest) (*DeleteWorkResponse, error)
 	GetRecoveryWorks(context.Context, *GetRecoveryWorksRequest) (*GetRecoveryWorksResponse, error)
+	UpdateWorkLabel(context.Context, *UpdateWorkLabelRequest) (*UpdateWorkLabelResponse, error)
 	mustEmbedUnimplementedWorkServiceServer()
 }
 
@@ -128,6 +141,9 @@ func (UnimplementedWorkServiceServer) DeleteWork(context.Context, *DeleteWorkReq
 }
 func (UnimplementedWorkServiceServer) GetRecoveryWorks(context.Context, *GetRecoveryWorksRequest) (*GetRecoveryWorksResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetRecoveryWorks not implemented")
+}
+func (UnimplementedWorkServiceServer) UpdateWorkLabel(context.Context, *UpdateWorkLabelRequest) (*UpdateWorkLabelResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpdateWorkLabel not implemented")
 }
 func (UnimplementedWorkServiceServer) mustEmbedUnimplementedWorkServiceServer() {}
 func (UnimplementedWorkServiceServer) testEmbeddedByValue()                     {}
@@ -240,6 +256,24 @@ func _WorkService_GetRecoveryWorks_Handler(srv interface{}, ctx context.Context,
 	return interceptor(ctx, in, info, handler)
 }
 
+func _WorkService_UpdateWorkLabel_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateWorkLabelRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(WorkServiceServer).UpdateWorkLabel(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: WorkService_UpdateWorkLabel_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(WorkServiceServer).UpdateWorkLabel(ctx, req.(*UpdateWorkLabelRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // WorkService_ServiceDesc is the grpc.ServiceDesc for WorkService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -266,6 +300,10 @@ var WorkService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetRecoveryWorks",
 			Handler:    _WorkService_GetRecoveryWorks_Handler,
+		},
+		{
+			MethodName: "UpdateWorkLabel",
+			Handler:    _WorkService_UpdateWorkLabel_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

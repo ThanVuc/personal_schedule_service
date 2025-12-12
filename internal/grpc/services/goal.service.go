@@ -32,7 +32,7 @@ func (s *goalService) GetGoals(ctx context.Context, req *personal_schedule.GetGo
 	if err != nil {
 		s.logger.Error("Error fetching goals from repo", "err", zap.Error(err))
 		return &personal_schedule.GetGoalsResponse{
-			Error:   utils.InternalServerError(ctx, err),
+			Error:    utils.InternalServerError(ctx, err),
 			Goals:    nil,
 			PageInfo: utils.ToPageInfo(req.PageQuery.Page, req.PageQuery.PageSize, int32(totalGoals)),
 		}, err
@@ -298,9 +298,9 @@ func (s *goalService) DeleteGoal(ctx context.Context, req *personal_schedule.Del
 }
 
 func (s *goalService) GetGoalsForDialog(ctx context.Context, req *personal_schedule.GetGoalsForDialogRequest) (*personal_schedule.GetGoalForDialogResponse, error) {
-    goals, err := s.goalRepo.GetGoalsForDialog(ctx, req.UserId)
+	goals, err := s.goalRepo.GetGoalsForDialog(ctx, req.UserId)
 	if err != nil {
-		s.logger.Error("Failed to get goals for dialog","", zap.Error(err))
+		s.logger.Error("Failed to get goals for dialog", "", zap.Error(err))
 		return &personal_schedule.GetGoalForDialogResponse{}, err
 	}
 
@@ -314,5 +314,75 @@ func (s *goalService) GetGoalsForDialog(ctx context.Context, req *personal_sched
 
 	return &personal_schedule.GetGoalForDialogResponse{
 		Goals: respItems,
+	}, nil
+}
+
+func (s *goalService) UpdateGoalLabel(ctx context.Context, req *personal_schedule.UpdateGoalLabelRequest) (*personal_schedule.UpdateGoalLabelResponse, error) {
+	goalID, err := bson.ObjectIDFromHex(req.GoalId)
+	if err != nil {
+		s.logger.Warn("Invalid goal ID format", "", zap.String("goal_id", req.GoalId), zap.Error(err))
+		return &personal_schedule.UpdateGoalLabelResponse{
+			Error: utils.InternalServerError(ctx, err),
+		}, nil
+	}
+
+	labelID, err := bson.ObjectIDFromHex(req.LabelId)
+	if err != nil {
+		s.logger.Warn("Invalid label ID format", "", zap.String("label_id", req.LabelId), zap.Error(err))
+		return &personal_schedule.UpdateGoalLabelResponse{
+			Error: utils.InternalServerError(ctx, err),
+		}, nil
+	}
+
+	goal, err := s.goalRepo.GetGoalByID(ctx, goalID)
+	if err != nil {
+		s.logger.Error("Failed to get goal by ID", "", zap.Error(err))
+		return &personal_schedule.UpdateGoalLabelResponse{
+			Error: utils.DatabaseError(ctx, err),
+		}, nil
+	}
+
+	if goal == nil {
+		errMsg := "goal not found"
+		s.logger.Warn(errMsg, "", zap.String("goal_id", req.GoalId))
+		return &personal_schedule.UpdateGoalLabelResponse{
+			Error: utils.NotFoundError(ctx, err),
+		}, nil
+	}
+	if goal.UserID != req.UserId {
+		errMsg := "forbidden: user does not own this goal"
+		s.logger.Warn(errMsg, "", zap.String("goal_id", req.GoalId), zap.String("user_id", req.UserId))
+		return &personal_schedule.UpdateGoalLabelResponse{
+			Error: utils.PermissionDeniedError(ctx, err),
+		}, nil
+	}
+
+	var fieldName string
+	switch req.LabelType {
+	case 2:
+		fieldName = "status_id"
+	case 3:
+		fieldName = "difficulty_id"
+	case 4:
+		fieldName = "priority_id"
+	case 5:
+		fieldName = "category_id"
+	default:
+		errMsg := "invalid label type"
+		s.logger.Warn(errMsg, "", zap.Int32("label_type", req.LabelType))
+		return &personal_schedule.UpdateGoalLabelResponse{
+			Error: utils.InternalServerError(ctx, err),
+		}, nil
+	}
+	if err := s.goalRepo.UpdateGoalField(ctx, goalID, fieldName, labelID); err != nil {
+		s.logger.Error("Failed to update goal field", "", zap.Error(err))
+		return &personal_schedule.UpdateGoalLabelResponse{
+			Error: utils.DatabaseError(ctx, err),
+		}, nil
+	}
+
+	return &personal_schedule.UpdateGoalLabelResponse{
+		Error:   nil,
+		Message: "Goal label updated successfully",
 	}, nil
 }

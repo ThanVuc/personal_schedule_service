@@ -24,6 +24,7 @@ const (
 	GoalService_GetGoal_FullMethodName           = "/personal_schedule.GoalService/GetGoal"
 	GoalService_DeleteGoal_FullMethodName        = "/personal_schedule.GoalService/DeleteGoal"
 	GoalService_GetGoalForDiaglog_FullMethodName = "/personal_schedule.GoalService/GetGoalForDiaglog"
+	GoalService_UpdateGoalLabel_FullMethodName   = "/personal_schedule.GoalService/UpdateGoalLabel"
 )
 
 // GoalServiceClient is the client API for GoalService service.
@@ -35,6 +36,7 @@ type GoalServiceClient interface {
 	GetGoal(ctx context.Context, in *GetGoalRequest, opts ...grpc.CallOption) (*GetGoalResponse, error)
 	DeleteGoal(ctx context.Context, in *DeleteGoalRequest, opts ...grpc.CallOption) (*DeleteGoalResponse, error)
 	GetGoalForDiaglog(ctx context.Context, in *GetGoalsForDialogRequest, opts ...grpc.CallOption) (*GetGoalForDialogResponse, error)
+	UpdateGoalLabel(ctx context.Context, in *UpdateGoalLabelRequest, opts ...grpc.CallOption) (*UpdateGoalLabelResponse, error)
 }
 
 type goalServiceClient struct {
@@ -95,6 +97,16 @@ func (c *goalServiceClient) GetGoalForDiaglog(ctx context.Context, in *GetGoalsF
 	return out, nil
 }
 
+func (c *goalServiceClient) UpdateGoalLabel(ctx context.Context, in *UpdateGoalLabelRequest, opts ...grpc.CallOption) (*UpdateGoalLabelResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(UpdateGoalLabelResponse)
+	err := c.cc.Invoke(ctx, GoalService_UpdateGoalLabel_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // GoalServiceServer is the server API for GoalService service.
 // All implementations must embed UnimplementedGoalServiceServer
 // for forward compatibility.
@@ -104,6 +116,7 @@ type GoalServiceServer interface {
 	GetGoal(context.Context, *GetGoalRequest) (*GetGoalResponse, error)
 	DeleteGoal(context.Context, *DeleteGoalRequest) (*DeleteGoalResponse, error)
 	GetGoalForDiaglog(context.Context, *GetGoalsForDialogRequest) (*GetGoalForDialogResponse, error)
+	UpdateGoalLabel(context.Context, *UpdateGoalLabelRequest) (*UpdateGoalLabelResponse, error)
 	mustEmbedUnimplementedGoalServiceServer()
 }
 
@@ -128,6 +141,9 @@ func (UnimplementedGoalServiceServer) DeleteGoal(context.Context, *DeleteGoalReq
 }
 func (UnimplementedGoalServiceServer) GetGoalForDiaglog(context.Context, *GetGoalsForDialogRequest) (*GetGoalForDialogResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetGoalForDiaglog not implemented")
+}
+func (UnimplementedGoalServiceServer) UpdateGoalLabel(context.Context, *UpdateGoalLabelRequest) (*UpdateGoalLabelResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpdateGoalLabel not implemented")
 }
 func (UnimplementedGoalServiceServer) mustEmbedUnimplementedGoalServiceServer() {}
 func (UnimplementedGoalServiceServer) testEmbeddedByValue()                     {}
@@ -240,6 +256,24 @@ func _GoalService_GetGoalForDiaglog_Handler(srv interface{}, ctx context.Context
 	return interceptor(ctx, in, info, handler)
 }
 
+func _GoalService_UpdateGoalLabel_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateGoalLabelRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(GoalServiceServer).UpdateGoalLabel(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: GoalService_UpdateGoalLabel_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(GoalServiceServer).UpdateGoalLabel(ctx, req.(*UpdateGoalLabelRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // GoalService_ServiceDesc is the grpc.ServiceDesc for GoalService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -266,6 +300,10 @@ var GoalService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetGoalForDiaglog",
 			Handler:    _GoalService_GetGoalForDiaglog_Handler,
+		},
+		{
+			MethodName: "UpdateGoalLabel",
+			Handler:    _GoalService_UpdateGoalLabel_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

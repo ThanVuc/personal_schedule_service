@@ -25,19 +25,19 @@ type GoalInfo struct {
 }
 
 type AggregatedWork struct {
-	ID                  bson.ObjectID       `bson:"_id"`
-	Name                string              `bson:"name"`
-	ShortDescriptions   *string             `bson:"short_descriptions,omitempty"`
-	DetailedDescription *string             `bson:"detailed_description,omitempty"`
-	StartDate           *time.Time          `bson:"start_date,omitempty"`
-	EndDate             time.Time           `bson:"end_date"`
-	UserID              string              `bson:"user_id"`
-	GoalInfo            []GoalInfo          `bson:"goalInfo"`
-	Status              []collection.Label  `bson:"statusInfo"`
-	Priority            []collection.Label  `bson:"priorityInfo"`
-	Difficulty          []collection.Label  `bson:"difficultyInfo"`
-	Type                []collection.Label  `bson:"typeInfo"`
-	Category            []collection.Label  `bson:"categoryInfo"`
+	ID                  bson.ObjectID      `bson:"_id"`
+	Name                string             `bson:"name"`
+	ShortDescriptions   *string            `bson:"short_descriptions,omitempty"`
+	DetailedDescription *string            `bson:"detailed_description,omitempty"`
+	StartDate           *time.Time         `bson:"start_date,omitempty"`
+	EndDate             time.Time          `bson:"end_date"`
+	UserID              string             `bson:"user_id"`
+	GoalInfo            []GoalInfo         `bson:"goalInfo"`
+	Status              []collection.Label `bson:"statusInfo"`
+	Priority            []collection.Label `bson:"priorityInfo"`
+	Difficulty          []collection.Label `bson:"difficultyInfo"`
+	Type                []collection.Label `bson:"typeInfo"`
+	Category            []collection.Label `bson:"categoryInfo"`
 	Draft               []collection.Label `bson:"draft,omitempty"`
 }
 
@@ -558,4 +558,19 @@ func (wr *workRepo) GetLabelsByTypeIDs(ctx context.Context, typeID int32) ([]col
 		return nil, err
 	}
 	return labels, nil
+}
+
+func (wr *workRepo) UpdateWorkField(ctx context.Context, workID bson.ObjectID, fieldName string, labelID bson.ObjectID) error {
+	coll := wr.mongoConnector.GetCollection(collection.WorksCollection)
+
+	update := bson.M{
+		"$set": bson.M{
+			fieldName:          labelID,
+			"last_modified_at": time.Now(),
+		},
+	}
+
+	_, err := coll.UpdateOne(ctx, bson.M{"_id": workID}, update)
+	wr.logger.Info("UpdateWorkField", "", zap.Any("value", labelID))
+	return err
 }
