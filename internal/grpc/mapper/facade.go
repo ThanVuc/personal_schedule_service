@@ -10,6 +10,7 @@ type (
 	LabelMapper interface {
 		MapLabelsToLabelTypesProto(labels []collection.Label) []*personal_schedule.LabelPerType
 		MapLabelsToLabelsProto(labels []collection.Label) []*personal_schedule.Label
+		MapLabelToProto(labels *collection.Label) *personal_schedule.LabelInfo
 	}
 
 	GoalMapper interface {

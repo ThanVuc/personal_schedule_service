@@ -37,6 +37,7 @@ func InjectGoalController() *controller.GoalController {
 func InjectWorkController() *controller.WorkController {
 	wire.Build(
 		repos.NewWorkRepo,
+		repos.NewLabelRepo,
 		mapper.NewWorkMapper,
 		services.NewWorkService,
 		controller.NewWorkController,

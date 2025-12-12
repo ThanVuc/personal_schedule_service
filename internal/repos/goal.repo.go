@@ -312,3 +312,18 @@ func (r *goalRepo) GetGoalsForDialog(ctx context.Context, userID string) ([]coll
 
 	return goals, nil
 }
+
+func (r *goalRepo) UpdateGoalField(ctx context.Context, goalID bson.ObjectID, fieldName string, labelID bson.ObjectID) error {
+	coll := r.mongoConnector.GetCollection(collection.GoalsCollection)
+
+	update := bson.M{
+		"$set": bson.M{
+			fieldName:          labelID,
+			"last_modified_at": time.Now(),
+		},
+	}
+
+	_, err := coll.UpdateOne(ctx, bson.M{"_id": goalID}, update)
+	r.logger.Info("UpdateGoalField", "", zap.Any("value", labelID))
+	return err
+}

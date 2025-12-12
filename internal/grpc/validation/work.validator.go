@@ -4,13 +4,30 @@ import (
 	"context"
 	"fmt"
 	"personal_schedule_service/internal/repos"
+	app_error "personal_schedule_service/pkg/settings/error"
+	"personal_schedule_service/proto/common"
 	"personal_schedule_service/proto/personal_schedule"
 
 	"go.mongodb.org/mongo-driver/v2/bson"
 )
 
 type workValidator struct {
-	workRepo repos.WorkRepo
+	workRepo  repos.WorkRepo
+	labelRepo repos.LabelRepo
+}
+
+func (wv *workValidator) checkLabel(ctx context.Context, id string, name string) error {
+	if _, err := bson.ObjectIDFromHex(id); err != nil {
+		return NewValidationError(common.ErrorCode_ERROR_CODE_RUN_TIME_ERROR, app_error.LabelNotFoundCode, fmt.Sprintf("invalid %s format", name))
+	}
+	exists, err := wv.labelRepo.CheckLabelExistence(ctx, id)
+	if err != nil {
+		return err
+	}
+	if !exists {
+		return NewValidationError(common.ErrorCode_ERROR_CODE_NOT_FOUND, app_error.LabelNotFoundCode, fmt.Sprintf("%s %s not found", name, id))
+	}
+	return nil
 }
 
 func (wv *workValidator) ValidateUpsertWork(ctx context.Context, req *personal_schedule.UpsertWorkRequest) error {
@@ -18,24 +35,24 @@ func (wv *workValidator) ValidateUpsertWork(ctx context.Context, req *personal_s
 		return fmt.Errorf("request is nil")
 	}
 
-	if _, err := bson.ObjectIDFromHex(req.StatusId); err != nil {
-		return fmt.Errorf("invalid StatusId")
+	if err := wv.checkLabel(ctx, req.TypeId, "TypeId"); err != nil {
+		return err
 	}
-	if _, err := bson.ObjectIDFromHex(req.DifficultyId); err != nil {
-		return fmt.Errorf("invalid DifficultyId")
+	if err := wv.checkLabel(ctx, req.StatusId, "StatusId"); err != nil {
+		return err
 	}
-	if _, err := bson.ObjectIDFromHex(req.PriorityId); err != nil {
-		return fmt.Errorf("invalid PriorityId")
+	if err := wv.checkLabel(ctx, req.DifficultyId, "DifficultyId"); err != nil {
+		return err
 	}
-	if _, err := bson.ObjectIDFromHex(req.TypeId); err != nil {
-		return fmt.Errorf("invalid TypeId")
+	if err := wv.checkLabel(ctx, req.PriorityId, "PriorityId"); err != nil {
+		return err
 	}
-	if _, err := bson.ObjectIDFromHex(req.CategoryId); err != nil {
-		return fmt.Errorf("invalid CategoryId")
+	if err := wv.checkLabel(ctx, req.CategoryId, "CategoryId"); err != nil {
+		return err
 	}
 	if req.GoalId != nil && *req.GoalId != "" {
 		if _, err := bson.ObjectIDFromHex(*req.GoalId); err != nil {
-			return fmt.Errorf("invalid GoalId")
+			return NewValidationError(common.ErrorCode_ERROR_CODE_NOT_FOUND, app_error.GoalNotFoundCode, "invalid GoalId")
 		}
 	} else {
 		req.GoalId = nil
@@ -44,47 +61,47 @@ func (wv *workValidator) ValidateUpsertWork(ctx context.Context, req *personal_s
 	for _, task := range req.SubTasks {
 		if task.Id != nil && *task.Id != "" {
 			if _, err := bson.ObjectIDFromHex(*task.Id); err != nil {
-				return fmt.Errorf("invalid SubTask Id %s: %v", *task.Id, err)
+				return NewValidationError(common.ErrorCode_ERROR_CODE_NOT_FOUND, app_error.SubTaskNotFound, "invalid SubTask Id")
 			}
 		}
 	}
 
 	if req.StartDate != nil {
 		if req.EndDate <= *req.StartDate {
-			return fmt.Errorf("EndDate must be greater than StartDate")
+			return NewValidationError(common.ErrorCode_ERROR_CODE_INTERNAL_ERROR, app_error.WorkEndDateBeforeStart, "EndDate must be after StartDate")
 		}
 
 		var excludeWorkID *bson.ObjectID
 		if req.Id != nil && *req.Id != "" {
 			workID, err := bson.ObjectIDFromHex(*req.Id)
 			if err != nil {
-				return fmt.Errorf("invalid Work Id %s: %v", *req.Id, err)
+				return NewValidationError(common.ErrorCode_ERROR_CODE_NOT_FOUND, app_error.WorkNotFound, "invalid Work Id")
 			}
 			excludeWorkID = &workID
 		}
 		count, err := wv.workRepo.CountOverlappingWorks(ctx, req.UserId, *req.StartDate, req.EndDate, excludeWorkID)
 		if err != nil {
-			return fmt.Errorf("error checking overlapping works: %v", err)
+			return NewValidationError(common.ErrorCode_ERROR_CODE_DATABASE_ERROR, app_error.WorkTimeOverlap, "error checking overlapping works")
 		}
 		if count > 0 {
-			return fmt.Errorf("work time overlaps with existing works")
+			return NewValidationError(common.ErrorCode_ERROR_CODE_DATABASE_ERROR, app_error.WorkTimeOverlap, "work time overlaps with existing work")
 		}
 	}
 
 	if req.Id != nil && *req.Id != "" {
 		workID, err := bson.ObjectIDFromHex(*req.Id)
 		if err != nil {
-			return fmt.Errorf("invalid Work Id %s: %v", *req.Id, err)
+			return NewValidationError(common.ErrorCode_ERROR_CODE_NOT_FOUND, app_error.WorkNotFound, "invalid Work Id")
 		}
 		existingWork, err := wv.workRepo.GetWorkByID(ctx, workID)
 		if err != nil {
-			return fmt.Errorf("error checking existing work: %v", err)
+			return NewValidationError(common.ErrorCode_ERROR_CODE_DATABASE_ERROR, app_error.WorkNotFound, "error retrieving work")
 		}
 		if existingWork == nil {
-			return fmt.Errorf("work not found")
+			return NewValidationError(common.ErrorCode_ERROR_CODE_NOT_FOUND, app_error.WorkNotFound, "work not found")
 		}
 		if existingWork.UserID != req.UserId {
-			return fmt.Errorf("forbidden: user does not own this work")
+			return NewValidationError(common.ErrorCode_ERROR_CODE_PERMISSION_DENIED, app_error.WorkForbidden, "user does not have permission to modify this work")
 		}
 	}
 

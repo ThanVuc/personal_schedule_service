@@ -6,7 +6,6 @@ import (
 	"personal_schedule_service/proto/personal_schedule"
 )
 
-
 type (
 	WorkValidator interface {
 		ValidateUpsertWork(ctx context.Context, req *personal_schedule.UpsertWorkRequest) error
@@ -15,8 +14,10 @@ type (
 
 func NewWorkValidator(
 	workRepo repos.WorkRepo,
+	label repos.LabelRepo,
 ) WorkValidator {
 	return &workValidator{
-		workRepo: workRepo,
+		workRepo:  workRepo,
+		labelRepo: label,
 	}
 }

@@ -98,39 +98,38 @@ func (s *labelService) GetLabelsByTypeIDs(ctx context.Context, req *common.IDReq
 }
 
 func (s *labelService) GetDefaultLabel(ctx context.Context, req *common.EmptyRequest) (*personal_schedule.GetDefaultLabelResponse, error) {
-	statusID, err := s.labelRepo.GetLabelIDByName(ctx, labels_constant.LabelInDay)
+	typeID, err := s.labelRepo.GetLabelByKey(ctx, labels_constant.LabelInDay)
 	if err != nil {
 		return nil, err
 	}
 
-	difficultyID, err := s.labelRepo.GetLabelIDByName(ctx, labels_constant.LabelDifficultyEasy)
+	difficultyID, err := s.labelRepo.GetLabelByKey(ctx, labels_constant.LabelDifficultyEasy)
 	if err != nil {
 		return nil, err
 	}
 
-	priorityID, err := s.labelRepo.GetLabelIDByName(ctx, labels_constant.LabelPriorityImportantNotUrgent)
+	priorityID, err := s.labelRepo.GetLabelByKey(ctx, labels_constant.LabelPriorityImportantNotUrgent)
 	if err != nil {
 		return nil, err
 	}
 
-	typeID, err := s.labelRepo.GetLabelIDByName(ctx, labels_constant.LabelPending)
+	statusID, err := s.labelRepo.GetLabelByKey(ctx, labels_constant.LabelPending)
 	if err != nil {
 		return nil, err
 	}
 
-	categoryID, err := s.labelRepo.GetLabelIDByName(ctx, labels_constant.LabelCategoryPersonal)
+	categoryID, err := s.labelRepo.GetLabelByKey(ctx, labels_constant.LabelCategoryPersonal)
 	if err != nil {
 		return nil, err
 	}
 
 	resp := &personal_schedule.GetDefaultLabelResponse{
-		StatusId:     statusID.Hex(),
-		DifficultyId: difficultyID.Hex(),
-		PriorityId:   priorityID.Hex(),
-		TypeId:       typeID.Hex(),
-		CategoryId:   categoryID.Hex(),
-		Error:        nil,
+		Type:       s.labelMapper.MapLabelToProto(typeID),
+		Status:     s.labelMapper.MapLabelToProto(statusID),
+		Difficulty: s.labelMapper.MapLabelToProto(difficultyID),
+		Priority:   s.labelMapper.MapLabelToProto(priorityID),
+		Category:   s.labelMapper.MapLabelToProto(categoryID),
+		Error:      nil,
 	}
 	return resp, nil
-
 }

@@ -90,7 +90,7 @@ func CustomError(ctx context.Context, code common.ErrorCode, errorCode int32, er
 	logger.Error("custom error occurred", requestId, zap.Error(err))
 	e := &common.Error{
 		Code:      code,
-		Message:   GetErrorKeyByCode(code),
+		Message:   err.Error(),
 		ErrorCode: &errorCode,
 	}
 	return e

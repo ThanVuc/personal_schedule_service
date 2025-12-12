@@ -128,11 +128,11 @@ func (x *GetLabelsByTypeIDsResponse) GetError() *common.Error {
 
 type GetDefaultLabelResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	StatusId      string                 `protobuf:"bytes,1,opt,name=status_id,json=statusId,proto3" json:"status_id"`
-	DifficultyId  string                 `protobuf:"bytes,2,opt,name=difficulty_id,json=difficultyId,proto3" json:"difficulty_id"`
-	PriorityId    string                 `protobuf:"bytes,3,opt,name=priority_id,json=priorityId,proto3" json:"priority_id"`
-	TypeId        string                 `protobuf:"bytes,4,opt,name=type_id,json=typeId,proto3" json:"type_id"`
-	CategoryId    string                 `protobuf:"bytes,5,opt,name=category_id,json=categoryId,proto3" json:"category_id"`
+	Status        *LabelInfo             `protobuf:"bytes,1,opt,name=status,proto3" json:"status"`
+	Difficulty    *LabelInfo             `protobuf:"bytes,2,opt,name=difficulty,proto3" json:"difficulty"`
+	Priority      *LabelInfo             `protobuf:"bytes,3,opt,name=priority,proto3" json:"priority"`
+	Type          *LabelInfo             `protobuf:"bytes,4,opt,name=type,proto3" json:"type"`
+	Category      *LabelInfo             `protobuf:"bytes,5,opt,name=category,proto3" json:"category"`
 	Error         *common.Error          `protobuf:"bytes,6,opt,name=error,proto3,oneof" json:"error"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -168,39 +168,39 @@ func (*GetDefaultLabelResponse) Descriptor() ([]byte, []int) {
 	return file_personal_schedule_service_label_proto_rawDescGZIP(), []int{2}
 }
 
-func (x *GetDefaultLabelResponse) GetStatusId() string {
+func (x *GetDefaultLabelResponse) GetStatus() *LabelInfo {
 	if x != nil {
-		return x.StatusId
+		return x.Status
 	}
-	return ""
+	return nil
 }
 
-func (x *GetDefaultLabelResponse) GetDifficultyId() string {
+func (x *GetDefaultLabelResponse) GetDifficulty() *LabelInfo {
 	if x != nil {
-		return x.DifficultyId
+		return x.Difficulty
 	}
-	return ""
+	return nil
 }
 
-func (x *GetDefaultLabelResponse) GetPriorityId() string {
+func (x *GetDefaultLabelResponse) GetPriority() *LabelInfo {
 	if x != nil {
-		return x.PriorityId
+		return x.Priority
 	}
-	return ""
+	return nil
 }
 
-func (x *GetDefaultLabelResponse) GetTypeId() string {
+func (x *GetDefaultLabelResponse) GetType() *LabelInfo {
 	if x != nil {
-		return x.TypeId
+		return x.Type
 	}
-	return ""
+	return nil
 }
 
-func (x *GetDefaultLabelResponse) GetCategoryId() string {
+func (x *GetDefaultLabelResponse) GetCategory() *LabelInfo {
 	if x != nil {
-		return x.CategoryId
+		return x.Category
 	}
-	return ""
+	return nil
 }
 
 func (x *GetDefaultLabelResponse) GetError() *common.Error {
@@ -222,15 +222,15 @@ const file_personal_schedule_service_label_proto_rawDesc = "" +
 	"\x1aGetLabelsByTypeIDsResponse\x120\n" +
 	"\x06labels\x18\x01 \x03(\v2\x18.personal_schedule.LabelR\x06labels\x12(\n" +
 	"\x05error\x18\x02 \x01(\v2\r.common.ErrorH\x00R\x05error\x88\x01\x01B\b\n" +
-	"\x06_error\"\xea\x01\n" +
-	"\x17GetDefaultLabelResponse\x12\x1b\n" +
-	"\tstatus_id\x18\x01 \x01(\tR\bstatusId\x12#\n" +
-	"\rdifficulty_id\x18\x02 \x01(\tR\fdifficultyId\x12\x1f\n" +
-	"\vpriority_id\x18\x03 \x01(\tR\n" +
-	"priorityId\x12\x17\n" +
-	"\atype_id\x18\x04 \x01(\tR\x06typeId\x12\x1f\n" +
-	"\vcategory_id\x18\x05 \x01(\tR\n" +
-	"categoryId\x12(\n" +
+	"\x06_error\"\xe7\x02\n" +
+	"\x17GetDefaultLabelResponse\x124\n" +
+	"\x06status\x18\x01 \x01(\v2\x1c.personal_schedule.LabelInfoR\x06status\x12<\n" +
+	"\n" +
+	"difficulty\x18\x02 \x01(\v2\x1c.personal_schedule.LabelInfoR\n" +
+	"difficulty\x128\n" +
+	"\bpriority\x18\x03 \x01(\v2\x1c.personal_schedule.LabelInfoR\bpriority\x120\n" +
+	"\x04type\x18\x04 \x01(\v2\x1c.personal_schedule.LabelInfoR\x04type\x128\n" +
+	"\bcategory\x18\x05 \x01(\v2\x1c.personal_schedule.LabelInfoR\bcategory\x12(\n" +
 	"\x05error\x18\x06 \x01(\v2\r.common.ErrorH\x00R\x05error\x88\x01\x01B\b\n" +
 	"\x06_error2\x92\x02\n" +
 	"\fLabelService\x12U\n" +
@@ -258,26 +258,32 @@ var file_personal_schedule_service_label_proto_goTypes = []any{
 	(*LabelPerType)(nil),               // 3: personal_schedule.LabelPerType
 	(*common.Error)(nil),               // 4: common.Error
 	(*Label)(nil),                      // 5: personal_schedule.Label
-	(*common.EmptyRequest)(nil),        // 6: common.EmptyRequest
-	(*common.IDRequest)(nil),           // 7: common.IDRequest
+	(*LabelInfo)(nil),                  // 6: personal_schedule.LabelInfo
+	(*common.EmptyRequest)(nil),        // 7: common.EmptyRequest
+	(*common.IDRequest)(nil),           // 8: common.IDRequest
 }
 var file_personal_schedule_service_label_proto_depIdxs = []int32{
-	3, // 0: personal_schedule.GetLabelPerTypesResponse.label_per_types:type_name -> personal_schedule.LabelPerType
-	4, // 1: personal_schedule.GetLabelPerTypesResponse.error:type_name -> common.Error
-	5, // 2: personal_schedule.GetLabelsByTypeIDsResponse.labels:type_name -> personal_schedule.Label
-	4, // 3: personal_schedule.GetLabelsByTypeIDsResponse.error:type_name -> common.Error
-	4, // 4: personal_schedule.GetDefaultLabelResponse.error:type_name -> common.Error
-	6, // 5: personal_schedule.LabelService.GetLabelPerTypes:input_type -> common.EmptyRequest
-	7, // 6: personal_schedule.LabelService.GetLabelsByTypeIDs:input_type -> common.IDRequest
-	6, // 7: personal_schedule.LabelService.GetDefaultLabel:input_type -> common.EmptyRequest
-	0, // 8: personal_schedule.LabelService.GetLabelPerTypes:output_type -> personal_schedule.GetLabelPerTypesResponse
-	1, // 9: personal_schedule.LabelService.GetLabelsByTypeIDs:output_type -> personal_schedule.GetLabelsByTypeIDsResponse
-	2, // 10: personal_schedule.LabelService.GetDefaultLabel:output_type -> personal_schedule.GetDefaultLabelResponse
-	8, // [8:11] is the sub-list for method output_type
-	5, // [5:8] is the sub-list for method input_type
-	5, // [5:5] is the sub-list for extension type_name
-	5, // [5:5] is the sub-list for extension extendee
-	0, // [0:5] is the sub-list for field type_name
+	3,  // 0: personal_schedule.GetLabelPerTypesResponse.label_per_types:type_name -> personal_schedule.LabelPerType
+	4,  // 1: personal_schedule.GetLabelPerTypesResponse.error:type_name -> common.Error
+	5,  // 2: personal_schedule.GetLabelsByTypeIDsResponse.labels:type_name -> personal_schedule.Label
+	4,  // 3: personal_schedule.GetLabelsByTypeIDsResponse.error:type_name -> common.Error
+	6,  // 4: personal_schedule.GetDefaultLabelResponse.status:type_name -> personal_schedule.LabelInfo
+	6,  // 5: personal_schedule.GetDefaultLabelResponse.difficulty:type_name -> personal_schedule.LabelInfo
+	6,  // 6: personal_schedule.GetDefaultLabelResponse.priority:type_name -> personal_schedule.LabelInfo
+	6,  // 7: personal_schedule.GetDefaultLabelResponse.type:type_name -> personal_schedule.LabelInfo
+	6,  // 8: personal_schedule.GetDefaultLabelResponse.category:type_name -> personal_schedule.LabelInfo
+	4,  // 9: personal_schedule.GetDefaultLabelResponse.error:type_name -> common.Error
+	7,  // 10: personal_schedule.LabelService.GetLabelPerTypes:input_type -> common.EmptyRequest
+	8,  // 11: personal_schedule.LabelService.GetLabelsByTypeIDs:input_type -> common.IDRequest
+	7,  // 12: personal_schedule.LabelService.GetDefaultLabel:input_type -> common.EmptyRequest
+	0,  // 13: personal_schedule.LabelService.GetLabelPerTypes:output_type -> personal_schedule.GetLabelPerTypesResponse
+	1,  // 14: personal_schedule.LabelService.GetLabelsByTypeIDs:output_type -> personal_schedule.GetLabelsByTypeIDsResponse
+	2,  // 15: personal_schedule.LabelService.GetDefaultLabel:output_type -> personal_schedule.GetDefaultLabelResponse
+	13, // [13:16] is the sub-list for method output_type
+	10, // [10:13] is the sub-list for method input_type
+	10, // [10:10] is the sub-list for extension type_name
+	10, // [10:10] is the sub-list for extension extendee
+	0,  // [0:10] is the sub-list for field type_name
 }
 
 func init() { file_personal_schedule_service_label_proto_init() }

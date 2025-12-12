@@ -68,12 +68,26 @@ func (lr *labelRepo) GetLabelsByTypeIDs(ctx context.Context, typeID int32) ([]co
 	return labels, nil
 }
 
-func (lr *labelRepo) GetLabelIDByName(ctx context.Context, key string) (*bson.ObjectID, error) {
+func (lr *labelRepo) GetLabelByKey(ctx context.Context, key string) (*collection.Label, error) {
 	coll := lr.mongoConnector.GetCollection(collection.LabelsCollection)
 	var label collection.Label
 	err := coll.FindOne(ctx, bson.M{"key": key}).Decode(&label)
 	if err != nil {
 		return nil, err
 	}
-	return &label.ID, nil
+	return &label, nil
+}
+
+func (lr *labelRepo) CheckLabelExistence(ctx context.Context, id string) (bool, error) {
+	oid, err := bson.ObjectIDFromHex(id)
+	if err != nil {
+		return false, nil
+	}
+
+	coll := lr.mongoConnector.GetCollection(collection.LabelsCollection)
+	count, err := coll.CountDocuments(ctx, bson.M{"_id": oid})
+	if err != nil {
+		return false, err
+	}
+	return count > 0, nil
 }

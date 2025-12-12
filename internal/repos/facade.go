@@ -22,7 +22,8 @@ type (
 		InsertLabels(ctx context.Context, labels *[]collection.Label) error
 		GetLabels(ctx context.Context) ([]collection.Label, error)
 		GetLabelsByTypeIDs(ctx context.Context, typeIDs int32) ([]collection.Label, error)
-		GetLabelIDByName(ctx context.Context, name string) (*bson.ObjectID, error)
+		GetLabelByKey(ctx context.Context, key string) (*collection.Label, error)
+		CheckLabelExistence(ctx context.Context, id string) (bool, error)
 	}
 
 	GoalRepo interface {
@@ -36,6 +37,7 @@ type (
 		DeleteTasksByGoalID(ctx context.Context, goalID bson.ObjectID) error
 		DeleteGoal(ctx context.Context, goalID bson.ObjectID) error
 		GetGoalsForDialog(ctx context.Context, userID string) ([]collection.Goal, error)
+		UpdateGoalField(ctx context.Context, goalID bson.ObjectID, fieldName string, labelID bson.ObjectID) error
 	}
 
 	WorkRepo interface {
@@ -55,6 +57,7 @@ type (
 		BulkInsertWorks(ctx context.Context, works []interface{}) error
 		BulkInsertSubTasks(ctx context.Context, subTasks []interface{}) error
 		GetLabelsByTypeIDs(ctx context.Context, typeID int32) ([]collection.Label, error)
+		UpdateWorkField(ctx context.Context, workID bson.ObjectID, fieldName string, labelID bson.ObjectID) error
 	}
 )
 
