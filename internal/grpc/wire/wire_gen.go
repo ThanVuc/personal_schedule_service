@@ -36,7 +36,8 @@ func InjectGoalController() *controller.GoalController {
 func InjectWorkController() *controller.WorkController {
 	workRepo := repos.NewWorkRepo()
 	workMapper := mapper.NewWorkMapper()
-	workValidator := validation.NewWorkValidator(workRepo)
+	labelRepo := repos.NewLabelRepo()
+	workValidator := validation.NewWorkValidator(workRepo, labelRepo)
 	workService := services.NewWorkService(workRepo, workMapper, workValidator)
 	workController := controller.NewWorkController(workService)
 	return workController

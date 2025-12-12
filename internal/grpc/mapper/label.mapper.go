@@ -52,3 +52,20 @@ func (m *labelMapper) MapLabelToLabelProto(labels collection.Label) *personal_sc
 		LabelType: int32(labels.LabelType),
 	}
 }
+
+func (m *labelMapper) MapLabelToProto(labels *collection.Label) *personal_schedule.LabelInfo {
+	if labels == nil {
+		return nil
+	}
+	lc := ""
+	if labels.Color != nil {
+		lc = *labels.Color
+	}
+	return &personal_schedule.LabelInfo{
+		Id:        labels.ID.Hex(),
+		Name:      labels.Name,
+		Color:     lc,
+		Key:       labels.Key,
+		LabelType: int32(labels.LabelType),
+	}
+}
