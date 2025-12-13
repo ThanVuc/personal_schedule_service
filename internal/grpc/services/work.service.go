@@ -168,7 +168,7 @@ func (s *workService) sendNotificationEvent(ctx context.Context, req *personal_s
 			TriggerAt:       &notification.TriggerAt,
 			IsSendMail:      notification.IsSendMail,
 			CorrelationId:   workId,
-			CorrelationType: common.NOTIFICATION_TYPE_SCHEDULED_NOTIFICATION.String(),
+			CorrelationType: common.NOTIFICATION_TYPE_SCHEDULED_NOTIFICATION,
 			ImageUrl:        nil,
 		}
 		notifications.Notifications = append(notifications.Notifications, notificationPayload)
