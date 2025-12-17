@@ -122,12 +122,9 @@ func (wr *workRepo) GetWorks(ctx context.Context, req *personal_schedule.GetWork
 
 	matchFilter := bson.D{
 		{Key: "user_id", Value: req.UserId},
-		{Key: "$and", Value: bson.A{
-			bson.D{{Key: "$or", Value: bson.A{
-				bson.D{{Key: "start_date", Value: bson.M{"$lte": toDate}}},
-				bson.D{{Key: "start_date", Value: nil}},
-			}}},
-			bson.D{{Key: "end_date", Value: bson.M{"$gte": fromDate}}},
+		{Key: "start_date", Value: bson.M{
+			"$gte": fromDate,
+			"$lte": toDate,
 		}},
 	}
 
@@ -144,7 +141,7 @@ func (wr *workRepo) GetWorks(ctx context.Context, req *personal_schedule.GetWork
 		} else if len([]rune(search)) < 3 {
 			matchFilter = append(matchFilter, bson.E{
 				Key: "name", Value: bson.M{
-					"$regex":    search,
+					"$regex":   search,
 					"$options": "i",
 				},
 			})
@@ -276,8 +273,8 @@ func (wr *workRepo) GetWorks(ctx context.Context, req *personal_schedule.GetWork
 func (wr *workRepo) CountOverlappingWorks(ctx context.Context, userID string, startDate, endDate int64, excludeWorkID *bson.ObjectID) (int64, error) {
 	coll := wr.mongoConnector.GetCollection(collection.WorksCollection)
 
-	start := time.Unix(startDate, 0)
-	end := time.Unix(endDate, 0)
+	start := time.UnixMilli(startDate)
+	end := time.UnixMilli(endDate)
 
 	filter := bson.D{
 		{Key: "user_id", Value: userID},
