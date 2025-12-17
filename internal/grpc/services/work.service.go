@@ -153,12 +153,11 @@ func (s *workService) sendNotificationEvent(ctx context.Context, req *personal_s
 	notifications := common.Notifications{}
 	for _, notification := range req.Notifications {
 		id := utils.Ternary(notification.Id != nil, *notification.Id, "")
-		title := "Nhắc nhở công việc: " + req.Name
-		message := utils.Ternary(req.ShortDescriptions != nil, *req.ShortDescriptions, "Bạn có công việc cần hoàn thành: "+req.Name)
+		message := utils.Ternary(req.ShortDescriptions != nil, *req.ShortDescriptions, utils.Ternary(req.DetailedDescription != nil, *req.DetailedDescription, req.Name))
 		link := utils.Ternary(notification.Link != nil, *notification.Link+workId, "")
 		notificationPayload := &common.Notification{
 			Id:              &id,
-			Title:           title,
+			Title:           req.Name,
 			Message:         message,
 			SenderId:        req.UserId,
 			ReceiverIds:     []string{req.UserId},
@@ -169,7 +168,7 @@ func (s *workService) sendNotificationEvent(ctx context.Context, req *personal_s
 			IsSendMail:      notification.IsSendMail,
 			CorrelationId:   workId,
 			CorrelationType: common.NOTIFICATION_TYPE_SCHEDULED_NOTIFICATION,
-			ImageUrl:        nil,
+			ImageUrl:        notification.ImgUrl,
 		}
 		notifications.Notifications = append(notifications.Notifications, notificationPayload)
 	}
