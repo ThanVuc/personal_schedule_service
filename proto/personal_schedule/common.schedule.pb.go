@@ -1168,6 +1168,7 @@ type WorkNotification struct {
 	IsSendMail    bool                   `protobuf:"varint,3,opt,name=is_send_mail,json=isSendMail,proto3" json:"is_send_mail"`
 	IsActive      bool                   `protobuf:"varint,4,opt,name=is_active,json=isActive,proto3" json:"is_active"`
 	Link          *string                `protobuf:"bytes,5,opt,name=link,proto3,oneof" json:"link"`
+	ImgUrl        *string                `protobuf:"bytes,6,opt,name=img_url,json=imgUrl,proto3,oneof" json:"img_url"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -1233,6 +1234,13 @@ func (x *WorkNotification) GetIsActive() bool {
 func (x *WorkNotification) GetLink() string {
 	if x != nil && x.Link != nil {
 		return *x.Link
+	}
+	return ""
+}
+
+func (x *WorkNotification) GetImgUrl() string {
+	if x != nil && x.ImgUrl != nil {
+		return *x.ImgUrl
 	}
 	return ""
 }
@@ -1362,7 +1370,7 @@ const file_personal_schedule_service_common_schedule_proto_rawDesc = "" +
 	"\x06labels\x18\b \x01(\v2'.personal_schedule.WorkLabelGroupDetailR\x06labels\x12>\n" +
 	"\tsub_tasks\x18\t \x03(\v2!.personal_schedule.SubTaskPayloadR\bsubTasksB\x15\n" +
 	"\x13_short_descriptionsB\x17\n" +
-	"\x15_detailed_description\"\xae\x01\n" +
+	"\x15_detailed_description\"\xd8\x01\n" +
 	"\x10WorkNotification\x12\x13\n" +
 	"\x02id\x18\x01 \x01(\tH\x00R\x02id\x88\x01\x01\x12\x1d\n" +
 	"\n" +
@@ -1370,9 +1378,12 @@ const file_personal_schedule_service_common_schedule_proto_rawDesc = "" +
 	"\fis_send_mail\x18\x03 \x01(\bR\n" +
 	"isSendMail\x12\x1b\n" +
 	"\tis_active\x18\x04 \x01(\bR\bisActive\x12\x17\n" +
-	"\x04link\x18\x05 \x01(\tH\x01R\x04link\x88\x01\x01B\x05\n" +
+	"\x04link\x18\x05 \x01(\tH\x01R\x04link\x88\x01\x01\x12\x1c\n" +
+	"\aimg_url\x18\x06 \x01(\tH\x02R\x06imgUrl\x88\x01\x01B\x05\n" +
 	"\x03_idB\a\n" +
-	"\x05_linkB\x19Z\x17proto/personal_scheduleb\x06proto3"
+	"\x05_linkB\n" +
+	"\n" +
+	"\b_img_urlB\x19Z\x17proto/personal_scheduleb\x06proto3"
 
 var (
 	file_personal_schedule_service_common_schedule_proto_rawDescOnce sync.Once
