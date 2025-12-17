@@ -4,6 +4,7 @@ import (
 	"context"
 	"personal_schedule_service/internal/collection"
 	"personal_schedule_service/proto/personal_schedule"
+	"strings"
 	"time"
 
 	"github.com/thanvuc/go-core-lib/log"
@@ -113,10 +114,10 @@ func (wr *workRepo) GetWorks(ctx context.Context, req *personal_schedule.GetWork
 
 	var fromDate, toDate time.Time
 	if req.FromDate != nil {
-		fromDate = time.Unix(*req.FromDate, 0)
+		fromDate = time.UnixMilli(*req.FromDate)
 	}
 	if req.ToDate != nil {
-		toDate = time.Unix(*req.ToDate, 0)
+		toDate = time.UnixMilli(*req.ToDate)
 	}
 
 	matchFilter := bson.D{
@@ -131,11 +132,29 @@ func (wr *workRepo) GetWorks(ctx context.Context, req *personal_schedule.GetWork
 	}
 
 	if req.Search != nil && *req.Search != "" {
-		matchFilter = append(matchFilter, bson.E{
-			Key: "$text", Value: bson.M{
-				"$search": *req.Search,
-			},
-		})
+		search := strings.TrimSpace(*req.Search)
+
+		if strings.Contains(search, " ") {
+			matchFilter = append(matchFilter, bson.E{
+				Key: "name", Value: bson.M{
+					"$regex":   search,
+					"$options": "i",
+				},
+			})
+		} else if len([]rune(search)) < 3 {
+			matchFilter = append(matchFilter, bson.E{
+				Key: "name", Value: bson.M{
+					"$regex":    search,
+					"$options": "i",
+				},
+			})
+		} else {
+			matchFilter = append(matchFilter, bson.E{
+				Key: "$text", Value: bson.M{
+					"$search": search,
+				},
+			})
+		}
 	}
 	if req.StatusId != nil && *req.StatusId != "" {
 		if objID, err := bson.ObjectIDFromHex(*req.StatusId); err == nil {

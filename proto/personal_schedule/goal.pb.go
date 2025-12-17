@@ -25,8 +25,8 @@ const (
 type GetGoalsRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	UserId        string                 `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id"`
-	Search        string                 `protobuf:"bytes,2,opt,name=search,proto3" json:"search"`
-	StatusId      string                 `protobuf:"bytes,3,opt,name=status_id,json=statusId,proto3" json:"status_id"`
+	Search        *string                `protobuf:"bytes,2,opt,name=search,proto3,oneof" json:"search"`
+	StatusId      *string                `protobuf:"bytes,3,opt,name=status_id,json=statusId,proto3,oneof" json:"status_id"`
 	PageQuery     *common.PageQuery      `protobuf:"bytes,4,opt,name=page_query,json=pageQuery,proto3" json:"page_query"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -70,15 +70,15 @@ func (x *GetGoalsRequest) GetUserId() string {
 }
 
 func (x *GetGoalsRequest) GetSearch() string {
-	if x != nil {
-		return x.Search
+	if x != nil && x.Search != nil {
+		return *x.Search
 	}
 	return ""
 }
 
 func (x *GetGoalsRequest) GetStatusId() string {
-	if x != nil {
-		return x.StatusId
+	if x != nil && x.StatusId != nil {
+		return *x.StatusId
 	}
 	return ""
 }
@@ -786,13 +786,16 @@ var File_personal_schedule_service_goal_proto protoreflect.FileDescriptor
 
 const file_personal_schedule_service_goal_proto_rawDesc = "" +
 	"\n" +
-	"$personal_schedule_service/goal.proto\x12\x11personal_schedule\x1a/personal_schedule_service/common.schedule.proto\x1a\x12common/error.proto\x1a\x17common/pagination.proto\x1a\x13common/common.proto\"\x91\x01\n" +
+	"$personal_schedule_service/goal.proto\x12\x11personal_schedule\x1a/personal_schedule_service/common.schedule.proto\x1a\x12common/error.proto\x1a\x17common/pagination.proto\x1a\x13common/common.proto\"\xb4\x01\n" +
 	"\x0fGetGoalsRequest\x12\x17\n" +
-	"\auser_id\x18\x01 \x01(\tR\x06userId\x12\x16\n" +
-	"\x06search\x18\x02 \x01(\tR\x06search\x12\x1b\n" +
-	"\tstatus_id\x18\x03 \x01(\tR\bstatusId\x120\n" +
+	"\auser_id\x18\x01 \x01(\tR\x06userId\x12\x1b\n" +
+	"\x06search\x18\x02 \x01(\tH\x00R\x06search\x88\x01\x01\x12 \n" +
+	"\tstatus_id\x18\x03 \x01(\tH\x01R\bstatusId\x88\x01\x01\x120\n" +
 	"\n" +
-	"page_query\x18\x04 \x01(\v2\x11.common.PageQueryR\tpageQuery\"\xc5\x01\n" +
+	"page_query\x18\x04 \x01(\v2\x11.common.PageQueryR\tpageQueryB\t\n" +
+	"\a_searchB\f\n" +
+	"\n" +
+	"_status_id\"\xc5\x01\n" +
 	"\x10GetGoalsResponse\x12-\n" +
 	"\x05goals\x18\x01 \x03(\v2\x17.personal_schedule.GoalR\x05goals\x12-\n" +
 	"\tpage_info\x18\x02 \x01(\v2\x10.common.PageInfoR\bpageInfo\x12\x1f\n" +
@@ -942,6 +945,7 @@ func file_personal_schedule_service_goal_proto_init() {
 		return
 	}
 	file_personal_schedule_service_common_schedule_proto_init()
+	file_personal_schedule_service_goal_proto_msgTypes[0].OneofWrappers = []any{}
 	file_personal_schedule_service_goal_proto_msgTypes[1].OneofWrappers = []any{}
 	file_personal_schedule_service_goal_proto_msgTypes[2].OneofWrappers = []any{}
 	file_personal_schedule_service_goal_proto_msgTypes[3].OneofWrappers = []any{}
