@@ -29,7 +29,7 @@ type (
 	GoalRepo interface {
 		GetGoals(ctx context.Context, req *personal_schedule.GetGoalsRequest) ([]AggregatedGoal, int32, error)
 		CreateGoal(ctx context.Context, goal *collection.Goal) (bson.ObjectID, error)
-		UpdateGoal(ctx context.Context, goalID bson.ObjectID, updates bson.M) error
+		UpdateGoal(ctx context.Context, goalID bson.ObjectID, goalDB *collection.Goal) error
 		GetTasksByGoalID(ctx context.Context, goalID bson.ObjectID) ([]collection.GoalTask, error)
 		BulkWriteTasks(ctx context.Context, operations []mongo.WriteModel) (*mongo.BulkWriteResult, error)
 		GetGoalByID(ctx context.Context, goalID bson.ObjectID) (*collection.Goal, error)

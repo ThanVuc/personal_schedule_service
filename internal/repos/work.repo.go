@@ -4,6 +4,7 @@ import (
 	"context"
 	"personal_schedule_service/internal/collection"
 	"personal_schedule_service/proto/personal_schedule"
+	"strings"
 	"time"
 
 	"github.com/thanvuc/go-core-lib/log"
@@ -113,29 +114,44 @@ func (wr *workRepo) GetWorks(ctx context.Context, req *personal_schedule.GetWork
 
 	var fromDate, toDate time.Time
 	if req.FromDate != nil {
-		fromDate = time.Unix(*req.FromDate, 0)
+		fromDate = time.UnixMilli(*req.FromDate)
 	}
 	if req.ToDate != nil {
-		toDate = time.Unix(*req.ToDate, 0)
+		toDate = time.UnixMilli(*req.ToDate)
 	}
 
 	matchFilter := bson.D{
 		{Key: "user_id", Value: req.UserId},
-		{Key: "$and", Value: bson.A{
-			bson.D{{Key: "$or", Value: bson.A{
-				bson.D{{Key: "start_date", Value: bson.M{"$lte": toDate}}},
-				bson.D{{Key: "start_date", Value: nil}},
-			}}},
-			bson.D{{Key: "end_date", Value: bson.M{"$gte": fromDate}}},
+		{Key: "start_date", Value: bson.M{
+			"$gte": fromDate,
+			"$lte": toDate,
 		}},
 	}
 
 	if req.Search != nil && *req.Search != "" {
-		matchFilter = append(matchFilter, bson.E{
-			Key: "$text", Value: bson.M{
-				"$search": *req.Search,
-			},
-		})
+		search := strings.TrimSpace(*req.Search)
+
+		if strings.Contains(search, " ") {
+			matchFilter = append(matchFilter, bson.E{
+				Key: "name", Value: bson.M{
+					"$regex":   search,
+					"$options": "i",
+				},
+			})
+		} else if len([]rune(search)) < 3 {
+			matchFilter = append(matchFilter, bson.E{
+				Key: "name", Value: bson.M{
+					"$regex":   search,
+					"$options": "i",
+				},
+			})
+		} else {
+			matchFilter = append(matchFilter, bson.E{
+				Key: "$text", Value: bson.M{
+					"$search": search,
+				},
+			})
+		}
 	}
 	if req.StatusId != nil && *req.StatusId != "" {
 		if objID, err := bson.ObjectIDFromHex(*req.StatusId); err == nil {
@@ -257,8 +273,8 @@ func (wr *workRepo) GetWorks(ctx context.Context, req *personal_schedule.GetWork
 func (wr *workRepo) CountOverlappingWorks(ctx context.Context, userID string, startDate, endDate int64, excludeWorkID *bson.ObjectID) (int64, error) {
 	coll := wr.mongoConnector.GetCollection(collection.WorksCollection)
 
-	start := time.Unix(startDate, 0)
-	end := time.Unix(endDate, 0)
+	start := time.UnixMilli(startDate)
+	end := time.UnixMilli(endDate)
 
 	filter := bson.D{
 		{Key: "user_id", Value: userID},

@@ -71,6 +71,10 @@ func (wv *workValidator) ValidateUpsertWork(ctx context.Context, req *personal_s
 			return NewValidationError(common.ErrorCode_ERROR_CODE_INTERNAL_ERROR, app_error.WorkEndDateBeforeStart, "EndDate must be after StartDate")
 		}
 
+		if req.StartDate == &req.EndDate {
+			return NewValidationError(common.ErrorCode_ERROR_CODE_INTERNAL_ERROR, app_error.WorkZeroDuration, "work duration cannot be zero")
+		}
+
 		var excludeWorkID *bson.ObjectID
 		if req.Id != nil && *req.Id != "" {
 			workID, err := bson.ObjectIDFromHex(*req.Id)
