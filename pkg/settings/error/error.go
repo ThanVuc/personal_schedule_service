@@ -11,4 +11,5 @@ const (
 	WorkNotFound             = 10007
 	WorkForbidden            = 10008
 	SubTaskNotFound          = 10009
+	WorkZeroDuration         = 10010
 )

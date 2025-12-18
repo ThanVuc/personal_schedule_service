@@ -46,21 +46,21 @@ func (r *goalRepo) GetGoals(ctx context.Context, req *personal_schedule.GetGoals
 
 	// Match conditions
 	matchStage := bson.D{{Key: "user_id", Value: req.UserId}}
-	if req.Search != "" {
+	if *req.Search != "" {
 		matchStage = append(matchStage, bson.E{
 			Key: "name",
 			Value: bson.M{
-				"$regex": bson.Regex{Pattern: req.Search, Options: "i"},
+				"$regex": bson.Regex{Pattern: *req.Search, Options: "i"},
 			},
 		})
 	}
 
-	if req.StatusId != "" {
-		objID, err := bson.ObjectIDFromHex(req.StatusId)
+	if *req.StatusId != "" {
+		objID, err := bson.ObjectIDFromHex(*req.StatusId)
 		if err == nil {
 			matchStage = append(matchStage, bson.E{Key: "status_id", Value: objID})
 		} else {
-			r.logger.Warn("Invalid filter_by_status_id format", "", zap.String("status_id", req.StatusId))
+			r.logger.Warn("Invalid filter_by_status_id format", "", zap.String("status_id", *req.StatusId))
 		}
 	}
 
@@ -175,8 +175,21 @@ func (r *goalRepo) CreateGoal(ctx context.Context, goal *collection.Goal) (bson.
 	return res.InsertedID.(bson.ObjectID), nil
 }
 
-func (r *goalRepo) UpdateGoal(ctx context.Context, goalID bson.ObjectID, updates bson.M) error {
+func (r *goalRepo) UpdateGoal(ctx context.Context, goalID bson.ObjectID, goalDB *collection.Goal) error {
 	coll := r.mongoConnector.GetCollection(collection.GoalsCollection)
+	now := time.Now()
+	updates := bson.M{
+		"name":                 goalDB.Name,
+		"short_descriptions":   goalDB.ShortDescriptions,
+		"detailed_description": goalDB.DetailedDescription,
+		"start_date":           goalDB.StartDate,
+		"end_date":             goalDB.EndDate,
+		"status_id":            goalDB.StatusID,
+		"difficulty_id":        goalDB.DifficultyID,
+		"priority_id":          goalDB.PriorityID,
+		"category_id":          goalDB.CategoryID,
+		"last_modified_at":     now,
+	}
 	_, err := coll.UpdateOne(ctx, bson.M{"_id": goalID}, bson.M{"$set": updates})
 	return err
 }

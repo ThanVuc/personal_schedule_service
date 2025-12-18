@@ -123,19 +123,7 @@ func (s *goalService) UpsertGoal(ctx context.Context, req *personal_schedule.Ups
 			}, nil
 		}
 
-		updates := bson.M{
-			"name":                 goalDB.Name,
-			"short_descriptions":   goalDB.ShortDescriptions,
-			"detailed_description": goalDB.DetailedDescription,
-			"start_date":           goalDB.StartDate,
-			"end_date":             goalDB.EndDate,
-			"status_id":            goalDB.StatusID,
-			"difficulty_id":        goalDB.DifficultyID,
-			"priority_id":          goalDB.PriorityID,
-			"last_modified_at":     now,
-		}
-
-		if err := s.goalRepo.UpdateGoal(ctx, goalID, updates); err != nil {
+		if err := s.goalRepo.UpdateGoal(ctx, goalID, goalDB); err != nil {
 			s.logger.Error("Failed to update goal", "", zap.Error(err))
 			return &personal_schedule.UpsertGoalResponse{
 				IsSuccess: false,

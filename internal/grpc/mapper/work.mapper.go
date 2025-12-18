@@ -54,11 +54,11 @@ func (m *workMapper) mapProtoWorkToDB(req *personal_schedule.UpsertWorkRequest) 
 		goalID = &id
 	}
 
-	endDate := time.Unix(req.EndDate, 0)
+	endDate := time.UnixMilli(req.EndDate)
 
 	var startDate *time.Time
 	if req.StartDate != nil {
-		t := time.Unix(*req.StartDate, 0)
+		t := time.UnixMilli(*req.StartDate)
 		startDate = &t
 	}
 
