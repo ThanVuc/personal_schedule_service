@@ -38,6 +38,7 @@ type (
 		DeleteGoal(ctx context.Context, goalID bson.ObjectID) error
 		GetGoalsForDialog(ctx context.Context, userID string) ([]collection.Goal, error)
 		UpdateGoalField(ctx context.Context, goalID bson.ObjectID, fieldName string, labelID bson.ObjectID) error
+		GetLabelByKey(ctx context.Context, key string) (*collection.Label, error)
 	}
 
 	WorkRepo interface {
@@ -58,6 +59,7 @@ type (
 		BulkInsertSubTasks(ctx context.Context, subTasks []interface{}) error
 		GetLabelsByTypeIDs(ctx context.Context, typeID int32) ([]collection.Label, error)
 		UpdateWorkField(ctx context.Context, workID bson.ObjectID, fieldName string, labelID bson.ObjectID) error
+		GetLabelByKey(ctx context.Context, key string) (*collection.Label, error)
 	}
 )
 

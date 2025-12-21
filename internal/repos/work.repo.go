@@ -3,8 +3,8 @@ package repos
 import (
 	"context"
 	"personal_schedule_service/internal/collection"
+	"personal_schedule_service/internal/grpc/utils"
 	"personal_schedule_service/proto/personal_schedule"
-	"strings"
 	"time"
 
 	"github.com/thanvuc/go-core-lib/log"
@@ -39,6 +39,7 @@ type AggregatedWork struct {
 	Difficulty          []collection.Label `bson:"difficultyInfo"`
 	Type                []collection.Label `bson:"typeInfo"`
 	Category            []collection.Label `bson:"categoryInfo"`
+	Overdue             []collection.Label `bson:"overdue,omitempty"`
 	Draft               []collection.Label `bson:"draft,omitempty"`
 }
 
@@ -70,6 +71,7 @@ func (wr *workRepo) UpdateWork(ctx context.Context, workID bson.ObjectID, work *
 	now := time.Now()
 	updates := bson.M{
 		"name":                 work.Name,
+		"name_normalized":      work.NameNormalized,
 		"short_descriptions":   work.ShortDescriptions,
 		"detailed_description": work.DetailedDescription,
 		"start_date":           work.StartDate,
@@ -129,29 +131,14 @@ func (wr *workRepo) GetWorks(ctx context.Context, req *personal_schedule.GetWork
 	}
 
 	if req.Search != nil && *req.Search != "" {
-		search := strings.TrimSpace(*req.Search)
-
-		if strings.Contains(search, " ") {
-			matchFilter = append(matchFilter, bson.E{
-				Key: "name", Value: bson.M{
-					"$regex":   search,
-					"$options": "i",
-				},
-			})
-		} else if len([]rune(search)) < 3 {
-			matchFilter = append(matchFilter, bson.E{
-				Key: "name", Value: bson.M{
-					"$regex":   search,
-					"$options": "i",
-				},
-			})
-		} else {
-			matchFilter = append(matchFilter, bson.E{
-				Key: "$text", Value: bson.M{
-					"$search": search,
-				},
-			})
-		}
+		searchNorm := utils.RemoveAccent(*req.Search)
+		matchFilter = append(matchFilter, bson.E{
+			Key: "name_normalized",
+			Value: bson.M{
+				"$regex":   searchNorm,
+				"$options": "i",
+			},
+		})
 	}
 	if req.StatusId != nil && *req.StatusId != "" {
 		if objID, err := bson.ObjectIDFromHex(*req.StatusId); err == nil {
@@ -589,4 +576,14 @@ func (wr *workRepo) UpdateWorkField(ctx context.Context, workID bson.ObjectID, f
 	_, err := coll.UpdateOne(ctx, bson.M{"_id": workID}, update)
 	wr.logger.Info("UpdateWorkField", "", zap.Any("value", labelID))
 	return err
+}
+
+func (wr *workRepo) GetLabelByKey(ctx context.Context, key string) (*collection.Label, error) {
+	coll := wr.mongoConnector.GetCollection(collection.LabelsCollection)
+	var label collection.Label
+	err := coll.FindOne(ctx, bson.M{"key": key}).Decode(&label)
+	if err != nil {
+		return nil, err
+	}
+	return &label, nil
 }

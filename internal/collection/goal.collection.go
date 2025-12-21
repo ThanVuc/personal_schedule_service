@@ -13,6 +13,7 @@ import (
 type Goal struct {
 	ID                  bson.ObjectID `bson:"_id,omitempty" json:"id"`
 	Name                string        `bson:"name" json:"name"`
+	NameNormalized      string        `bson:"name_normalized" json:"name_normalized"`
 	ShortDescriptions   *string       `bson:"short_descriptions,omitempty" json:"short_descriptions,omitempty"`
 	DetailedDescription *string       `bson:"detailed_description,omitempty" json:"detailed_description,omitempty"`
 	StartDate           *time.Time    `bson:"start_date,omitempty" json:"start_date,omitempty"`
@@ -37,7 +38,7 @@ func createGoalCollection() error {
 	goalValidator := bson.M{
 		"$jsonSchema": bson.M{
 			"bsonType": "object",
-			"required": []string{"name", "status_id", "difficulty_id", "priority_id","category_id", "user_id", "created_at", "last_modified_at"},
+			"required": []string{"name", "status_id", "difficulty_id", "priority_id", "category_id", "user_id", "created_at", "last_modified_at"},
 			"properties": bson.M{
 				"_id": bson.M{
 					"bsonType":    "objectId",
@@ -46,6 +47,10 @@ func createGoalCollection() error {
 				"name": bson.M{
 					"bsonType":    "string",
 					"description": "Goal name, required",
+				},
+				"name_normalized": bson.M{
+					"bsonType":    "string",
+					"description": "Normalized goal name for search",
 				},
 				"short_descriptions": bson.M{
 					"bsonType":    []string{"string", "null"},

@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"personal_schedule_service/internal/collection"
+	labels_constant "personal_schedule_service/internal/constant/labels"
 	notifications_constant "personal_schedule_service/internal/constant/notifications"
 	"personal_schedule_service/internal/grpc/mapper"
 	"personal_schedule_service/internal/grpc/utils"
@@ -217,6 +218,20 @@ func (s *workService) GetWorks(ctx context.Context, req *personal_schedule.GetWo
 			Error: utils.InternalServerError(ctx, err),
 		}, nil
 	}
+
+	overdueLabel, err := s.workRepo.GetLabelByKey(ctx, labels_constant.LabelOverDue)
+	if err != nil {
+		s.logger.Error("Failed to get overdue label", "", zap.Error(err))
+	}
+
+	timeNow := time.Now()
+
+	for i := range aggWorks {
+		if aggWorks[i].EndDate.Before(timeNow) {
+			aggWorks[i].Overdue = []collection.Label{*overdueLabel}
+		}
+	}
+
 	protoWorks := s.workMapper.ConvertAggregatedWorksToProto(aggWorks)
 
 	return &personal_schedule.GetWorksResponse{

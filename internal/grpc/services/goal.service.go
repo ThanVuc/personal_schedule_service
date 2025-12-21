@@ -6,6 +6,7 @@ import (
 
 	// "fmt"
 	"personal_schedule_service/internal/collection"
+	labels_constant "personal_schedule_service/internal/constant/labels"
 	"personal_schedule_service/internal/grpc/mapper"
 	"personal_schedule_service/internal/grpc/utils"
 	"personal_schedule_service/internal/repos"
@@ -45,6 +46,17 @@ func (s *goalService) GetGoals(ctx context.Context, req *personal_schedule.GetGo
 			TotalGoals: 0,
 			PageInfo:   utils.ToPageInfo(req.PageQuery.Page, req.PageQuery.PageSize, int32(totalGoals)),
 		}, nil
+	}
+
+	overdueLabel, err := s.goalRepo.GetLabelByKey(ctx, labels_constant.LabelOverDue)
+	if err != nil {
+		s.logger.Error("Failed to get overdue label", "", zap.Error(err))
+	}
+	timeNow := time.Now()
+	for i, goal := range goals {
+		if goal.EndDate != nil && goal.EndDate.Before(timeNow) {
+			goals[i].Overdue = []collection.Label{*overdueLabel}
+		}
 	}
 
 	protoGoals := s.goalMapper.ConvertAggregatedGoalsToProto(goals)

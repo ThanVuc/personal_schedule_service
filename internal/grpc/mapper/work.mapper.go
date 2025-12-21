@@ -2,6 +2,7 @@ package mapper
 
 import (
 	"personal_schedule_service/internal/collection"
+	"personal_schedule_service/internal/grpc/utils"
 	"personal_schedule_service/internal/repos"
 	"personal_schedule_service/proto/personal_schedule"
 	"time"
@@ -45,6 +46,8 @@ func (m *workMapper) mapProtoWorkToDB(req *personal_schedule.UpsertWorkRequest) 
 		return nil, err
 	}
 
+	normalizedName := utils.RemoveAccent(req.Name)
+
 	var goalID *bson.ObjectID
 	if req.GoalId != nil && *req.GoalId != "" {
 		id, err := bson.ObjectIDFromHex(*req.GoalId)
@@ -66,6 +69,7 @@ func (m *workMapper) mapProtoWorkToDB(req *personal_schedule.UpsertWorkRequest) 
 		Name:                req.Name,
 		ShortDescriptions:   req.ShortDescriptions,
 		DetailedDescription: req.DetailedDescription,
+		NameNormalized:      normalizedName,
 		StartDate:           startDate,
 		EndDate:             endDate,
 		StatusID:            statusID,
@@ -115,9 +119,9 @@ func (m *workMapper) MapAggregatedWorkToProto(aggWork repos.AggregatedWork) *per
 
 	var startdate, enddate int64
 	if aggWork.StartDate != nil {
-		startdate = aggWork.StartDate.Unix()
+		startdate = aggWork.StartDate.UnixMilli()
 	}
-	enddate = aggWork.EndDate.Unix()
+	enddate = aggWork.EndDate.UnixMilli()
 
 	var goalProto *personal_schedule.GoalOfWork
 	if len(aggWork.GoalInfo) > 0 {
@@ -143,6 +147,7 @@ func (m *workMapper) MapAggregatedWorkToProto(aggWork repos.AggregatedWork) *per
 			Draft:      m.mapLabelsToProto(aggWork.Draft),
 		},
 		Category: m.mapLabelsToProto(aggWork.Category),
+		Overdue:  m.mapLabelsToProto(aggWork.Overdue),
 	}
 }
 

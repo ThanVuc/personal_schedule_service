@@ -33,6 +33,7 @@ type AggregatedGoal struct {
 	Priority            []collection.Label `bson:"priorityInfo"`
 	Difficulty          []collection.Label `bson:"difficultyInfo"`
 	Category            []collection.Label `bson:"categoryInfo"`
+	Overdue             []collection.Label `bson:"overdue,omitempty"`
 	CreatedAt           time.Time          `bson:"created_at"`
 }
 
@@ -46,11 +47,13 @@ func (r *goalRepo) GetGoals(ctx context.Context, req *personal_schedule.GetGoals
 
 	// Match conditions
 	matchStage := bson.D{{Key: "user_id", Value: req.UserId}}
-	if *req.Search != "" {
+	if req.Search != nil && *req.Search != "" {
+		searchNorm := utils.RemoveAccent(*req.Search)
 		matchStage = append(matchStage, bson.E{
-			Key: "name",
+			Key: "name_normalized",
 			Value: bson.M{
-				"$regex": bson.Regex{Pattern: *req.Search, Options: "i"},
+				"$regex":   searchNorm,
+				"$options": "i",
 			},
 		})
 	}
@@ -181,6 +184,7 @@ func (r *goalRepo) UpdateGoal(ctx context.Context, goalID bson.ObjectID, goalDB 
 	updates := bson.M{
 		"name":                 goalDB.Name,
 		"short_descriptions":   goalDB.ShortDescriptions,
+		"name_normalized":      goalDB.NameNormalized,
 		"detailed_description": goalDB.DetailedDescription,
 		"start_date":           goalDB.StartDate,
 		"end_date":             goalDB.EndDate,
@@ -339,4 +343,14 @@ func (r *goalRepo) UpdateGoalField(ctx context.Context, goalID bson.ObjectID, fi
 	_, err := coll.UpdateOne(ctx, bson.M{"_id": goalID}, update)
 	r.logger.Info("UpdateGoalField", "", zap.Any("value", labelID))
 	return err
+}
+
+func (r *goalRepo) GetLabelByKey(ctx context.Context, key string) (*collection.Label, error) {
+	coll := r.mongoConnector.GetCollection(collection.LabelsCollection)
+	var label collection.Label
+	err := coll.FindOne(ctx, bson.M{"key": key}).Decode(&label)
+	if err != nil {
+		return nil, err
+	}
+	return &label, nil
 }
