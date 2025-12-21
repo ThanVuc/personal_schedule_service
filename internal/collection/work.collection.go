@@ -13,6 +13,7 @@ import (
 type Work struct {
 	ID                  bson.ObjectID  `bson:"_id,omitempty" json:"id"`
 	Name                string         `bson:"name" json:"name"`
+	NameNormalized      string         `bson:"name_normalized" json:"name_normalized"`
 	ShortDescriptions   *string        `bson:"short_descriptions,omitempty" json:"short_descriptions,omitempty"`
 	DetailedDescription *string        `bson:"detailed_description,omitempty" json:"detailed_description,omitempty"`
 	StartDate           *time.Time     `bson:"start_date,omitempty" json:"start_date,omitempty"`
@@ -50,6 +51,10 @@ func createWorkCollection() error {
 					"bsonType":    "string",
 					"description": "Work name",
 				},
+				"name_normalized": bson.M{
+					"bsonType":    "string",
+					"description": "Normalized work name for search",
+				},
 				"short_descriptions": bson.M{
 					"bsonType":    []string{"string", "null"},
 					"description": "Short description, optional",
@@ -84,6 +89,7 @@ func createWorkCollection() error {
 		{
 			Keys: bson.D{
 				{Key: "name", Value: "text"},
+				{Key: "name_normalized", Value: "text"},
 				{Key: "short_descriptions", Value: "text"},
 			},
 			Options: options.Index().
@@ -91,6 +97,7 @@ func createWorkCollection() error {
 				SetDefaultLanguage("none").
 				SetWeights(bson.D{
 					{Key: "name", Value: 10},
+					{Key: "name_normalized", Value: 10},
 					{Key: "short_descriptions", Value: 5},
 				}),
 		},

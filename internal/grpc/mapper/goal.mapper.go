@@ -2,6 +2,7 @@ package mapper
 
 import (
 	"personal_schedule_service/internal/collection"
+	"personal_schedule_service/internal/grpc/utils"
 	"personal_schedule_service/internal/repos"
 	"personal_schedule_service/proto/personal_schedule"
 
@@ -33,11 +34,11 @@ func (m *goalMapper) MapAggregatedGoalToProto(aggGoal repos.AggregatedGoal) *per
 	}
 	var stDate int64 = 0
 	if aggGoal.StartDate != nil {
-		stDate = aggGoal.StartDate.Unix()
+		stDate = aggGoal.StartDate.UnixMilli()
 	}
 	var enDate int64 = 0
 	if aggGoal.EndDate != nil {
-		enDate = aggGoal.EndDate.Unix()
+		enDate = aggGoal.EndDate.UnixMilli()
 	}
 
 	return &personal_schedule.Goal{
@@ -53,6 +54,7 @@ func (m *goalMapper) MapAggregatedGoalToProto(aggGoal repos.AggregatedGoal) *per
 			Priority:   m.mapLabelsToProto(aggGoal.Priority),
 		},
 		Category: m.mapLabelsToProto(aggGoal.Category),
+		Overdue:  m.mapLabelsToProto(aggGoal.Overdue),
 	}
 }
 
@@ -105,6 +107,8 @@ func (m *goalMapper) mapProtoGoalToDB(req *personal_schedule.UpsertGoalRequest) 
 		return nil, err
 	}
 
+	normalizedName := utils.RemoveAccent(req.Name)
+
 	endDate := time.UnixMilli(*req.EndDate)
 
 	var startDate *time.Time
@@ -115,6 +119,7 @@ func (m *goalMapper) mapProtoGoalToDB(req *personal_schedule.UpsertGoalRequest) 
 
 	return &collection.Goal{
 		Name:                req.Name,
+		NameNormalized:      normalizedName,
 		ShortDescriptions:   req.ShortDescriptions,
 		DetailedDescription: req.DetailedDescription,
 		StartDate:           startDate,

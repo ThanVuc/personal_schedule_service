@@ -311,6 +311,7 @@ type Goal struct {
 	EndDate             int64                  `protobuf:"varint,6,opt,name=end_date,json=endDate,proto3" json:"end_date"`
 	GoalLabels          *GoalLabels            `protobuf:"bytes,7,opt,name=goalLabels,proto3" json:"goalLabels"`
 	Category            *LabelInfo             `protobuf:"bytes,8,opt,name=category,proto3" json:"category"`
+	Overdue             *LabelInfo             `protobuf:"bytes,9,opt,name=overdue,proto3,oneof" json:"overdue"`
 	unknownFields       protoimpl.UnknownFields
 	sizeCache           protoimpl.SizeCache
 }
@@ -397,6 +398,13 @@ func (x *Goal) GetGoalLabels() *GoalLabels {
 func (x *Goal) GetCategory() *LabelInfo {
 	if x != nil {
 		return x.Category
+	}
+	return nil
+}
+
+func (x *Goal) GetOverdue() *LabelInfo {
+	if x != nil {
+		return x.Overdue
 	}
 	return nil
 }
@@ -828,6 +836,7 @@ type Work struct {
 	Goal                *GoalOfWork            `protobuf:"bytes,7,opt,name=goal,proto3" json:"goal"`
 	Labels              *WorkLabelGroup        `protobuf:"bytes,8,opt,name=labels,proto3" json:"labels"`
 	Category            *LabelInfo             `protobuf:"bytes,9,opt,name=category,proto3" json:"category"`
+	Overdue             *LabelInfo             `protobuf:"bytes,10,opt,name=overdue,proto3,oneof" json:"overdue"`
 	unknownFields       protoimpl.UnknownFields
 	sizeCache           protoimpl.SizeCache
 }
@@ -921,6 +930,13 @@ func (x *Work) GetLabels() *WorkLabelGroup {
 func (x *Work) GetCategory() *LabelInfo {
 	if x != nil {
 		return x.Category
+	}
+	return nil
+}
+
+func (x *Work) GetOverdue() *LabelInfo {
+	if x != nil {
+		return x.Overdue
 	}
 	return nil
 }
@@ -1275,7 +1291,7 @@ const file_personal_schedule_service_common_schedule_proto_rawDesc = "" +
 	"\n" +
 	"difficulty\x18\x02 \x01(\v2\x1c.personal_schedule.LabelInfoR\n" +
 	"difficulty\x128\n" +
-	"\bpriority\x18\x03 \x01(\v2\x1c.personal_schedule.LabelInfoR\bpriority\"\xf9\x02\n" +
+	"\bpriority\x18\x03 \x01(\v2\x1c.personal_schedule.LabelInfoR\bpriority\"\xc2\x03\n" +
 	"\x04Goal\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x12\n" +
 	"\x04name\x18\x02 \x01(\tR\x04name\x122\n" +
@@ -1287,9 +1303,12 @@ const file_personal_schedule_service_common_schedule_proto_rawDesc = "" +
 	"\n" +
 	"goalLabels\x18\a \x01(\v2\x1d.personal_schedule.GoalLabelsR\n" +
 	"goalLabels\x128\n" +
-	"\bcategory\x18\b \x01(\v2\x1c.personal_schedule.LabelInfoR\bcategoryB\x15\n" +
+	"\bcategory\x18\b \x01(\v2\x1c.personal_schedule.LabelInfoR\bcategory\x12;\n" +
+	"\aoverdue\x18\t \x01(\v2\x1c.personal_schedule.LabelInfoH\x02R\aoverdue\x88\x01\x01B\x15\n" +
 	"\x13_short_descriptionsB\x17\n" +
-	"\x15_detailed_description\"d\n" +
+	"\x15_detailed_descriptionB\n" +
+	"\n" +
+	"\b_overdue\"d\n" +
 	"\x0fGoalTaskPayload\x12\x13\n" +
 	"\x02id\x18\x01 \x01(\tH\x00R\x02id\x88\x01\x01\x12\x12\n" +
 	"\x04name\x18\x02 \x01(\tR\x04name\x12!\n" +
@@ -1331,7 +1350,7 @@ const file_personal_schedule_service_common_schedule_proto_rawDesc = "" +
 	"\n" +
 	"GoalOfWork\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x12\n" +
-	"\x04name\x18\x02 \x01(\tR\x04name\"\xa8\x03\n" +
+	"\x04name\x18\x02 \x01(\tR\x04name\"\xf1\x03\n" +
 	"\x04Work\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x12\n" +
 	"\x04name\x18\x02 \x01(\tR\x04name\x122\n" +
@@ -1342,9 +1361,13 @@ const file_personal_schedule_service_common_schedule_proto_rawDesc = "" +
 	"\bend_date\x18\x06 \x01(\x03R\aendDate\x121\n" +
 	"\x04goal\x18\a \x01(\v2\x1d.personal_schedule.GoalOfWorkR\x04goal\x129\n" +
 	"\x06labels\x18\b \x01(\v2!.personal_schedule.WorkLabelGroupR\x06labels\x128\n" +
-	"\bcategory\x18\t \x01(\v2\x1c.personal_schedule.LabelInfoR\bcategoryB\x15\n" +
+	"\bcategory\x18\t \x01(\v2\x1c.personal_schedule.LabelInfoR\bcategory\x12;\n" +
+	"\aoverdue\x18\n" +
+	" \x01(\v2\x1c.personal_schedule.LabelInfoH\x02R\aoverdue\x88\x01\x01B\x15\n" +
 	"\x13_short_descriptionsB\x17\n" +
-	"\x15_detailed_description\"`\n" +
+	"\x15_detailed_descriptionB\n" +
+	"\n" +
+	"\b_overdue\"`\n" +
 	"\x10RecoveryWorkItem\x12+\n" +
 	"\x04work\x18\x01 \x01(\v2\x17.personal_schedule.WorkR\x04work\x12\x1f\n" +
 	"\vis_conflict\x18\x02 \x01(\bR\n" +
@@ -1423,34 +1446,36 @@ var file_personal_schedule_service_common_schedule_proto_depIdxs = []int32{
 	2,  // 3: personal_schedule.GoalLabels.priority:type_name -> personal_schedule.LabelInfo
 	3,  // 4: personal_schedule.Goal.goalLabels:type_name -> personal_schedule.GoalLabels
 	2,  // 5: personal_schedule.Goal.category:type_name -> personal_schedule.LabelInfo
-	2,  // 6: personal_schedule.GoalLabel.status:type_name -> personal_schedule.LabelInfo
-	2,  // 7: personal_schedule.GoalLabel.difficulty:type_name -> personal_schedule.LabelInfo
-	2,  // 8: personal_schedule.GoalLabel.priority:type_name -> personal_schedule.LabelInfo
-	2,  // 9: personal_schedule.GoalLabel.category:type_name -> personal_schedule.LabelInfo
-	6,  // 10: personal_schedule.GoalDetail.goalLabels:type_name -> personal_schedule.GoalLabel
-	5,  // 11: personal_schedule.GoalDetail.tasks:type_name -> personal_schedule.GoalTaskPayload
-	2,  // 12: personal_schedule.WorkLabelGroup.status:type_name -> personal_schedule.LabelInfo
-	2,  // 13: personal_schedule.WorkLabelGroup.difficulty:type_name -> personal_schedule.LabelInfo
-	2,  // 14: personal_schedule.WorkLabelGroup.priority:type_name -> personal_schedule.LabelInfo
-	2,  // 15: personal_schedule.WorkLabelGroup.type:type_name -> personal_schedule.LabelInfo
-	2,  // 16: personal_schedule.WorkLabelGroup.draft:type_name -> personal_schedule.LabelInfo
-	10, // 17: personal_schedule.Work.goal:type_name -> personal_schedule.GoalOfWork
-	9,  // 18: personal_schedule.Work.labels:type_name -> personal_schedule.WorkLabelGroup
-	2,  // 19: personal_schedule.Work.category:type_name -> personal_schedule.LabelInfo
-	11, // 20: personal_schedule.RecoveryWorkItem.work:type_name -> personal_schedule.Work
-	2,  // 21: personal_schedule.WorkLabelGroupDetail.status:type_name -> personal_schedule.LabelInfo
-	2,  // 22: personal_schedule.WorkLabelGroupDetail.difficulty:type_name -> personal_schedule.LabelInfo
-	2,  // 23: personal_schedule.WorkLabelGroupDetail.priority:type_name -> personal_schedule.LabelInfo
-	2,  // 24: personal_schedule.WorkLabelGroupDetail.type:type_name -> personal_schedule.LabelInfo
-	2,  // 25: personal_schedule.WorkLabelGroupDetail.category:type_name -> personal_schedule.LabelInfo
-	10, // 26: personal_schedule.WorkDetail.goal:type_name -> personal_schedule.GoalOfWork
-	13, // 27: personal_schedule.WorkDetail.labels:type_name -> personal_schedule.WorkLabelGroupDetail
-	8,  // 28: personal_schedule.WorkDetail.sub_tasks:type_name -> personal_schedule.SubTaskPayload
-	29, // [29:29] is the sub-list for method output_type
-	29, // [29:29] is the sub-list for method input_type
-	29, // [29:29] is the sub-list for extension type_name
-	29, // [29:29] is the sub-list for extension extendee
-	0,  // [0:29] is the sub-list for field type_name
+	2,  // 6: personal_schedule.Goal.overdue:type_name -> personal_schedule.LabelInfo
+	2,  // 7: personal_schedule.GoalLabel.status:type_name -> personal_schedule.LabelInfo
+	2,  // 8: personal_schedule.GoalLabel.difficulty:type_name -> personal_schedule.LabelInfo
+	2,  // 9: personal_schedule.GoalLabel.priority:type_name -> personal_schedule.LabelInfo
+	2,  // 10: personal_schedule.GoalLabel.category:type_name -> personal_schedule.LabelInfo
+	6,  // 11: personal_schedule.GoalDetail.goalLabels:type_name -> personal_schedule.GoalLabel
+	5,  // 12: personal_schedule.GoalDetail.tasks:type_name -> personal_schedule.GoalTaskPayload
+	2,  // 13: personal_schedule.WorkLabelGroup.status:type_name -> personal_schedule.LabelInfo
+	2,  // 14: personal_schedule.WorkLabelGroup.difficulty:type_name -> personal_schedule.LabelInfo
+	2,  // 15: personal_schedule.WorkLabelGroup.priority:type_name -> personal_schedule.LabelInfo
+	2,  // 16: personal_schedule.WorkLabelGroup.type:type_name -> personal_schedule.LabelInfo
+	2,  // 17: personal_schedule.WorkLabelGroup.draft:type_name -> personal_schedule.LabelInfo
+	10, // 18: personal_schedule.Work.goal:type_name -> personal_schedule.GoalOfWork
+	9,  // 19: personal_schedule.Work.labels:type_name -> personal_schedule.WorkLabelGroup
+	2,  // 20: personal_schedule.Work.category:type_name -> personal_schedule.LabelInfo
+	2,  // 21: personal_schedule.Work.overdue:type_name -> personal_schedule.LabelInfo
+	11, // 22: personal_schedule.RecoveryWorkItem.work:type_name -> personal_schedule.Work
+	2,  // 23: personal_schedule.WorkLabelGroupDetail.status:type_name -> personal_schedule.LabelInfo
+	2,  // 24: personal_schedule.WorkLabelGroupDetail.difficulty:type_name -> personal_schedule.LabelInfo
+	2,  // 25: personal_schedule.WorkLabelGroupDetail.priority:type_name -> personal_schedule.LabelInfo
+	2,  // 26: personal_schedule.WorkLabelGroupDetail.type:type_name -> personal_schedule.LabelInfo
+	2,  // 27: personal_schedule.WorkLabelGroupDetail.category:type_name -> personal_schedule.LabelInfo
+	10, // 28: personal_schedule.WorkDetail.goal:type_name -> personal_schedule.GoalOfWork
+	13, // 29: personal_schedule.WorkDetail.labels:type_name -> personal_schedule.WorkLabelGroupDetail
+	8,  // 30: personal_schedule.WorkDetail.sub_tasks:type_name -> personal_schedule.SubTaskPayload
+	31, // [31:31] is the sub-list for method output_type
+	31, // [31:31] is the sub-list for method input_type
+	31, // [31:31] is the sub-list for extension type_name
+	31, // [31:31] is the sub-list for extension extendee
+	0,  // [0:31] is the sub-list for field type_name
 }
 
 func init() { file_personal_schedule_service_common_schedule_proto_init() }
