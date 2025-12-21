@@ -3,7 +3,13 @@ package utils
 import (
 	"encoding/json"
 	"math"
+	"strings"
 	"time"
+	"unicode"
+
+	"golang.org/x/text/runes"
+	"golang.org/x/text/transform"
+	"golang.org/x/text/unicode/norm"
 )
 
 func RoundToTwoDecimal(val float64) float64 {
@@ -84,4 +90,10 @@ func SafeInt64(i *int64) int64 {
 	}
 
 	return *i
+}
+
+func RemoveAccent(s string) string {
+	t := transform.Chain(norm.NFD, runes.Remove(runes.In(unicode.Mn)), norm.NFC)
+	result, _, _ := transform.String(t, s)
+	return strings.ToLower(result)
 }
