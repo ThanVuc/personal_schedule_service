@@ -16,6 +16,11 @@ func RunConsumer(ctx context.Context) {
 		handler:      wire.InjectSyncAuthHandler(),
 	}
 
+	cronJobConsumer := NewCronJobConsumer(global.Logger)
+
 	syncAuthDBConsumer.ConsumeUserDB(ctx)
+	cronJobConsumer.ConsumeGiveUpJob(ctx)
+	cronJobConsumer.ConsumeCreateTodayRepeatedWorksJob(ctx)
+
 	global.Logger.Info("Sync Auth DB Consumer started", "")
 }
