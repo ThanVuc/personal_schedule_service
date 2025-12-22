@@ -89,7 +89,6 @@ func createWorkCollection() error {
 		{
 			Keys: bson.D{
 				{Key: "name", Value: "text"},
-				{Key: "name_normalized", Value: "text"},
 				{Key: "short_descriptions", Value: "text"},
 			},
 			Options: options.Index().
@@ -97,7 +96,6 @@ func createWorkCollection() error {
 				SetDefaultLanguage("none").
 				SetWeights(bson.D{
 					{Key: "name", Value: 10},
-					{Key: "name_normalized", Value: 10},
 					{Key: "short_descriptions", Value: 5},
 				}),
 		},
