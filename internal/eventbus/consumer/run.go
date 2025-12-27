@@ -4,7 +4,7 @@ import (
 	"context"
 	"personal_schedule_service/global"
 	"personal_schedule_service/internal/eventbus/publisher"
-	"personal_schedule_service/internal/grpc/wire"
+	"personal_schedule_service/internal/wire"
 )
 
 func RunConsumer(ctx context.Context) {
@@ -16,11 +16,7 @@ func RunConsumer(ctx context.Context) {
 		handler:      wire.InjectSyncAuthHandler(),
 	}
 
-	cronJobConsumer := NewCronJobConsumer(global.Logger)
-
 	syncAuthDBConsumer.ConsumeUserDB(ctx)
-	cronJobConsumer.ConsumeGiveUpJob(ctx)
-	cronJobConsumer.ConsumeCreateTodayRepeatedWorksJob(ctx)
 
 	global.Logger.Info("Sync Auth DB Consumer started", "")
 }

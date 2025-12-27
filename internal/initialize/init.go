@@ -15,6 +15,7 @@ func initConfigAndResources() error {
 	initMongoDB()
 	initRedis()
 	initEventBus()
+	initCronjobManager()
 
 	return nil
 }
@@ -25,6 +26,8 @@ func startGrpcSerivces(ctx context.Context, wg *sync.WaitGroup) {
 }
 
 func gracefulShutdown(wg *sync.WaitGroup, logger log.Logger) {
+	wg.Add(1)
+	global.CronJobManager.Shutdown(wg)
 
 	wg.Add(1)
 	err := global.MongoDbConntector.GracefulClose(context.Background(), wg)

@@ -5,6 +5,7 @@ import (
 	"os"
 	"os/signal"
 	"personal_schedule_service/global"
+	cronjob_run "personal_schedule_service/internal/cronjob"
 	"personal_schedule_service/internal/eventbus/consumer"
 	"sync"
 	"syscall"
@@ -21,8 +22,15 @@ func Run() {
 	ctx, cancel := context.WithCancel(context.Background())
 	wg := &sync.WaitGroup{}
 
+	// Start gRPC services
 	startGrpcSerivces(ctx, wg)
+
+	// Start event consumers
 	consumer.RunConsumer(ctx)
+
+	// start cron jobs
+	go cronjob_run.RunCronJob(ctx)
+
 	stop := make(chan os.Signal, 1)
 	signal.Notify(stop, syscall.SIGINT, syscall.SIGTERM)
 

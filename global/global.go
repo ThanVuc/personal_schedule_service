@@ -4,6 +4,7 @@ import (
 	"personal_schedule_service/pkg/settings"
 
 	"github.com/thanvuc/go-core-lib/cache"
+	"github.com/thanvuc/go-core-lib/cronjob"
 	"github.com/thanvuc/go-core-lib/eventbus"
 	"github.com/thanvuc/go-core-lib/log"
 	"github.com/thanvuc/go-core-lib/mongolib"
@@ -20,4 +21,5 @@ var (
 	RedisDb           *cache.RedisCache
 	EventBusConnector *eventbus.RabbitMQConnector
 	MongoDbConntector *mongolib.MongoConnector
+	CronJobManager    *cronjob.CronManager
 )
