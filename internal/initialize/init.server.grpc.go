@@ -6,7 +6,7 @@ import (
 	"net"
 	"personal_schedule_service/global"
 	"personal_schedule_service/internal/grpc/controller"
-	"personal_schedule_service/internal/grpc/wire"
+	"personal_schedule_service/internal/wire"
 	"personal_schedule_service/pkg/settings"
 	"personal_schedule_service/proto/personal_schedule"
 	"sync"

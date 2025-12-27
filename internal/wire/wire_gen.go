@@ -7,6 +7,7 @@
 package wire
 
 import (
+	"personal_schedule_service/internal/cronjob/cronjob"
 	"personal_schedule_service/internal/eventbus/handler"
 	"personal_schedule_service/internal/grpc/controller"
 	"personal_schedule_service/internal/grpc/mapper"
@@ -41,6 +42,18 @@ func InjectWorkController() *controller.WorkController {
 	workService := services.NewWorkService(workRepo, workMapper, workValidator)
 	workController := controller.NewWorkController(workService)
 	return workController
+}
+
+// Injectors from cronjob.wire.go:
+
+func InjectWorkCronJob() *cronjob.WorkCronJob {
+	workRepo := repos.NewWorkRepo()
+	workMapper := mapper.NewWorkMapper()
+	labelRepo := repos.NewLabelRepo()
+	workValidator := validation.NewWorkValidator(workRepo, labelRepo)
+	workService := services.NewWorkService(workRepo, workMapper, workValidator)
+	workCronJob := cronjob.NewWorkCronJob(workService)
+	return workCronJob
 }
 
 // Injectors from handler.wire.go:
