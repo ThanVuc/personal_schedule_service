@@ -31,13 +31,13 @@ func NewWorkCronJob(
 
 func (c *WorkCronJob) CreateDailyWorkCronJob(ctx context.Context) {
 	// Define the cron schedule (every day at midnight)
-	loc, _ := time.LoadLocation(cronjob_constant.LOCATION_HCM)
-	jobScheduler := cronjob.NewCronScheduler(global.RedisDb, cronjob_constant.CREATE_DAILY_WORK_CRONJOB, cron.WithLocation(loc))
+	jobScheduler := cronjob.NewCronScheduler(global.RedisDb, cronjob_constant.CREATE_DAILY_WORK_CRONJOB, cron.WithLocation(time.UTC))
 
 	c.cronJobManager.AddScheduler(jobScheduler)
 
 	// add schedule string for scheduling cronjob. eg. "0 0 * * *": every day at midnight
-	err := jobScheduler.ScheduleCronJob("*/3 * * * *", func() {
+	// Use OTC, so minus 7 hours from UTC (get Vietnam time)
+	err := jobScheduler.ScheduleCronJob("0 17 * * *", func() {
 		// Logic to create daily work entries
 		// call to work service to create daily work
 		c.logger.Info("Executing CreateDailyWorkCronJob", "")
