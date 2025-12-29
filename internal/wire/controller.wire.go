@@ -26,9 +26,11 @@ func InjectLabelController() *controller.LabelController {
 func InjectGoalController() *controller.GoalController {
 	wire.Build(
 		repos.NewGoalRepo,
+		repos.NewLabelRepo,
 		mapper.NewGoalMapper,
 		services.NewGoalService,
 		controller.NewGoalController,
+		validation.NewGoalValidator,
 	)
 
 	return nil

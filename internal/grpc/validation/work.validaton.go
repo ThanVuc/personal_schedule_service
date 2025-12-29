@@ -68,11 +68,11 @@ func (wv *workValidator) ValidateUpsertWork(ctx context.Context, req *personal_s
 
 	if req.StartDate != nil {
 		if req.EndDate <= *req.StartDate {
-			return NewValidationError(common.ErrorCode_ERROR_CODE_INTERNAL_ERROR, app_error.WorkEndDateBeforeStart, "EndDate must be after StartDate")
+			return NewValidationError(common.ErrorCode_ERROR_CODE_INTERNAL_ERROR, app_error.EndDateBeforeStart, "EndDate must be after StartDate")
 		}
 
 		if req.StartDate == &req.EndDate {
-			return NewValidationError(common.ErrorCode_ERROR_CODE_INTERNAL_ERROR, app_error.WorkZeroDuration, "work duration cannot be zero")
+			return NewValidationError(common.ErrorCode_ERROR_CODE_INTERNAL_ERROR, app_error.ZeroDuration, "work duration cannot be zero")
 		}
 
 		var excludeWorkID *bson.ObjectID
@@ -85,10 +85,10 @@ func (wv *workValidator) ValidateUpsertWork(ctx context.Context, req *personal_s
 		}
 		count, err := wv.workRepo.CountOverlappingWorks(ctx, req.UserId, *req.StartDate, req.EndDate, excludeWorkID)
 		if err != nil {
-			return NewValidationError(common.ErrorCode_ERROR_CODE_DATABASE_ERROR, app_error.WorkTimeOverlap, "error checking overlapping works")
+			return NewValidationError(common.ErrorCode_ERROR_CODE_DATABASE_ERROR, app_error.TimeOverlap, "error checking overlapping works")
 		}
 		if count > 0 {
-			return NewValidationError(common.ErrorCode_ERROR_CODE_DATABASE_ERROR, app_error.WorkTimeOverlap, "work time overlaps with existing work")
+			return NewValidationError(common.ErrorCode_ERROR_CODE_DATABASE_ERROR, app_error.TimeOverlap, "work time overlaps with existing work")
 		}
 	}
 

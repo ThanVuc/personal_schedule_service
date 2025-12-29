@@ -24,6 +24,8 @@ type (
 		GetLabelsByTypeIDs(ctx context.Context, typeIDs int32) ([]collection.Label, error)
 		GetLabelByKey(ctx context.Context, key string) (*collection.Label, error)
 		CheckLabelExistence(ctx context.Context, id string) (bool, error)
+		CountGoalByLabelKey(ctx context.Context, key string) (int64, error)
+		GetLabelByID(ctx context.Context, labelID bson.ObjectID) (*collection.Label, error)
 	}
 
 	GoalRepo interface {
@@ -47,19 +49,19 @@ type (
 		UpdateWork(ctx context.Context, workID bson.ObjectID, work *collection.Work) error
 		GetSubTasksByWorkID(ctx context.Context, workID bson.ObjectID) ([]collection.SubTask, error)
 		BulkWriteSubTasks(ctx context.Context, operations []mongo.WriteModel) (*mongo.BulkWriteResult, error)
-		GetWorks(ctx context.Context, req *personal_schedule.GetWorksRequest) ([]AggregatedWork, error)
+		GetWorks(ctx context.Context, req *personal_schedule.GetWorksRequest) ([]AggregatedWork, int32, error)
 		GetAggregatedWorkByID(ctx context.Context, workID bson.ObjectID) (*AggregatedWork, error)
 		CountOverlappingWorks(ctx context.Context, userID string, startDate, endDate int64, excludeWorkID *bson.ObjectID) (int64, error)
 		DeleteSubTaskByWorkID(ctx context.Context, workID bson.ObjectID) error
 		DeleteWork(ctx context.Context, workID bson.ObjectID) error
 		DeleteDraftsByDate(ctx context.Context, userID string, startDate, endDate time.Time) error
 		GetAggregatedWorksByDateRangeMs(ctx context.Context, userID string, startMs, endMs int64) ([]AggregatedWork, error)
-		GetWorksByDateRangeMs(ctx context.Context, userID string, startMs, endMs int64) ([]collection.Work, error)
 		BulkInsertWorks(ctx context.Context, works []interface{}) error
 		BulkInsertSubTasks(ctx context.Context, subTasks []interface{}) error
 		GetLabelsByTypeIDs(ctx context.Context, typeID int32) ([]collection.Label, error)
 		UpdateWorkField(ctx context.Context, workID bson.ObjectID, fieldName string, labelID bson.ObjectID) error
 		GetLabelByKey(ctx context.Context, key string) (*collection.Label, error)
+		CommitRecoveryDrafts(ctx context.Context, userID string, workIDs []bson.ObjectID, draftID bson.ObjectID) error
 	}
 )
 

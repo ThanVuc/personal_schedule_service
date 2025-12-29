@@ -29,7 +29,9 @@ func InjectLabelController() *controller.LabelController {
 func InjectGoalController() *controller.GoalController {
 	goalRepo := repos.NewGoalRepo()
 	goalMapper := mapper.NewGoalMapper()
-	goalService := services.NewGoalService(goalRepo, goalMapper)
+	labelRepo := repos.NewLabelRepo()
+	goalValidator := validation.NewGoalValidator(goalRepo, labelRepo)
+	goalService := services.NewGoalService(goalRepo, goalMapper, goalValidator)
 	goalController := controller.NewGoalController(goalService)
 	return goalController
 }

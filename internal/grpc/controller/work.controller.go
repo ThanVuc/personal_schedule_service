@@ -43,3 +43,7 @@ func (wc *WorkController) GetRecoveryWorks(ctx context.Context, req *personal_sc
 func (wc *WorkController) UpdateWorkLabel(ctx context.Context, req *personal_schedule.UpdateWorkLabelRequest) (*personal_schedule.UpdateWorkLabelResponse, error) {
 	return utils.WithSafePanic(ctx, req, wc.workService.UpdateWorkLabel)
 }
+
+func (wc *WorkController) CommitRecoveryDrafts(ctx context.Context, req *personal_schedule.CommitRecoveryDraftsRequest) (*personal_schedule.CommitRecoveryDraftsResponse, error) {
+	return utils.WithSafePanic(ctx, req, wc.workService.CommitRecoveryDrafts)
+}
