@@ -91,3 +91,22 @@ func (lr *labelRepo) CheckLabelExistence(ctx context.Context, id string) (bool, 
 	}
 	return count > 0, nil
 }
+
+func (lr *labelRepo) CountGoalByLabelKey(ctx context.Context, key string) (int64, error) {
+	coll := lr.mongoConnector.GetCollection(collection.GoalsCollection)
+	count, err := coll.CountDocuments(ctx, bson.M{"key": key})
+	if err != nil {
+		return 0, err
+	}
+	return count, nil
+}
+
+func (lr *labelRepo) GetLabelByID(ctx context.Context, labelID bson.ObjectID) (*collection.Label, error) {
+	coll := lr.mongoConnector.GetCollection(collection.LabelsCollection)
+	var label collection.Label
+	err := coll.FindOne(ctx, bson.M{"_id": labelID}).Decode(&label)
+	if err != nil {
+		return nil, err
+	}
+	return &label, nil
+}

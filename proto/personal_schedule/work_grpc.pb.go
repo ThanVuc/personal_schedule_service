@@ -19,12 +19,13 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	WorkService_UpsertWork_FullMethodName       = "/personal_schedule.WorkService/UpsertWork"
-	WorkService_GetWorks_FullMethodName         = "/personal_schedule.WorkService/GetWorks"
-	WorkService_GetWork_FullMethodName          = "/personal_schedule.WorkService/GetWork"
-	WorkService_DeleteWork_FullMethodName       = "/personal_schedule.WorkService/DeleteWork"
-	WorkService_GetRecoveryWorks_FullMethodName = "/personal_schedule.WorkService/GetRecoveryWorks"
-	WorkService_UpdateWorkLabel_FullMethodName  = "/personal_schedule.WorkService/UpdateWorkLabel"
+	WorkService_UpsertWork_FullMethodName           = "/personal_schedule.WorkService/UpsertWork"
+	WorkService_GetWorks_FullMethodName             = "/personal_schedule.WorkService/GetWorks"
+	WorkService_GetWork_FullMethodName              = "/personal_schedule.WorkService/GetWork"
+	WorkService_DeleteWork_FullMethodName           = "/personal_schedule.WorkService/DeleteWork"
+	WorkService_GetRecoveryWorks_FullMethodName     = "/personal_schedule.WorkService/GetRecoveryWorks"
+	WorkService_UpdateWorkLabel_FullMethodName      = "/personal_schedule.WorkService/UpdateWorkLabel"
+	WorkService_CommitRecoveryDrafts_FullMethodName = "/personal_schedule.WorkService/CommitRecoveryDrafts"
 )
 
 // WorkServiceClient is the client API for WorkService service.
@@ -37,6 +38,7 @@ type WorkServiceClient interface {
 	DeleteWork(ctx context.Context, in *DeleteWorkRequest, opts ...grpc.CallOption) (*DeleteWorkResponse, error)
 	GetRecoveryWorks(ctx context.Context, in *GetRecoveryWorksRequest, opts ...grpc.CallOption) (*GetRecoveryWorksResponse, error)
 	UpdateWorkLabel(ctx context.Context, in *UpdateWorkLabelRequest, opts ...grpc.CallOption) (*UpdateWorkLabelResponse, error)
+	CommitRecoveryDrafts(ctx context.Context, in *CommitRecoveryDraftsRequest, opts ...grpc.CallOption) (*CommitRecoveryDraftsResponse, error)
 }
 
 type workServiceClient struct {
@@ -107,6 +109,16 @@ func (c *workServiceClient) UpdateWorkLabel(ctx context.Context, in *UpdateWorkL
 	return out, nil
 }
 
+func (c *workServiceClient) CommitRecoveryDrafts(ctx context.Context, in *CommitRecoveryDraftsRequest, opts ...grpc.CallOption) (*CommitRecoveryDraftsResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(CommitRecoveryDraftsResponse)
+	err := c.cc.Invoke(ctx, WorkService_CommitRecoveryDrafts_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // WorkServiceServer is the server API for WorkService service.
 // All implementations must embed UnimplementedWorkServiceServer
 // for forward compatibility.
@@ -117,6 +129,7 @@ type WorkServiceServer interface {
 	DeleteWork(context.Context, *DeleteWorkRequest) (*DeleteWorkResponse, error)
 	GetRecoveryWorks(context.Context, *GetRecoveryWorksRequest) (*GetRecoveryWorksResponse, error)
 	UpdateWorkLabel(context.Context, *UpdateWorkLabelRequest) (*UpdateWorkLabelResponse, error)
+	CommitRecoveryDrafts(context.Context, *CommitRecoveryDraftsRequest) (*CommitRecoveryDraftsResponse, error)
 	mustEmbedUnimplementedWorkServiceServer()
 }
 
@@ -144,6 +157,9 @@ func (UnimplementedWorkServiceServer) GetRecoveryWorks(context.Context, *GetReco
 }
 func (UnimplementedWorkServiceServer) UpdateWorkLabel(context.Context, *UpdateWorkLabelRequest) (*UpdateWorkLabelResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UpdateWorkLabel not implemented")
+}
+func (UnimplementedWorkServiceServer) CommitRecoveryDrafts(context.Context, *CommitRecoveryDraftsRequest) (*CommitRecoveryDraftsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CommitRecoveryDrafts not implemented")
 }
 func (UnimplementedWorkServiceServer) mustEmbedUnimplementedWorkServiceServer() {}
 func (UnimplementedWorkServiceServer) testEmbeddedByValue()                     {}
@@ -274,6 +290,24 @@ func _WorkService_UpdateWorkLabel_Handler(srv interface{}, ctx context.Context, 
 	return interceptor(ctx, in, info, handler)
 }
 
+func _WorkService_CommitRecoveryDrafts_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CommitRecoveryDraftsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(WorkServiceServer).CommitRecoveryDrafts(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: WorkService_CommitRecoveryDrafts_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(WorkServiceServer).CommitRecoveryDrafts(ctx, req.(*CommitRecoveryDraftsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // WorkService_ServiceDesc is the grpc.ServiceDesc for WorkService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -304,6 +338,10 @@ var WorkService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "UpdateWorkLabel",
 			Handler:    _WorkService_UpdateWorkLabel_Handler,
+		},
+		{
+			MethodName: "CommitRecoveryDrafts",
+			Handler:    _WorkService_CommitRecoveryDrafts_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

@@ -2,6 +2,7 @@ package repos
 
 import (
 	"context"
+	"fmt"
 	"personal_schedule_service/internal/collection"
 	"personal_schedule_service/internal/grpc/utils"
 	"personal_schedule_service/proto/personal_schedule"
@@ -28,6 +29,7 @@ type GoalInfo struct {
 type AggregatedWork struct {
 	ID                  bson.ObjectID      `bson:"_id"`
 	Name                string             `bson:"name"`
+	NameNormalized      string             `bson:"name_normalized"`
 	ShortDescriptions   *string            `bson:"short_descriptions,omitempty"`
 	DetailedDescription *string            `bson:"detailed_description,omitempty"`
 	StartDate           *time.Time         `bson:"start_date,omitempty"`
@@ -40,7 +42,11 @@ type AggregatedWork struct {
 	Type                []collection.Label `bson:"typeInfo"`
 	Category            []collection.Label `bson:"categoryInfo"`
 	Overdue             []collection.Label `bson:"overdue,omitempty"`
-	Draft               []collection.Label `bson:"draft,omitempty"`
+	Draft               []collection.Label `bson:"draftInfo,omitempty"`
+}
+
+type totalCountWorksResult struct {
+	Total int32 `bson:"total"`
 }
 
 func (wr *workRepo) GetWorkByID(ctx context.Context, workID bson.ObjectID) (*collection.Work, error) {
@@ -68,7 +74,7 @@ func (wr *workRepo) CreateWork(ctx context.Context, work *collection.Work) (bson
 
 func (wr *workRepo) UpdateWork(ctx context.Context, workID bson.ObjectID, work *collection.Work) error {
 	coll := wr.mongoConnector.GetCollection(collection.WorksCollection)
-	now := time.Now()
+	now := time.Now().UTC()
 	updates := bson.M{
 		"name":                 work.Name,
 		"name_normalized":      work.NameNormalized,
@@ -81,6 +87,7 @@ func (wr *workRepo) UpdateWork(ctx context.Context, workID bson.ObjectID, work *
 		"priority_id":          work.PriorityID,
 		"type_id":              work.TypeID,
 		"category_id":          work.CategoryID,
+		"draft_id":             work.DraftID,
 		"goal_id":              work.GoalID,
 		"last_modified_at":     now,
 	}
@@ -111,7 +118,7 @@ func (wr *workRepo) BulkWriteSubTasks(ctx context.Context, operations []mongo.Wr
 	return coll.BulkWrite(ctx, operations)
 }
 
-func (wr *workRepo) GetWorks(ctx context.Context, req *personal_schedule.GetWorksRequest) ([]AggregatedWork, error) {
+func (wr *workRepo) GetWorks(ctx context.Context, req *personal_schedule.GetWorksRequest) ([]AggregatedWork, int32, error) {
 	coll := wr.mongoConnector.GetCollection(collection.WorksCollection)
 
 	var fromDate, toDate time.Time
@@ -211,6 +218,15 @@ func (wr *workRepo) GetWorks(ctx context.Context, req *personal_schedule.GetWork
 			"as":           "typeInfo",
 		},
 	}}
+	lookupDraft := bson.D{{
+		Key: "$lookup",
+		Value: bson.M{
+			"from":         collection.LabelsCollection,
+			"localField":   "draft_id",
+			"foreignField": "_id",
+			"as":           "draftInfo",
+		},
+	}}
 	lookupGoal := bson.D{{
 		Key: "$lookup",
 		Value: bson.M{
@@ -239,22 +255,45 @@ func (wr *workRepo) GetWorks(ctx context.Context, req *personal_schedule.GetWork
 		lookupPriority,
 		lookupCategory,
 		lookupType,
+		lookupDraft,
 		sortStage,
 		lookupGoal,
 	}
 
+	pipelineCount := mongo.Pipeline{
+		{{Key: "$match", Value: matchFilter}},
+		{{Key: "$count", Value: "total"}},
+	}
+
 	cursor, err := coll.Aggregate(ctx, pipeline)
 	if err != nil {
-		return nil, err
+		return nil, 0, err
 	}
 	defer cursor.Close(ctx)
 
 	var works []AggregatedWork
 	if err = cursor.All(ctx, &works); err != nil {
-		return nil, err
+		wr.logger.Error("Failed to decode works", "", zap.Error(err))
+		return nil, 0, err
 	}
 
-	return works, nil
+	countCursor, err := coll.Aggregate(ctx, pipelineCount)
+	totalWorks := int32(0)
+	if err != nil {
+		wr.logger.Error("Failed to aggregate works count", "", zap.Error(err))
+		return nil, 0, err
+	} else {
+		defer countCursor.Close(ctx)
+		var countResult []totalCountResult
+		if err = countCursor.All(ctx, &countResult); err == nil && len(countResult) > 0 {
+			totalWorks = countResult[0].Total
+		} else if err != nil {
+			wr.logger.Error("Failed to decode GetWorks count results", "err", zap.Error(err))
+		}
+	}
+	fmt.Println("Total works:", totalWorks)
+
+	return works, totalWorks, nil
 }
 
 func (wr *workRepo) CountOverlappingWorks(ctx context.Context, userID string, startDate, endDate int64, excludeWorkID *bson.ObjectID) (int64, error) {
@@ -331,6 +370,15 @@ func (wr *workRepo) GetAggregatedWorkByID(ctx context.Context, workID bson.Objec
 			"as":           "typeInfo",
 		},
 	}}
+	lookupDraft := bson.D{{
+		Key: "$lookup",
+		Value: bson.M{
+			"from":         collection.LabelsCollection,
+			"localField":   "draft_id",
+			"foreignField": "_id",
+			"as":           "draftInfo",
+		},
+	}}
 	lookupGoal := bson.D{{
 		Key: "$lookup",
 		Value: bson.M{
@@ -352,6 +400,7 @@ func (wr *workRepo) GetAggregatedWorkByID(ctx context.Context, workID bson.Objec
 		lookupCategory,
 		lookupType,
 		lookupGoal,
+		lookupDraft,
 		{{Key: "$limit", Value: 1}},
 	}
 
@@ -503,39 +552,13 @@ func (wr *workRepo) GetAggregatedWorksByDateRangeMs(ctx context.Context, userID 
 	return works, nil
 }
 
-func (wr *workRepo) GetWorksByDateRangeMs(ctx context.Context, userID string, startMs, endMs int64) ([]collection.Work, error) {
-	coll := wr.mongoConnector.GetCollection(collection.WorksCollection)
-	start := time.UnixMilli(startMs)
-	end := time.UnixMilli(endMs)
-	filter := bson.D{
-		{Key: "user_id", Value: userID},
-		{Key: "draft_id", Value: nil},
-		{Key: "$and", Value: bson.A{
-			bson.D{{Key: "$or", Value: bson.A{
-				bson.D{{Key: "start_date", Value: bson.M{"$lte": end}}},
-				bson.D{{Key: "start_date", Value: nil}},
-			}}},
-			bson.D{{Key: "end_date", Value: bson.M{"$gte": start}}},
-		}},
-	}
-
-	cursor, err := coll.Find(ctx, filter)
-	if err != nil {
-		return nil, err
-	}
-	var works []collection.Work
-	if err = cursor.All(ctx, &works); err != nil {
-		return nil, err
-	}
-	return works, nil
-}
-
 func (wr *workRepo) BulkInsertWorks(ctx context.Context, works []interface{}) error {
 	if len(works) == 0 {
 		return nil
 	}
 	coll := wr.mongoConnector.GetCollection(collection.WorksCollection)
 	_, err := coll.InsertMany(ctx, works)
+	wr.logger.Info("BulkInsertWorks", "", zap.Int("count", len(works)))
 	return err
 }
 func (wr *workRepo) BulkInsertSubTasks(ctx context.Context, subTasks []interface{}) error {
@@ -544,6 +567,7 @@ func (wr *workRepo) BulkInsertSubTasks(ctx context.Context, subTasks []interface
 	}
 	coll := wr.mongoConnector.GetCollection(collection.SubTasksCollection)
 	_, err := coll.InsertMany(ctx, subTasks)
+	wr.logger.Info("BulkInsertSubTasks", "", zap.Int("count", len(subTasks)))
 	return err
 }
 
@@ -586,4 +610,21 @@ func (wr *workRepo) GetLabelByKey(ctx context.Context, key string) (*collection.
 		return nil, err
 	}
 	return &label, nil
+}
+
+func (wr *workRepo) CommitRecoveryDrafts(ctx context.Context, req *personal_schedule.CommitRecoveryDraftsRequest, draftID bson.ObjectID) error {
+	coll := wr.mongoConnector.GetCollection(collection.WorksCollection)
+	filler := bson.M{
+		"_id":      bson.M{"$in": req.WorkIds},
+		"user_id":  req.UserId,
+		"draft_id": draftID,
+	}
+	update := bson.M{
+		"$unset": bson.M{
+			"draft_id": "",
+		},
+	}
+	_, err := coll.UpdateMany(ctx, filler, update)
+	wr.logger.Info("CommitRecoveryDrafts", "", zap.Int("work_count", len(req.WorkIds)))
+	return err
 }

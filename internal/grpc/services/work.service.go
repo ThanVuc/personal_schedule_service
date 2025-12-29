@@ -33,6 +33,14 @@ type workService struct {
 	eventbusConnector *eventbus.RabbitMQConnector
 }
 
+type recovertTimes struct {
+	TargetStart time.Time
+	TargetEnd   time.Time
+	SourceStart time.Time
+	SourceEnd   time.Time
+	TimeShift   time.Duration
+}
+
 func (s *workService) UpsertWork(ctx context.Context, req *personal_schedule.UpsertWorkRequest) (*personal_schedule.UpsertWorkResponse, error) {
 	requestId := utils.GetRequestIDFromOutgoingContext(ctx)
 	if err := s.validator.ValidateUpsertWork(ctx, req); err != nil {
@@ -54,7 +62,7 @@ func (s *workService) UpsertWork(ctx context.Context, req *personal_schedule.Ups
 		}, nil
 	}
 
-	now := time.Now()
+	now := time.Now().UTC()
 	if req.Id == nil || *req.Id == "" {
 		work.UserID = req.UserId
 		work.CreatedAt = now
@@ -210,12 +218,13 @@ func (s *workService) publishNotifications(ctx context.Context, payload []byte) 
 }
 
 func (s *workService) GetWorks(ctx context.Context, req *personal_schedule.GetWorksRequest) (*personal_schedule.GetWorksResponse, error) {
-	aggWorks, err := s.workRepo.GetWorks(ctx, req)
+	aggWorks, totalWorks, err := s.workRepo.GetWorks(ctx, req)
 	if err != nil {
 		s.logger.Error("Failed to get works", "", zap.Error(err))
 		return &personal_schedule.GetWorksResponse{
-			Works: []*personal_schedule.Work{},
-			Error: utils.InternalServerError(ctx, err),
+			Works:      []*personal_schedule.Work{},
+			TotalWorks: 0,
+			Error:      utils.InternalServerError(ctx, err),
 		}, nil
 	}
 
@@ -235,8 +244,11 @@ func (s *workService) GetWorks(ctx context.Context, req *personal_schedule.GetWo
 	protoWorks := s.workMapper.ConvertAggregatedWorksToProto(aggWorks)
 
 	return &personal_schedule.GetWorksResponse{
-		Works: protoWorks,
+		Works:      protoWorks,
+		TotalWorks: int32(totalWorks),
+		Error:      nil,
 	}, nil
+
 }
 
 func (s *workService) GetWork(ctx context.Context, req *personal_schedule.GetWorkRequest) (*personal_schedule.GetWorkResponse, error) {
@@ -344,161 +356,159 @@ func (s *workService) DeleteWork(ctx context.Context, req *personal_schedule.Del
 
 }
 
-func (s *workService) RecoverWorks(ctx context.Context, req *personal_schedule.GetRecoveryWorksRequest) (*personal_schedule.GetRecoveryWorksResponse, error) {
-	targetStart := time.Unix(0, req.TargetDate*int64(time.Millisecond))
-	targetEnd := utils.EndOfDay(targetStart)
-	sourceStart := time.Unix(0, req.SourceDate*int64(time.Millisecond))
-	sourceEnd := utils.EndOfDay(sourceStart)
-	timeShift := targetStart.Sub(sourceStart)
+func (s *workService) parseRecoverTimes(req *personal_schedule.GetRecoveryWorksRequest) (*recovertTimes, error) {
+	targetStart := time.UnixMilli(req.TargetDate)
+	sourceStart := time.UnixMilli(req.SourceDate)
 
-	targetStartMs := targetStart.UnixMilli()
-	targetEndMs := targetEnd.UnixMilli()
-	sourceStartMs := sourceStart.UnixMilli()
-	sourceEndMs := sourceEnd.UnixMilli()
+	return &recovertTimes{
+		TargetStart: targetStart,
+		TargetEnd:   utils.EndOfDay(targetStart),
+		SourceStart: sourceStart,
+		SourceEnd:   utils.EndOfDay(sourceStart),
+		TimeShift:   targetStart.Sub(sourceStart),
+	}, nil
+}
 
-	draftLabels, err := s.workRepo.GetLabelsByTypeIDs(ctx, 6)
-	if err != nil || len(draftLabels) == 0 {
-		return nil, fmt.Errorf("system error: draft label not found")
+func (s *workService) cloneSubTasks(oldSubs []collection.SubTask, newWorkID bson.ObjectID, now time.Time) []collection.SubTask {
+	var result []collection.SubTask
+	for _, s := range oldSubs {
+		result = append(result, collection.SubTask{
+			ID:             bson.NewObjectID(),
+			Name:           s.Name,
+			IsCompleted:    false,
+			WorkID:         newWorkID,
+			CreatedAt:      now,
+			LastModifiedAt: now,
+		})
 	}
-	draftLabelID := draftLabels[0].ID
+	return result
+}
 
-	_ = s.workRepo.DeleteDraftsByDate(ctx, req.UserId, targetStart, targetEnd)
+func (s *workService) cloneSingleWork(ctx context.Context, oldWork repos.AggregatedWork, times *recovertTimes, draft *collection.Label) (newWork collection.Work, subTasks []collection.SubTask, err error) {
+	now := time.Now().UTC()
+	newEnd := oldWork.EndDate.Add(times.TimeShift)
+	var newStart *time.Time
+	if oldWork.StartDate != nil {
+		t := oldWork.StartDate.Add(times.TimeShift)
+		newStart = &t
+	}
 
-	sourceWorks, err := s.workRepo.GetAggregatedWorksByDateRangeMs(
-		ctx,
-		req.UserId,
-		sourceStartMs,
-		sourceEndMs,
-	)
+	newWorkID := bson.NewObjectID()
+	oldSubs, err := s.workRepo.GetSubTasksByWorkID(ctx, oldWork.ID)
+	if err != nil {
+		s.logger.Error("Failed to get subtasks for work", "", zap.Error(err))
+		return newWork, nil, err
+	}
+	subTasks = s.cloneSubTasks(oldSubs, newWorkID, now)
+
+	inProgress, err := s.workRepo.GetLabelByKey(ctx, labels_constant.LabelInProgress)
+	if err != nil {
+		s.logger.Error("Failed to get in-progress label", "", zap.Error(err))
+		return newWork, nil, err
+	}
+
+	var goalID *bson.ObjectID
+	if len(oldWork.GoalInfo) > 0 {
+		gid := oldWork.GoalInfo[0].ID
+		goalID = &gid
+	}
+
+	newWork = collection.Work{
+		ID:                  newWorkID,
+		Name:                oldWork.Name,
+		ShortDescriptions:   oldWork.ShortDescriptions,
+		DetailedDescription: oldWork.DetailedDescription,
+		NameNormalized:      oldWork.NameNormalized,
+		StartDate:           newStart,
+		EndDate:             newEnd,
+		UserID:              oldWork.UserID,
+		StatusID:            inProgress.ID,
+		DifficultyID:        oldWork.Difficulty[0].ID,
+		PriorityID:          oldWork.Priority[0].ID,
+		TypeID:              oldWork.Type[0].ID,
+		CategoryID:          oldWork.Category[0].ID,
+		GoalID:              goalID,
+		DraftID:             &draft.ID,
+		CreatedAt:           now,
+		LastModifiedAt:      now,
+	}
+
+	return newWork, subTasks, nil
+}
+
+func (s *workService) RecoverWorks(ctx context.Context, req *personal_schedule.GetRecoveryWorksRequest) (*personal_schedule.GetRecoveryWorksResponse, error) {
+	times, err := s.parseRecoverTimes(req)
+	if err != nil {
+		s.logger.Error("Failed to parse recover times", "", zap.Error(err))
+		return &personal_schedule.GetRecoveryWorksResponse{
+			IsSuccess: false,
+			Message:   "Failed to parse recover times",
+			Error:     utils.InternalServerError(ctx, err),
+		}, nil
+	}
+
+	draft, err := s.workRepo.GetLabelByKey(ctx, labels_constant.LabelDraft)
+	if err != nil {
+		s.logger.Error("Failed to get draft label", "", zap.Error(err))
+		return nil, err
+	}
+
+	if err := s.workRepo.DeleteDraftsByDate(ctx, req.UserId, times.TargetStart, times.TargetEnd); err != nil {
+		s.logger.Error("Failed to delete drafts by date", "", zap.Error(err))
+		return &personal_schedule.GetRecoveryWorksResponse{
+			IsSuccess: false,
+			Message:   "Failed to delete drafts by date",
+			Error:     utils.DatabaseError(ctx, err),
+		}, nil
+	}
+
+	sourceWorks, err := s.workRepo.GetAggregatedWorksByDateRangeMs(ctx, req.UserId, times.SourceStart.UnixMilli(), times.SourceEnd.UnixMilli())
 	if err != nil {
 		s.logger.Error("Failed to get source works", "", zap.Error(err))
 		return &personal_schedule.GetRecoveryWorksResponse{
-			Error: utils.DatabaseError(ctx, err),
-		}, nil
-	}
-	if len(sourceWorks) == 0 {
-		return &personal_schedule.GetRecoveryWorksResponse{
-			Works: []*personal_schedule.RecoveryWorkItem{},
+			IsSuccess: false,
+			Message:   "Failed to get source works",
+			Error:     utils.DatabaseError(ctx, err),
 		}, nil
 	}
 
-	targetWorks, err := s.workRepo.GetWorksByDateRangeMs(
-		ctx,
-		req.UserId,
-		targetStartMs,
-		targetEndMs,
-	)
-
-	if err != nil {
-		s.logger.Error("Failed to get target works", "", zap.Error(err))
-		return &personal_schedule.GetRecoveryWorksResponse{
-			Error: utils.DatabaseError(ctx, err),
-		}, nil
-	}
-
-	var responseItems []*personal_schedule.RecoveryWorkItem
 	var worksToInsert []interface{}
 	var subTasksToInsert []interface{}
-	now := time.Now()
 
 	for _, oldWork := range sourceWorks {
-		newEnd := oldWork.EndDate.Add(timeShift)
-		var newStart *time.Time
-		hasStart := false
-		if oldWork.StartDate != nil {
-			t := oldWork.StartDate.Add(timeShift)
-			newStart = &t
-			hasStart = true
-		}
-
-		isConflict := false
-		if hasStart {
-			for _, existing := range targetWorks {
-				var exStart time.Time
-				if existing.StartDate != nil {
-					exStart = *existing.StartDate
-				}
-				if newStart.Before(existing.EndDate) && newEnd.After(exStart) {
-					isConflict = true
-					break
-				}
-			}
-		}
-
-		newWorkID := bson.NewObjectID()
-
-		oldSubTasks, err := s.workRepo.GetSubTasksByWorkID(ctx, oldWork.ID)
+		newWork, subtasks, err := s.cloneSingleWork(ctx, oldWork, times, draft)
 		if err != nil {
-			s.logger.Error("Failed to get subtasks for work", "", zap.Error(err))
-			return &personal_schedule.GetRecoveryWorksResponse{Error: utils.DatabaseError(ctx, err)}, nil
-		}
-		for _, oldSub := range oldSubTasks {
-			nst := collection.SubTask{
-				ID:             bson.NewObjectID(),
-				Name:           oldSub.Name,
-				IsCompleted:    false,
-				WorkID:         newWorkID,
-				CreatedAt:      now,
-				LastModifiedAt: now,
-			}
-			subTasksToInsert = append(subTasksToInsert, nst)
-
+			s.logger.Error("Failed to clone single work", "", zap.Error(err))
+			return &personal_schedule.GetRecoveryWorksResponse{
+				IsSuccess: false,
+				Message:   "Failed to clone single work",
+				Error:     utils.DatabaseError(ctx, err),
+			}, nil
 		}
 
-		var goalID *bson.ObjectID
-		if len(oldWork.GoalInfo) > 0 {
-			gid := oldWork.GoalInfo[0].ID
-			goalID = &gid
+		worksToInsert = append(worksToInsert, newWork)
+
+		for _, st := range subtasks {
+			subTasksToInsert = append(subTasksToInsert, st)
 		}
 
-		fmt.Println("Old Work ID:", oldWork.ID.Hex(), "New Work ID:", newWorkID.Hex())
-		newWorkDB := collection.Work{
-			ID:                  newWorkID,
-			Name:                oldWork.Name,
-			ShortDescriptions:   oldWork.ShortDescriptions,
-			DetailedDescription: oldWork.DetailedDescription,
-			StartDate:           newStart,
-			EndDate:             newEnd,
-			UserID:              oldWork.UserID,
-			StatusID:            oldWork.Status[0].ID,
-			DifficultyID:        oldWork.Difficulty[0].ID,
-			PriorityID:          oldWork.Priority[0].ID,
-			TypeID:              oldWork.Type[0].ID,
-			CategoryID:          oldWork.Category[0].ID,
-			GoalID:              goalID,
-			DraftID:             &draftLabelID,
-			CreatedAt:           now,
-			LastModifiedAt:      now,
-		}
-		worksToInsert = append(worksToInsert, newWorkDB)
-
-		tempAggWork := oldWork
-		tempAggWork.ID = newWorkID
-		tempAggWork.StartDate = newStart
-		tempAggWork.EndDate = newEnd
-
-		protoWorks := s.workMapper.ConvertAggregatedWorksToProto([]repos.AggregatedWork{tempAggWork})
-		workDetailProto := protoWorks[0]
-		workDetailProto.Id = ""
-
-		responseItems = append(responseItems, &personal_schedule.RecoveryWorkItem{
-			Work:       workDetailProto,
-			IsConflict: isConflict,
-		})
+	}
+	if err := s.workRepo.BulkInsertWorks(ctx, worksToInsert); err != nil {
+		return &personal_schedule.GetRecoveryWorksResponse{
+			IsSuccess: false,
+			Message:   "Failed to insert recovered works",
+			Error:     utils.DatabaseError(ctx, err),
+		}, nil
 	}
 
-	if len(worksToInsert) > 0 {
-		if err := s.workRepo.BulkInsertWorks(ctx, worksToInsert); err != nil {
-			s.logger.Error("Failed to bulk insert recovered works", "", zap.Error(err))
-			return &personal_schedule.GetRecoveryWorksResponse{Error: utils.DatabaseError(ctx, err)}, nil
-		}
-	}
 	if len(subTasksToInsert) > 0 {
-		s.workRepo.BulkInsertSubTasks(ctx, subTasksToInsert)
+		_ = s.workRepo.BulkInsertSubTasks(ctx, subTasksToInsert)
 	}
 
 	return &personal_schedule.GetRecoveryWorksResponse{
-		Works: responseItems,
+		IsSuccess: true,
+		Message:   "Works recovered successfully",
+		Error:     nil,
 	}, nil
 }
 
@@ -572,5 +582,37 @@ func (s *workService) UpdateWorkLabel(ctx context.Context, req *personal_schedul
 	return &personal_schedule.UpdateWorkLabelResponse{
 		IsSuccess: true,
 		Message:   "Label updated successfully",
+	}, nil
+}
+
+func (s *workService) CommitRecoveryDrafts(ctx context.Context, req *personal_schedule.CommitRecoveryDraftsRequest) (*personal_schedule.CommitRecoveryDraftsResponse, error) {
+	draftID, err := s.workRepo.GetLabelByKey(ctx, labels_constant.LabelDraft)
+	if err != nil {
+		s.logger.Error("Failed to get draft label", "", zap.Error(err))
+		return &personal_schedule.CommitRecoveryDraftsResponse{
+			IsSuccess: false,
+			Message:   "Failed to get draft label",
+			Error:     utils.DatabaseError(ctx, err),
+		}, nil
+	}
+
+	if len(req.WorkIds) == 0 {
+		return &personal_schedule.CommitRecoveryDraftsResponse{
+			IsSuccess: true,
+		}, nil
+	}
+
+	err = s.workRepo.CommitRecoveryDrafts(ctx, req, draftID.ID)
+	if err != nil {
+		s.logger.Error("Failed to commit recovery drafts", "", zap.Error(err))
+		return &personal_schedule.CommitRecoveryDraftsResponse{
+			IsSuccess: false,
+			Message:   "Failed to commit recovery drafts",
+			Error:     utils.DatabaseError(ctx, err),
+		}, nil
+	}
+	return &personal_schedule.CommitRecoveryDraftsResponse{
+		IsSuccess: true,
+		Message:   "Recovery drafts committed successfully",
 	}, nil
 }
