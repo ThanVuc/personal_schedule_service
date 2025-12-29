@@ -601,8 +601,18 @@ func (s *workService) CommitRecoveryDrafts(ctx context.Context, req *personal_sc
 			IsSuccess: true,
 		}, nil
 	}
+	var workObjectIDs []bson.ObjectID
+	for _, id := range req.WorkIds {
+		oid, err := bson.ObjectIDFromHex(id)
+		if err != nil {
+			return &personal_schedule.CommitRecoveryDraftsResponse{
+				IsSuccess: false,
+			}, nil
+		}
+		workObjectIDs = append(workObjectIDs, oid)
+	}
 
-	err = s.workRepo.CommitRecoveryDrafts(ctx, req, draftID.ID)
+	err = s.workRepo.CommitRecoveryDrafts(ctx, req.UserId, workObjectIDs, draftID.ID)
 	if err != nil {
 		s.logger.Error("Failed to commit recovery drafts", "", zap.Error(err))
 		return &personal_schedule.CommitRecoveryDraftsResponse{

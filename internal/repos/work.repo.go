@@ -612,11 +612,11 @@ func (wr *workRepo) GetLabelByKey(ctx context.Context, key string) (*collection.
 	return &label, nil
 }
 
-func (wr *workRepo) CommitRecoveryDrafts(ctx context.Context, req *personal_schedule.CommitRecoveryDraftsRequest, draftID bson.ObjectID) error {
+func (wr *workRepo) CommitRecoveryDrafts(ctx context.Context, userID string, workIDs []bson.ObjectID, draftID bson.ObjectID) error {
 	coll := wr.mongoConnector.GetCollection(collection.WorksCollection)
 	filler := bson.M{
-		"_id":      bson.M{"$in": req.WorkIds},
-		"user_id":  req.UserId,
+		"_id":      bson.M{"$in": workIDs},
+		"user_id":  userID,
 		"draft_id": draftID,
 	}
 	update := bson.M{
@@ -625,6 +625,6 @@ func (wr *workRepo) CommitRecoveryDrafts(ctx context.Context, req *personal_sche
 		},
 	}
 	_, err := coll.UpdateMany(ctx, filler, update)
-	wr.logger.Info("CommitRecoveryDrafts", "", zap.Int("work_count", len(req.WorkIds)))
+	wr.logger.Info("CommitRecoveryDrafts", "", zap.Int("count", len(workIDs)))
 	return err
 }
