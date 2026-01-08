@@ -9,6 +9,7 @@ import (
 	labels_constant "personal_schedule_service/internal/constant/labels"
 	"personal_schedule_service/internal/grpc/mapper"
 	"personal_schedule_service/internal/grpc/utils"
+	"personal_schedule_service/internal/grpc/validation"
 	"personal_schedule_service/internal/repos"
 	"personal_schedule_service/proto/personal_schedule"
 	"time"
@@ -24,12 +25,12 @@ type goalService struct {
 	logger         log.Logger
 	goalRepo       repos.GoalRepo
 	goalMapper     mapper.GoalMapper
+	validator      validation.GoalValidator
 	mongoConnector *mongolib.MongoConnector
 }
 
 func (s *goalService) GetGoals(ctx context.Context, req *personal_schedule.GetGoalsRequest) (*personal_schedule.GetGoalsResponse, error) {
 	goals, totalGoals, err := s.goalRepo.GetGoals(ctx, req)
-
 	if err != nil {
 		s.logger.Error("Error fetching goals from repo", "err", zap.Error(err))
 		return &personal_schedule.GetGoalsResponse{
@@ -74,6 +75,17 @@ func (s *goalService) GetGoals(ctx context.Context, req *personal_schedule.GetGo
 }
 
 func (s *goalService) UpsertGoal(ctx context.Context, req *personal_schedule.UpsertGoalRequest) (*personal_schedule.UpsertGoalResponse, error) {
+	requestID := utils.GetRequestIDFromOutgoingContext(ctx)
+	if err := s.validator.ValidationGoal(ctx, req); err != nil {
+		s.logger.Warn("Goal validation failed", "", zap.String("request_id", requestID), zap.Error(err))
+		if ve, ok := err.(*validation.ValidationError); ok {
+			return &personal_schedule.UpsertGoalResponse{
+				IsSuccess: false,
+				Error:     utils.CustomError(ctx, ve.Category, ve.Code, err),
+			}, nil
+		}
+	}
+
 	goalDB, tasksDB, err := s.goalMapper.MapUpsertProtoToModels(req)
 	if err != nil {
 		s.logger.Warn("Failed to map UpsertGoal proto", "", zap.Error(err))
