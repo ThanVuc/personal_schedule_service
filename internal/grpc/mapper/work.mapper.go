@@ -200,6 +200,7 @@ func (m *workMapper) MapAggregatedToWorkDetailProto(aggWork repos.AggregatedWork
 			Type:       workBaseProto.Labels.Type,
 			Category:   workBaseProto.Category,
 		},
+		Draft:    workBaseProto.Labels.Draft,
 		SubTasks: subTasksProto,
 	}
 }
