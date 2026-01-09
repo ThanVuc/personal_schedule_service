@@ -62,6 +62,10 @@ type (
 		UpdateWorkField(ctx context.Context, workID bson.ObjectID, fieldName string, labelID bson.ObjectID) error
 		GetLabelByKey(ctx context.Context, key string) (*collection.Label, error)
 		CommitRecoveryDrafts(ctx context.Context, userID string, workIDs []bson.ObjectID, draftID bson.ObjectID) error
+		DeleteAllDraftWorks(ctx context.Context, userID string, workIDs []bson.ObjectID) error
+		BulkUpdateWorks(ctx context.Context, models []mongo.WriteModel) error
+		GetFutureRepeatedWorks(ctx context.Context, repeatedID bson.ObjectID, fromTargetDate time.Time) ([]collection.Work, error)
+		DeleteSubTasksByWorkIDs(ctx context.Context, workIDs []bson.ObjectID) error
 	}
 )
 

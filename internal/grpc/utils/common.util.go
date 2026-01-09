@@ -97,3 +97,7 @@ func RemoveAccent(s string) string {
 	result, _, _ := transform.String(t, s)
 	return strings.ToLower(result)
 }
+
+func TruncateToDay(t time.Time) time.Time {
+	return time.Date(t.Year(), t.Month(), t.Day(), 0, 0, 0, 0, t.Location())
+}

@@ -26,6 +26,7 @@ const (
 	WorkService_GetRecoveryWorks_FullMethodName     = "/personal_schedule.WorkService/GetRecoveryWorks"
 	WorkService_UpdateWorkLabel_FullMethodName      = "/personal_schedule.WorkService/UpdateWorkLabel"
 	WorkService_CommitRecoveryDrafts_FullMethodName = "/personal_schedule.WorkService/CommitRecoveryDrafts"
+	WorkService_DeleteAllDraftWorks_FullMethodName  = "/personal_schedule.WorkService/DeleteAllDraftWorks"
 )
 
 // WorkServiceClient is the client API for WorkService service.
@@ -39,6 +40,7 @@ type WorkServiceClient interface {
 	GetRecoveryWorks(ctx context.Context, in *GetRecoveryWorksRequest, opts ...grpc.CallOption) (*GetRecoveryWorksResponse, error)
 	UpdateWorkLabel(ctx context.Context, in *UpdateWorkLabelRequest, opts ...grpc.CallOption) (*UpdateWorkLabelResponse, error)
 	CommitRecoveryDrafts(ctx context.Context, in *CommitRecoveryDraftsRequest, opts ...grpc.CallOption) (*CommitRecoveryDraftsResponse, error)
+	DeleteAllDraftWorks(ctx context.Context, in *DeleteAllDraftWorksRequest, opts ...grpc.CallOption) (*DeleteAllDraftWorksResponse, error)
 }
 
 type workServiceClient struct {
@@ -119,6 +121,16 @@ func (c *workServiceClient) CommitRecoveryDrafts(ctx context.Context, in *Commit
 	return out, nil
 }
 
+func (c *workServiceClient) DeleteAllDraftWorks(ctx context.Context, in *DeleteAllDraftWorksRequest, opts ...grpc.CallOption) (*DeleteAllDraftWorksResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(DeleteAllDraftWorksResponse)
+	err := c.cc.Invoke(ctx, WorkService_DeleteAllDraftWorks_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // WorkServiceServer is the server API for WorkService service.
 // All implementations must embed UnimplementedWorkServiceServer
 // for forward compatibility.
@@ -130,6 +142,7 @@ type WorkServiceServer interface {
 	GetRecoveryWorks(context.Context, *GetRecoveryWorksRequest) (*GetRecoveryWorksResponse, error)
 	UpdateWorkLabel(context.Context, *UpdateWorkLabelRequest) (*UpdateWorkLabelResponse, error)
 	CommitRecoveryDrafts(context.Context, *CommitRecoveryDraftsRequest) (*CommitRecoveryDraftsResponse, error)
+	DeleteAllDraftWorks(context.Context, *DeleteAllDraftWorksRequest) (*DeleteAllDraftWorksResponse, error)
 	mustEmbedUnimplementedWorkServiceServer()
 }
 
@@ -160,6 +173,9 @@ func (UnimplementedWorkServiceServer) UpdateWorkLabel(context.Context, *UpdateWo
 }
 func (UnimplementedWorkServiceServer) CommitRecoveryDrafts(context.Context, *CommitRecoveryDraftsRequest) (*CommitRecoveryDraftsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CommitRecoveryDrafts not implemented")
+}
+func (UnimplementedWorkServiceServer) DeleteAllDraftWorks(context.Context, *DeleteAllDraftWorksRequest) (*DeleteAllDraftWorksResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeleteAllDraftWorks not implemented")
 }
 func (UnimplementedWorkServiceServer) mustEmbedUnimplementedWorkServiceServer() {}
 func (UnimplementedWorkServiceServer) testEmbeddedByValue()                     {}
@@ -308,6 +324,24 @@ func _WorkService_CommitRecoveryDrafts_Handler(srv interface{}, ctx context.Cont
 	return interceptor(ctx, in, info, handler)
 }
 
+func _WorkService_DeleteAllDraftWorks_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeleteAllDraftWorksRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(WorkServiceServer).DeleteAllDraftWorks(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: WorkService_DeleteAllDraftWorks_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(WorkServiceServer).DeleteAllDraftWorks(ctx, req.(*DeleteAllDraftWorksRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // WorkService_ServiceDesc is the grpc.ServiceDesc for WorkService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -342,6 +376,10 @@ var WorkService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "CommitRecoveryDrafts",
 			Handler:    _WorkService_CommitRecoveryDrafts_Handler,
+		},
+		{
+			MethodName: "DeleteAllDraftWorks",
+			Handler:    _WorkService_DeleteAllDraftWorks_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
