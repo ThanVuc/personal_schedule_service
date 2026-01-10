@@ -4,6 +4,7 @@ go 1.24.3
 
 require (
 	github.com/google/wire v0.7.0
+	github.com/robfig/cron/v3 v3.0.0
 	github.com/thanvuc/go-core-lib v1.1.9
 	go.mongodb.org/mongo-driver/v2 v2.3.0
 	go.uber.org/zap v1.27.0
@@ -30,7 +31,6 @@ require (
 	github.com/golang/snappy v1.0.0 // indirect
 	github.com/klauspost/compress v1.16.7 // indirect
 	github.com/pelletier/go-toml/v2 v2.2.4 // indirect
-	github.com/robfig/cron/v3 v3.0.0 // indirect
 	github.com/sagikazarmark/locafero v0.7.0 // indirect
 	github.com/sourcegraph/conc v0.3.0 // indirect
 	github.com/spf13/afero v1.12.0 // indirect

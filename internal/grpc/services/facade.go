@@ -36,6 +36,7 @@ type (
 		RecoverWorks(ctx context.Context, req *personal_schedule.GetRecoveryWorksRequest) (*personal_schedule.GetRecoveryWorksResponse, error)
 		UpdateWorkLabel(ctx context.Context, req *personal_schedule.UpdateWorkLabelRequest) (*personal_schedule.UpdateWorkLabelResponse, error)
 		CommitRecoveryDrafts(ctx context.Context, req *personal_schedule.CommitRecoveryDraftsRequest) (*personal_schedule.CommitRecoveryDraftsResponse, error)
+		DeleteAllDraftWorks(ctx context.Context, req *personal_schedule.DeleteAllDraftWorksRequest) (*personal_schedule.DeleteAllDraftWorksResponse, error)
 	}
 )
 
