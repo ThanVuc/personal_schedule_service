@@ -40,6 +40,9 @@ type UpsertWorkRequest struct {
 	GoalId              *string                `protobuf:"bytes,14,opt,name=goal_id,json=goalId,proto3,oneof" json:"goal_id"`
 	SubTasks            []*SubTaskPayload      `protobuf:"bytes,15,rep,name=sub_tasks,json=subTasks,proto3" json:"sub_tasks"`
 	Notifications       []*WorkNotification    `protobuf:"bytes,16,rep,name=notifications,proto3" json:"notifications"`
+	UpdateType          *int32                 `protobuf:"varint,17,opt,name=update_type,json=updateType,proto3,oneof" json:"update_type"`
+	RepeatStartDate     *int64                 `protobuf:"varint,18,opt,name=repeat_start_date,json=repeatStartDate,proto3,oneof" json:"repeat_start_date"`
+	RepeatEndDate       *int64                 `protobuf:"varint,19,opt,name=repeat_end_date,json=repeatEndDate,proto3,oneof" json:"repeat_end_date"`
 	unknownFields       protoimpl.UnknownFields
 	sizeCache           protoimpl.SizeCache
 }
@@ -184,6 +187,27 @@ func (x *UpsertWorkRequest) GetNotifications() []*WorkNotification {
 		return x.Notifications
 	}
 	return nil
+}
+
+func (x *UpsertWorkRequest) GetUpdateType() int32 {
+	if x != nil && x.UpdateType != nil {
+		return *x.UpdateType
+	}
+	return 0
+}
+
+func (x *UpsertWorkRequest) GetRepeatStartDate() int64 {
+	if x != nil && x.RepeatStartDate != nil {
+		return *x.RepeatStartDate
+	}
+	return 0
+}
+
+func (x *UpsertWorkRequest) GetRepeatEndDate() int64 {
+	if x != nil && x.RepeatEndDate != nil {
+		return *x.RepeatEndDate
+	}
+	return 0
 }
 
 type UpsertWorkResponse struct {
@@ -990,11 +1014,123 @@ func (x *CommitRecoveryDraftsResponse) GetError() *common.Error {
 	return nil
 }
 
+type DeleteAllDraftWorksRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	UserId        string                 `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id"`
+	WorkIds       []string               `protobuf:"bytes,2,rep,name=work_ids,json=workIds,proto3" json:"work_ids"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *DeleteAllDraftWorksRequest) Reset() {
+	*x = DeleteAllDraftWorksRequest{}
+	mi := &file_personal_schedule_service_work_proto_msgTypes[14]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *DeleteAllDraftWorksRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DeleteAllDraftWorksRequest) ProtoMessage() {}
+
+func (x *DeleteAllDraftWorksRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_personal_schedule_service_work_proto_msgTypes[14]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DeleteAllDraftWorksRequest.ProtoReflect.Descriptor instead.
+func (*DeleteAllDraftWorksRequest) Descriptor() ([]byte, []int) {
+	return file_personal_schedule_service_work_proto_rawDescGZIP(), []int{14}
+}
+
+func (x *DeleteAllDraftWorksRequest) GetUserId() string {
+	if x != nil {
+		return x.UserId
+	}
+	return ""
+}
+
+func (x *DeleteAllDraftWorksRequest) GetWorkIds() []string {
+	if x != nil {
+		return x.WorkIds
+	}
+	return nil
+}
+
+type DeleteAllDraftWorksResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	IsSuccess     bool                   `protobuf:"varint,1,opt,name=is_success,json=isSuccess,proto3" json:"is_success"`
+	Message       string                 `protobuf:"bytes,2,opt,name=message,proto3" json:"message"`
+	Error         *common.Error          `protobuf:"bytes,3,opt,name=error,proto3,oneof" json:"error"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *DeleteAllDraftWorksResponse) Reset() {
+	*x = DeleteAllDraftWorksResponse{}
+	mi := &file_personal_schedule_service_work_proto_msgTypes[15]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *DeleteAllDraftWorksResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DeleteAllDraftWorksResponse) ProtoMessage() {}
+
+func (x *DeleteAllDraftWorksResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_personal_schedule_service_work_proto_msgTypes[15]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DeleteAllDraftWorksResponse.ProtoReflect.Descriptor instead.
+func (*DeleteAllDraftWorksResponse) Descriptor() ([]byte, []int) {
+	return file_personal_schedule_service_work_proto_rawDescGZIP(), []int{15}
+}
+
+func (x *DeleteAllDraftWorksResponse) GetIsSuccess() bool {
+	if x != nil {
+		return x.IsSuccess
+	}
+	return false
+}
+
+func (x *DeleteAllDraftWorksResponse) GetMessage() string {
+	if x != nil {
+		return x.Message
+	}
+	return ""
+}
+
+func (x *DeleteAllDraftWorksResponse) GetError() *common.Error {
+	if x != nil {
+		return x.Error
+	}
+	return nil
+}
+
 var File_personal_schedule_service_work_proto protoreflect.FileDescriptor
 
 const file_personal_schedule_service_work_proto_rawDesc = "" +
 	"\n" +
-	"$personal_schedule_service/work.proto\x12\x11personal_schedule\x1a/personal_schedule_service/common.schedule.proto\x1a\x12common/error.proto\"\xc5\x05\n" +
+	"$personal_schedule_service/work.proto\x12\x11personal_schedule\x1a/personal_schedule_service/common.schedule.proto\x1a\x12common/error.proto\"\x83\a\n" +
 	"\x11UpsertWorkRequest\x12\x17\n" +
 	"\auser_id\x18\x01 \x01(\tR\x06userId\x12\x13\n" +
 	"\x02id\x18\x02 \x01(\tH\x00R\x02id\x88\x01\x01\x12\x12\n" +
@@ -1015,14 +1151,21 @@ const file_personal_schedule_service_work_proto_rawDesc = "" +
 	"\bdraft_id\x18\r \x01(\tH\x04R\adraftId\x88\x01\x01\x12\x1c\n" +
 	"\agoal_id\x18\x0e \x01(\tH\x05R\x06goalId\x88\x01\x01\x12>\n" +
 	"\tsub_tasks\x18\x0f \x03(\v2!.personal_schedule.SubTaskPayloadR\bsubTasks\x12I\n" +
-	"\rnotifications\x18\x10 \x03(\v2#.personal_schedule.WorkNotificationR\rnotificationsB\x05\n" +
+	"\rnotifications\x18\x10 \x03(\v2#.personal_schedule.WorkNotificationR\rnotifications\x12$\n" +
+	"\vupdate_type\x18\x11 \x01(\x05H\x06R\n" +
+	"updateType\x88\x01\x01\x12/\n" +
+	"\x11repeat_start_date\x18\x12 \x01(\x03H\aR\x0frepeatStartDate\x88\x01\x01\x12+\n" +
+	"\x0frepeat_end_date\x18\x13 \x01(\x03H\bR\rrepeatEndDate\x88\x01\x01B\x05\n" +
 	"\x03_idB\x15\n" +
 	"\x13_short_descriptionsB\x17\n" +
 	"\x15_detailed_descriptionB\r\n" +
 	"\v_start_dateB\v\n" +
 	"\t_draft_idB\n" +
 	"\n" +
-	"\b_goal_id\"\x81\x01\n" +
+	"\b_goal_idB\x0e\n" +
+	"\f_update_typeB\x14\n" +
+	"\x12_repeat_start_dateB\x12\n" +
+	"\x10_repeat_end_date\"\x81\x01\n" +
 	"\x12UpsertWorkResponse\x12\x1d\n" +
 	"\n" +
 	"is_success\x18\x01 \x01(\bR\tisSuccess\x12\x18\n" +
@@ -1109,7 +1252,16 @@ const file_personal_schedule_service_work_proto_rawDesc = "" +
 	"is_success\x18\x01 \x01(\bR\tisSuccess\x12\x18\n" +
 	"\amessage\x18\x02 \x01(\tR\amessage\x12(\n" +
 	"\x05error\x18\x03 \x01(\v2\r.common.ErrorH\x00R\x05error\x88\x01\x01B\b\n" +
-	"\x06_error2\xba\x05\n" +
+	"\x06_error\"P\n" +
+	"\x1aDeleteAllDraftWorksRequest\x12\x17\n" +
+	"\auser_id\x18\x01 \x01(\tR\x06userId\x12\x19\n" +
+	"\bwork_ids\x18\x02 \x03(\tR\aworkIds\"\x8a\x01\n" +
+	"\x1bDeleteAllDraftWorksResponse\x12\x1d\n" +
+	"\n" +
+	"is_success\x18\x01 \x01(\bR\tisSuccess\x12\x18\n" +
+	"\amessage\x18\x02 \x01(\tR\amessage\x12(\n" +
+	"\x05error\x18\x03 \x01(\v2\r.common.ErrorH\x00R\x05error\x88\x01\x01B\b\n" +
+	"\x06_error2\xb0\x06\n" +
 	"\vWorkService\x12Y\n" +
 	"\n" +
 	"UpsertWork\x12$.personal_schedule.UpsertWorkRequest\x1a%.personal_schedule.UpsertWorkResponse\x12S\n" +
@@ -1119,7 +1271,8 @@ const file_personal_schedule_service_work_proto_rawDesc = "" +
 	"DeleteWork\x12$.personal_schedule.DeleteWorkRequest\x1a%.personal_schedule.DeleteWorkResponse\x12k\n" +
 	"\x10GetRecoveryWorks\x12*.personal_schedule.GetRecoveryWorksRequest\x1a+.personal_schedule.GetRecoveryWorksResponse\x12h\n" +
 	"\x0fUpdateWorkLabel\x12).personal_schedule.UpdateWorkLabelRequest\x1a*.personal_schedule.UpdateWorkLabelResponse\x12w\n" +
-	"\x14CommitRecoveryDrafts\x12..personal_schedule.CommitRecoveryDraftsRequest\x1a/.personal_schedule.CommitRecoveryDraftsResponseB\x19Z\x17proto/personal_scheduleb\x06proto3"
+	"\x14CommitRecoveryDrafts\x12..personal_schedule.CommitRecoveryDraftsRequest\x1a/.personal_schedule.CommitRecoveryDraftsResponse\x12t\n" +
+	"\x13DeleteAllDraftWorks\x12-.personal_schedule.DeleteAllDraftWorksRequest\x1a..personal_schedule.DeleteAllDraftWorksResponseB\x19Z\x17proto/personal_scheduleb\x06proto3"
 
 var (
 	file_personal_schedule_service_work_proto_rawDescOnce sync.Once
@@ -1133,7 +1286,7 @@ func file_personal_schedule_service_work_proto_rawDescGZIP() []byte {
 	return file_personal_schedule_service_work_proto_rawDescData
 }
 
-var file_personal_schedule_service_work_proto_msgTypes = make([]protoimpl.MessageInfo, 14)
+var file_personal_schedule_service_work_proto_msgTypes = make([]protoimpl.MessageInfo, 16)
 var file_personal_schedule_service_work_proto_goTypes = []any{
 	(*UpsertWorkRequest)(nil),            // 0: personal_schedule.UpsertWorkRequest
 	(*UpsertWorkResponse)(nil),           // 1: personal_schedule.UpsertWorkResponse
@@ -1149,43 +1302,48 @@ var file_personal_schedule_service_work_proto_goTypes = []any{
 	(*UpdateWorkLabelResponse)(nil),      // 11: personal_schedule.UpdateWorkLabelResponse
 	(*CommitRecoveryDraftsRequest)(nil),  // 12: personal_schedule.CommitRecoveryDraftsRequest
 	(*CommitRecoveryDraftsResponse)(nil), // 13: personal_schedule.CommitRecoveryDraftsResponse
-	(*SubTaskPayload)(nil),               // 14: personal_schedule.SubTaskPayload
-	(*WorkNotification)(nil),             // 15: personal_schedule.WorkNotification
-	(*common.Error)(nil),                 // 16: common.Error
-	(*Work)(nil),                         // 17: personal_schedule.Work
-	(*WorkDetail)(nil),                   // 18: personal_schedule.WorkDetail
+	(*DeleteAllDraftWorksRequest)(nil),   // 14: personal_schedule.DeleteAllDraftWorksRequest
+	(*DeleteAllDraftWorksResponse)(nil),  // 15: personal_schedule.DeleteAllDraftWorksResponse
+	(*SubTaskPayload)(nil),               // 16: personal_schedule.SubTaskPayload
+	(*WorkNotification)(nil),             // 17: personal_schedule.WorkNotification
+	(*common.Error)(nil),                 // 18: common.Error
+	(*Work)(nil),                         // 19: personal_schedule.Work
+	(*WorkDetail)(nil),                   // 20: personal_schedule.WorkDetail
 }
 var file_personal_schedule_service_work_proto_depIdxs = []int32{
-	14, // 0: personal_schedule.UpsertWorkRequest.sub_tasks:type_name -> personal_schedule.SubTaskPayload
-	15, // 1: personal_schedule.UpsertWorkRequest.notifications:type_name -> personal_schedule.WorkNotification
-	16, // 2: personal_schedule.UpsertWorkResponse.error:type_name -> common.Error
-	17, // 3: personal_schedule.GetWorksResponse.works:type_name -> personal_schedule.Work
-	16, // 4: personal_schedule.GetWorksResponse.error:type_name -> common.Error
-	18, // 5: personal_schedule.GetWorkResponse.work:type_name -> personal_schedule.WorkDetail
-	16, // 6: personal_schedule.GetWorkResponse.error:type_name -> common.Error
-	16, // 7: personal_schedule.DeleteWorkResponse.error:type_name -> common.Error
-	16, // 8: personal_schedule.GetRecoveryWorksResponse.error:type_name -> common.Error
-	16, // 9: personal_schedule.UpdateWorkLabelResponse.error:type_name -> common.Error
-	16, // 10: personal_schedule.CommitRecoveryDraftsResponse.error:type_name -> common.Error
-	0,  // 11: personal_schedule.WorkService.UpsertWork:input_type -> personal_schedule.UpsertWorkRequest
-	2,  // 12: personal_schedule.WorkService.GetWorks:input_type -> personal_schedule.GetWorksRequest
-	4,  // 13: personal_schedule.WorkService.GetWork:input_type -> personal_schedule.GetWorkRequest
-	6,  // 14: personal_schedule.WorkService.DeleteWork:input_type -> personal_schedule.DeleteWorkRequest
-	8,  // 15: personal_schedule.WorkService.GetRecoveryWorks:input_type -> personal_schedule.GetRecoveryWorksRequest
-	10, // 16: personal_schedule.WorkService.UpdateWorkLabel:input_type -> personal_schedule.UpdateWorkLabelRequest
-	12, // 17: personal_schedule.WorkService.CommitRecoveryDrafts:input_type -> personal_schedule.CommitRecoveryDraftsRequest
-	1,  // 18: personal_schedule.WorkService.UpsertWork:output_type -> personal_schedule.UpsertWorkResponse
-	3,  // 19: personal_schedule.WorkService.GetWorks:output_type -> personal_schedule.GetWorksResponse
-	5,  // 20: personal_schedule.WorkService.GetWork:output_type -> personal_schedule.GetWorkResponse
-	7,  // 21: personal_schedule.WorkService.DeleteWork:output_type -> personal_schedule.DeleteWorkResponse
-	9,  // 22: personal_schedule.WorkService.GetRecoveryWorks:output_type -> personal_schedule.GetRecoveryWorksResponse
-	11, // 23: personal_schedule.WorkService.UpdateWorkLabel:output_type -> personal_schedule.UpdateWorkLabelResponse
-	13, // 24: personal_schedule.WorkService.CommitRecoveryDrafts:output_type -> personal_schedule.CommitRecoveryDraftsResponse
-	18, // [18:25] is the sub-list for method output_type
-	11, // [11:18] is the sub-list for method input_type
-	11, // [11:11] is the sub-list for extension type_name
-	11, // [11:11] is the sub-list for extension extendee
-	0,  // [0:11] is the sub-list for field type_name
+	16, // 0: personal_schedule.UpsertWorkRequest.sub_tasks:type_name -> personal_schedule.SubTaskPayload
+	17, // 1: personal_schedule.UpsertWorkRequest.notifications:type_name -> personal_schedule.WorkNotification
+	18, // 2: personal_schedule.UpsertWorkResponse.error:type_name -> common.Error
+	19, // 3: personal_schedule.GetWorksResponse.works:type_name -> personal_schedule.Work
+	18, // 4: personal_schedule.GetWorksResponse.error:type_name -> common.Error
+	20, // 5: personal_schedule.GetWorkResponse.work:type_name -> personal_schedule.WorkDetail
+	18, // 6: personal_schedule.GetWorkResponse.error:type_name -> common.Error
+	18, // 7: personal_schedule.DeleteWorkResponse.error:type_name -> common.Error
+	18, // 8: personal_schedule.GetRecoveryWorksResponse.error:type_name -> common.Error
+	18, // 9: personal_schedule.UpdateWorkLabelResponse.error:type_name -> common.Error
+	18, // 10: personal_schedule.CommitRecoveryDraftsResponse.error:type_name -> common.Error
+	18, // 11: personal_schedule.DeleteAllDraftWorksResponse.error:type_name -> common.Error
+	0,  // 12: personal_schedule.WorkService.UpsertWork:input_type -> personal_schedule.UpsertWorkRequest
+	2,  // 13: personal_schedule.WorkService.GetWorks:input_type -> personal_schedule.GetWorksRequest
+	4,  // 14: personal_schedule.WorkService.GetWork:input_type -> personal_schedule.GetWorkRequest
+	6,  // 15: personal_schedule.WorkService.DeleteWork:input_type -> personal_schedule.DeleteWorkRequest
+	8,  // 16: personal_schedule.WorkService.GetRecoveryWorks:input_type -> personal_schedule.GetRecoveryWorksRequest
+	10, // 17: personal_schedule.WorkService.UpdateWorkLabel:input_type -> personal_schedule.UpdateWorkLabelRequest
+	12, // 18: personal_schedule.WorkService.CommitRecoveryDrafts:input_type -> personal_schedule.CommitRecoveryDraftsRequest
+	14, // 19: personal_schedule.WorkService.DeleteAllDraftWorks:input_type -> personal_schedule.DeleteAllDraftWorksRequest
+	1,  // 20: personal_schedule.WorkService.UpsertWork:output_type -> personal_schedule.UpsertWorkResponse
+	3,  // 21: personal_schedule.WorkService.GetWorks:output_type -> personal_schedule.GetWorksResponse
+	5,  // 22: personal_schedule.WorkService.GetWork:output_type -> personal_schedule.GetWorkResponse
+	7,  // 23: personal_schedule.WorkService.DeleteWork:output_type -> personal_schedule.DeleteWorkResponse
+	9,  // 24: personal_schedule.WorkService.GetRecoveryWorks:output_type -> personal_schedule.GetRecoveryWorksResponse
+	11, // 25: personal_schedule.WorkService.UpdateWorkLabel:output_type -> personal_schedule.UpdateWorkLabelResponse
+	13, // 26: personal_schedule.WorkService.CommitRecoveryDrafts:output_type -> personal_schedule.CommitRecoveryDraftsResponse
+	15, // 27: personal_schedule.WorkService.DeleteAllDraftWorks:output_type -> personal_schedule.DeleteAllDraftWorksResponse
+	20, // [20:28] is the sub-list for method output_type
+	12, // [12:20] is the sub-list for method input_type
+	12, // [12:12] is the sub-list for extension type_name
+	12, // [12:12] is the sub-list for extension extendee
+	0,  // [0:12] is the sub-list for field type_name
 }
 
 func init() { file_personal_schedule_service_work_proto_init() }
@@ -1203,13 +1361,14 @@ func file_personal_schedule_service_work_proto_init() {
 	file_personal_schedule_service_work_proto_msgTypes[9].OneofWrappers = []any{}
 	file_personal_schedule_service_work_proto_msgTypes[11].OneofWrappers = []any{}
 	file_personal_schedule_service_work_proto_msgTypes[13].OneofWrappers = []any{}
+	file_personal_schedule_service_work_proto_msgTypes[15].OneofWrappers = []any{}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_personal_schedule_service_work_proto_rawDesc), len(file_personal_schedule_service_work_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   14,
+			NumMessages:   16,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

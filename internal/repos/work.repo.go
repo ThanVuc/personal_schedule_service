@@ -43,6 +43,8 @@ type AggregatedWork struct {
 	Category            []collection.Label `bson:"categoryInfo"`
 	Overdue             []collection.Label `bson:"overdue,omitempty"`
 	Draft               []collection.Label `bson:"draftInfo,omitempty"`
+	RepeatedID          *bson.ObjectID     `bson:"repeated_id,omitempty"`
+	TargetDate          *time.Time         `bson:"target_date,omitempty"`
 }
 
 type totalCountWorksResult struct {
@@ -533,6 +535,7 @@ func (wr *workRepo) GetAggregatedWorksByDateRangeMs(ctx context.Context, userID 
 			},
 		},
 	}}
+	
 
 	pipeline := mongo.Pipeline{
 		{{Key: "$match", Value: matchStage}},
@@ -561,6 +564,7 @@ func (wr *workRepo) BulkInsertWorks(ctx context.Context, works []interface{}) er
 	wr.logger.Info("BulkInsertWorks", "", zap.Int("count", len(works)))
 	return err
 }
+
 func (wr *workRepo) BulkInsertSubTasks(ctx context.Context, subTasks []interface{}) error {
 	if len(subTasks) == 0 {
 		return nil
@@ -597,7 +601,17 @@ func (wr *workRepo) UpdateWorkField(ctx context.Context, workID bson.ObjectID, f
 		},
 	}
 
-	_, err := coll.UpdateOne(ctx, bson.M{"_id": workID}, update)
+	res, err := coll.UpdateOne(ctx, bson.M{"_id": workID}, update)
+	if err != nil {
+		return err
+	}
+	if res.MatchedCount == 0 {
+		return mongo.ErrNoDocuments
+	}
+	if res.ModifiedCount == 0 {
+		wr.logger.Warn("UpdateWorkField: no documents were modified", "", zap.String("work_id", workID.Hex()), zap.String("field", fieldName), zap.Any("value", labelID))
+		return nil
+	}
 	wr.logger.Info("UpdateWorkField", "", zap.Any("value", labelID))
 	return err
 }
@@ -626,5 +640,65 @@ func (wr *workRepo) CommitRecoveryDrafts(ctx context.Context, userID string, wor
 	}
 	_, err := coll.UpdateMany(ctx, filler, update)
 	wr.logger.Info("CommitRecoveryDrafts", "", zap.Int("count", len(workIDs)))
+	return err
+}
+
+func (wr *workRepo) DeleteAllDraftWorks(ctx context.Context, userID string, workIDs []bson.ObjectID) error {
+	coll := wr.mongoConnector.GetCollection(collection.WorksCollection)
+	filter := bson.M{
+		"_id":     bson.M{"$in": workIDs},
+		"user_id": userID,
+		"draft_id": bson.M{
+			"$exists": true,
+			"$ne":     nil,
+		},
+	}
+	result, err := coll.DeleteMany(ctx, filter)
+	if err != nil {
+		return err
+	}
+	wr.logger.Info("DeleteAllDraftWorks", "", zap.Int64("deleted_count", result.DeletedCount))
+	return nil
+}
+
+func (wr *workRepo) BulkUpdateWorks(ctx context.Context, models []mongo.WriteModel) error {
+	if len(models) == 0 {
+		return nil
+	}
+	coll := wr.mongoConnector.GetCollection(collection.WorksCollection)
+	_, err := coll.BulkWrite(ctx, models)
+	return err
+}
+
+func (wr *workRepo) GetFutureRepeatedWorks(ctx context.Context, repeatedID bson.ObjectID, fromTargetDate time.Time) ([]collection.Work, error) {
+	coll := wr.mongoConnector.GetCollection(collection.WorksCollection)
+
+	filter := bson.M{
+		"repeated_id": repeatedID,
+		"target_date": bson.M{"$gte": fromTargetDate},
+	}
+
+	opts := options.Find().SetSort(bson.D{{Key: "target_date", Value: 1}})
+
+	cursor, err := coll.Find(ctx, filter, opts)
+	if err != nil {
+		return nil, err
+	}
+	defer cursor.Close(ctx)
+
+	var results []collection.Work
+	if err = cursor.All(ctx, &results); err != nil {
+		return nil, err
+	}
+	return results, nil
+}
+
+func (wr *workRepo) DeleteSubTasksByWorkIDs(ctx context.Context, workIDs []bson.ObjectID) error {
+	if len(workIDs) == 0 {
+		return nil
+	}
+	coll := wr.mongoConnector.GetCollection(collection.SubTasksCollection)
+	filter := bson.M{"work_id": bson.M{"$in": workIDs}}
+	_, err := coll.DeleteMany(ctx, filter)
 	return err
 }

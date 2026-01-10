@@ -15,4 +15,6 @@ const (
 	DraftNotFound            = 10011
 	GoalForbidden            = 10012
 	GoalLimitExceeded        = 10013
+	RepeatedWorkMissingDates = 10014
+	RepeatedWorkInvalidDates = 10015
 )

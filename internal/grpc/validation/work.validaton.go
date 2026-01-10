@@ -3,6 +3,7 @@ package validation
 import (
 	"context"
 	"fmt"
+	labels_constant "personal_schedule_service/internal/constant/labels"
 	"personal_schedule_service/internal/repos"
 	app_error "personal_schedule_service/pkg/settings/error"
 	"personal_schedule_service/proto/common"
@@ -71,24 +72,44 @@ func (wv *workValidator) ValidateUpsertWork(ctx context.Context, req *personal_s
 			return NewValidationError(common.ErrorCode_ERROR_CODE_INTERNAL_ERROR, app_error.EndDateBeforeStart, "EndDate must be after StartDate")
 		}
 
-		if req.StartDate == &req.EndDate {
+		if *req.StartDate == req.EndDate {
 			return NewValidationError(common.ErrorCode_ERROR_CODE_INTERNAL_ERROR, app_error.ZeroDuration, "work duration cannot be zero")
 		}
 
-		var excludeWorkID *bson.ObjectID
-		if req.Id != nil && *req.Id != "" {
-			workID, err := bson.ObjectIDFromHex(*req.Id)
-			if err != nil {
-				return NewValidationError(common.ErrorCode_ERROR_CODE_NOT_FOUND, app_error.WorkNotFound, "invalid Work Id")
+		repeatLabel, _ := wv.workRepo.GetLabelByKey(ctx, labels_constant.LabelRepeated)
+
+		var isRepeated bool
+		if repeatLabel != nil {
+			isRepeated = req.TypeId == repeatLabel.ID.Hex()
+		} else {
+			isRepeated = false
+		}
+
+		if isRepeated {
+			if req.RepeatStartDate == nil || req.RepeatEndDate == nil {
+				return NewValidationError(common.ErrorCode_ERROR_CODE_INTERNAL_ERROR, app_error.RepeatedWorkMissingDates, "non-repeated work cannot have repeat dates")
 			}
-			excludeWorkID = &workID
+			if *req.RepeatStartDate >= *req.RepeatEndDate {
+				return NewValidationError(common.ErrorCode_ERROR_CODE_INTERNAL_ERROR, app_error.RepeatedWorkInvalidDates, "invalid repeat dates for non-repeated work")
+			}
 		}
-		count, err := wv.workRepo.CountOverlappingWorks(ctx, req.UserId, *req.StartDate, req.EndDate, excludeWorkID)
-		if err != nil {
-			return NewValidationError(common.ErrorCode_ERROR_CODE_DATABASE_ERROR, app_error.TimeOverlap, "error checking overlapping works")
-		}
-		if count > 0 {
-			return NewValidationError(common.ErrorCode_ERROR_CODE_DATABASE_ERROR, app_error.TimeOverlap, "work time overlaps with existing work")
+
+		if !isRepeated {
+			var excludeWorkID *bson.ObjectID
+			if req.Id != nil && *req.Id != "" {
+				workID, err := bson.ObjectIDFromHex(*req.Id)
+				if err != nil {
+					return NewValidationError(common.ErrorCode_ERROR_CODE_NOT_FOUND, app_error.WorkNotFound, "invalid Work Id")
+				}
+				excludeWorkID = &workID
+			}
+			count, err := wv.workRepo.CountOverlappingWorks(ctx, req.UserId, *req.StartDate, req.EndDate, excludeWorkID)
+			if err != nil {
+				return NewValidationError(common.ErrorCode_ERROR_CODE_DATABASE_ERROR, app_error.TimeOverlap, "error checking overlapping works")
+			}
+			if count > 0 {
+				return NewValidationError(common.ErrorCode_ERROR_CODE_DATABASE_ERROR, app_error.TimeOverlap, "work time overlaps with existing work")
+			}
 		}
 	}
 
