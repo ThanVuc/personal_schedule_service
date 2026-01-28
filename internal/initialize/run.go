@@ -14,7 +14,7 @@ import (
 )
 
 func Run() {
-	if err := initConfigAndResources(); err != nil {
+	if err := InitConfigAndResources(); err != nil {
 		global.Logger.Error("Failed to initialize configs and resources", "", zap.Error(err))
 		os.Exit(1)
 	}
