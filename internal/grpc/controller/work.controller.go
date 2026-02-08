@@ -4,6 +4,7 @@ import (
 	"context"
 	"personal_schedule_service/internal/grpc/services"
 	"personal_schedule_service/internal/grpc/utils"
+	"personal_schedule_service/proto/common"
 	"personal_schedule_service/proto/personal_schedule"
 )
 
@@ -50,4 +51,8 @@ func (wc *WorkController) CommitRecoveryDrafts(ctx context.Context, req *persona
 
 func (wc *WorkController) DeleteAllDraftWorks(ctx context.Context, req *personal_schedule.DeleteAllDraftWorksRequest) (*personal_schedule.DeleteAllDraftWorksResponse, error) {
 	return utils.WithSafePanic(ctx, req, wc.workService.DeleteAllDraftWorks)
+}
+
+func (wc *WorkController) GenerateWorksByAI(ctx context.Context, req *personal_schedule.GenerateWorksByAIRequest) (*common.EmptyResponse, error) {
+	return utils.WithSafePanic(ctx, req, wc.workService.GenerateWorksFromAI)
 }

@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"personal_schedule_service/internal/collection"
+	"personal_schedule_service/internal/grpc/models"
 	"personal_schedule_service/internal/grpc/utils"
 	"personal_schedule_service/proto/personal_schedule"
 	"time"
@@ -535,7 +536,6 @@ func (wr *workRepo) GetAggregatedWorksByDateRangeMs(ctx context.Context, userID 
 			},
 		},
 	}}
-	
 
 	pipeline := mongo.Pipeline{
 		{{Key: "$match", Value: matchStage}},
@@ -701,4 +701,38 @@ func (wr *workRepo) DeleteSubTasksByWorkIDs(ctx context.Context, workIDs []bson.
 	filter := bson.M{"work_id": bson.M{"$in": workIDs}}
 	_, err := coll.DeleteMany(ctx, filter)
 	return err
+}
+
+func (wr *workRepo) GetExistingTimes(ctx context.Context, userID string, localDate string) ([]*models.TimeRange, error) {
+	coll := wr.mongoConnector.GetCollection(collection.WorksCollection)
+	startOfDay, endOffDay, err := utils.VietNameLocalDateRangeUTC(localDate)
+	if err != nil {
+		return nil, err
+	}
+	filter := bson.M{
+		"user_id":    userID,
+		"start_date": bson.M{"$gte": startOfDay, "$lte": endOffDay},
+	}
+	cursor, err := coll.Find(ctx, filter)
+	if err != nil {
+		return nil, err
+	}
+	defer cursor.Close(ctx)
+
+	var works []collection.Work
+	if err = cursor.All(ctx, &works); err != nil {
+		return nil, err
+	}
+	existingTimes := []*models.TimeRange{}
+
+	for _, work := range works {
+		if work.StartDate != nil && !work.EndDate.IsZero() {
+			existingTimes = append(existingTimes, &models.TimeRange{
+				StartTime: work.StartDate.UnixMilli(),
+				EndTime:   work.EndDate.UnixMilli(),
+			})
+		}
+	}
+
+	return existingTimes, nil
 }

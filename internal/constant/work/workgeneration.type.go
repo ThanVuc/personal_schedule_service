@@ -90,3 +90,8 @@ var (
 		WORK_GENERATION,
 	)
 )
+
+const (
+	LINK       = "https://www.schedulr.site/schedule/daily"
+	IMGAGE_URL = ""
+)
