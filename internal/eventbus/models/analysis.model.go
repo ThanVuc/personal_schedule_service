@@ -1,2 +1,1 @@
-package models
-
+package event_models

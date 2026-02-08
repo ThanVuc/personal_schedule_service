@@ -3,6 +3,7 @@ package utils
 import (
 	"encoding/json"
 	"math"
+	"personal_schedule_service/global"
 	"strings"
 	"time"
 	"unicode"
@@ -10,6 +11,8 @@ import (
 	"golang.org/x/text/runes"
 	"golang.org/x/text/transform"
 	"golang.org/x/text/unicode/norm"
+
+	_ "time/tzdata"
 )
 
 func RoundToTwoDecimal(val float64) float64 {
@@ -100,4 +103,51 @@ func RemoveAccent(s string) string {
 
 func TruncateToDay(t time.Time) time.Time {
 	return time.Date(t.Year(), t.Month(), t.Day(), 0, 0, 0, 0, t.Location())
+}
+
+func VietNameLocalDateRangeUTC(localDate string) (time.Time, time.Time, error) {
+	t, err := time.ParseInLocation("2006-01-02", localDate, global.HCMTimeLocation)
+	if err != nil {
+		return time.Time{}, time.Time{}, err
+	}
+
+	startLocal := time.Date(t.Year(), t.Month(), t.Day(), 0, 0, 0, 0, global.HCMTimeLocation)
+	endLocal := startLocal.Add(24 * time.Hour)
+
+	return startLocal.UTC(), endLocal.UTC(), nil
+}
+
+func ToCompactJSON(data any) (string, error) {
+	if data == nil {
+		return "null", nil
+	}
+
+	b, err := json.Marshal(data)
+	if err != nil {
+		return "", err
+	}
+	return string(b), nil
+}
+
+func ParseLocalTimePtrToUTC(value string, layout string) (*time.Time, error) {
+	if value == "" {
+		return nil, nil
+	}
+
+	t, err := time.ParseInLocation(layout, value, global.HCMTimeLocation)
+	if err != nil {
+		return nil, err
+	}
+
+	utc := t.UTC()
+	return &utc, nil
+}
+
+func ParseLocalTimeToUTC(value string, layout string) (time.Time, error) {
+	t, err := time.ParseInLocation(layout, value, global.HCMTimeLocation)
+	if err != nil {
+		return time.Time{}, err
+	}
+
+	return t.UTC(), nil
 }

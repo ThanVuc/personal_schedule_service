@@ -3,18 +3,24 @@ package validation
 import (
 	"context"
 	"fmt"
+	"personal_schedule_service/internal/collection"
 	labels_constant "personal_schedule_service/internal/constant/labels"
+	event_models "personal_schedule_service/internal/eventbus/models"
 	"personal_schedule_service/internal/repos"
 	app_error "personal_schedule_service/pkg/settings/error"
 	"personal_schedule_service/proto/common"
 	"personal_schedule_service/proto/personal_schedule"
+	"time"
 
+	"github.com/thanvuc/go-core-lib/log"
 	"go.mongodb.org/mongo-driver/v2/bson"
+	"go.uber.org/zap"
 )
 
 type workValidator struct {
 	workRepo  repos.WorkRepo
 	labelRepo repos.LabelRepo
+	logger    log.Logger
 }
 
 func (wv *workValidator) checkLabel(ctx context.Context, id string, name string) error {
@@ -127,6 +133,72 @@ func (wv *workValidator) ValidateUpsertWork(ctx context.Context, req *personal_s
 		}
 		if existingWork.UserID != req.UserId {
 			return NewValidationError(common.ErrorCode_ERROR_CODE_PERMISSION_DENIED, app_error.WorkForbidden, "user does not have permission to modify this work")
+		}
+	}
+
+	return nil
+}
+
+func (wv *workValidator) ValidatePrompts(req *personal_schedule.GenerateWorksByAIRequest) error {
+	if req == nil {
+		return fmt.Errorf("request is nil")
+	}
+
+	errors := make([]string, 0)
+	// validate prompts
+	for i, prompt := range req.Prompts {
+		if len(prompt) <= 20 {
+			errors = append(errors, fmt.Sprintf("prompt at index %d is too short, must be at least 20 characters", i))
+		}
+		if len(prompt) > 500 {
+			errors = append(errors, fmt.Sprintf("prompt at index %d is too long, must be at most 500 characters", i))
+		}
+	}
+
+	// validate local date
+	_, err := time.Parse("2006-01-02", req.LocalDate)
+	if err != nil {
+		return fmt.Errorf("local_date must be in format yyyy-mm-dd")
+	}
+
+	// validate additional context if provided
+	if req.AdditionalContext != "" {
+		if len(req.AdditionalContext) < 10 {
+			errors = append(errors, "additional_context is too short, must be at least 10 characters")
+		}
+		if len(req.AdditionalContext) > 1000 {
+			errors = append(errors, "additional_context is too long, must be at most 1000 characters")
+		}
+	}
+
+	if len(errors) > 0 {
+		wv.logger.Error(
+			"Validation errors in GenerateWorksByAIRequest",
+			"",
+			zap.Error(fmt.Errorf("%v", errors)),
+		)
+		return fmt.Errorf("validation errors")
+	}
+
+	return nil
+}
+
+func (vw *workValidator) ValidateWorkMessages(ctx context.Context, labelMap map[string]collection.Label, workMessages []event_models.WorkMessage) error {
+	for _, workMessage := range workMessages {
+		if _, exists := labelMap[workMessage.DifficultyKey]; !exists {
+			return fmt.Errorf("invalid difficulty key: %s", workMessage.DifficultyKey)
+		}
+
+		if _, exists := labelMap[workMessage.PriorityKey]; !exists {
+			return fmt.Errorf("invalid priority key: %s", workMessage.PriorityKey)
+		}
+
+		if _, exists := labelMap[workMessage.CategoryKey]; !exists {
+			return fmt.Errorf("invalid category key: %s", workMessage.CategoryKey)
+		}
+
+		if workMessage.StartDate >= workMessage.EndDate {
+			return fmt.Errorf("end date must be after start date for work: %s", workMessage.Name)
 		}
 	}
 

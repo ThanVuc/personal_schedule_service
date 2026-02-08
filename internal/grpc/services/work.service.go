@@ -2,17 +2,22 @@ package services
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
+	"personal_schedule_service/global"
 	"personal_schedule_service/internal/collection"
 	labels_constant "personal_schedule_service/internal/constant/labels"
 	notifications_constant "personal_schedule_service/internal/constant/notifications"
+	workgeneration_constant "personal_schedule_service/internal/constant/work"
 	"personal_schedule_service/internal/grpc/mapper"
+	"personal_schedule_service/internal/grpc/models"
 	"personal_schedule_service/internal/grpc/utils"
 	"personal_schedule_service/internal/grpc/validation"
 	"personal_schedule_service/internal/repos"
 	app_error "personal_schedule_service/pkg/settings/error"
 	"personal_schedule_service/proto/common"
 	"personal_schedule_service/proto/personal_schedule"
+	"strings"
 	"time"
 
 	"github.com/thanvuc/go-core-lib/eventbus"
@@ -22,6 +27,8 @@ import (
 	"go.mongodb.org/mongo-driver/v2/mongo"
 	"go.uber.org/zap"
 	"google.golang.org/protobuf/proto"
+
+	_ "time/tzdata"
 )
 
 type workService struct {
@@ -1024,4 +1031,111 @@ func (s *workService) DeleteAllDraftWorks(ctx context.Context, req *personal_sch
 		IsSuccess: true,
 		Message:   "Draft works deleted successfully",
 	}, nil
+}
+
+func (s *workService) GenerateWorksFromAI(ctx context.Context, req *personal_schedule.GenerateWorksByAIRequest) (*common.EmptyResponse, error) {
+	err := s.validator.ValidatePrompts(req)
+	requestId := utils.GetRequestIDFromOutgoingContext(ctx)
+	if err != nil {
+		s.logger.Error("Validation failed for generate works by AI request", "", zap.Error(err))
+		return &common.EmptyResponse{
+			Success: utils.ToBoolPointer(false),
+			Message: utils.ToStringPointer("Validation error"),
+			Error:   utils.InternalServerError(ctx, err),
+		}, nil
+	}
+
+	// push message to rabbitmq
+	publisher := eventbus.NewPublisher(
+		s.eventbusConnector,
+		workgeneration_constant.WORK_GENERATION_EXCHANGE,
+		eventbus.ExchangeTypeDirect,
+		nil,
+		nil,
+		false,
+	)
+
+	type StandardizedPromptsStruct struct {
+		Id     string `json:"id"`
+		Prompt string `json:"prompt"`
+	}
+
+	standardizedPrompts := make([]StandardizedPromptsStruct, 0, len(req.Prompts))
+	for index, p := range req.Prompts {
+		standardizedPrompts = append(standardizedPrompts, StandardizedPromptsStruct{
+			Prompt: p,
+			Id:     fmt.Sprintf("w-%d", index+1),
+		})
+	}
+
+	standardizedPromptsString, err := utils.ToCompactJSON(standardizedPrompts)
+	if err != nil {
+		s.logger.Error("Failed to marshal generate works by AI prompts", "", zap.Error(err))
+		return &common.EmptyResponse{
+			Success: utils.ToBoolPointer(false),
+			Message: utils.ToStringPointer("Internal error"),
+			Error:   utils.InternalServerError(ctx, err),
+		}, err
+	}
+
+	existingTime, err := s.workRepo.GetExistingTimes(ctx, req.UserId, req.LocalDate)
+	if err != nil {
+		s.logger.Error("Failed to get existing work times for user", "", zap.Error(err))
+		return &common.EmptyResponse{
+			Success: utils.ToBoolPointer(false),
+			Message: utils.ToStringPointer("Internal error"),
+			Error:   utils.InternalServerError(ctx, err),
+		}, err
+	}
+
+	standardizedConstraintsPrompt := buildExistingTimeConstraint(existingTime)
+
+	payload, err := json.Marshal(models.GenerationWorksModel{
+		UserID:            req.UserId,
+		Prompts:           standardizedPromptsString,
+		LocalDate:         req.LocalDate,
+		AdditionalContext: req.AdditionalContext,
+		Constraints:       standardizedConstraintsPrompt,
+		UserPersonality:   "",
+	})
+
+	if err != nil {
+		s.logger.Error("Failed to marshal generate works by AI payload", "", zap.Error(err))
+		return &common.EmptyResponse{
+			Success: utils.ToBoolPointer(false),
+			Message: utils.ToStringPointer("Internal error"),
+			Error:   utils.InternalServerError(ctx, err),
+		}, err
+	}
+
+	err = publisher.Publish(ctx, requestId, []string{workgeneration_constant.WORK_GENERATION_ROUTING_KEY}, payload, nil)
+	if err != nil {
+		s.logger.Error("Failed to publish generate works by AI event", "", zap.Error(err))
+		return &common.EmptyResponse{
+			Success: utils.ToBoolPointer(false),
+			Message: utils.ToStringPointer("Internal error"),
+			Error:   utils.InternalServerError(ctx, err),
+		}, err
+	}
+	return &common.EmptyResponse{
+		Success: utils.ToBoolPointer(true),
+		Message: utils.ToStringPointer("Work generation request submitted successfully, processing in background"),
+	}, nil
+}
+
+func buildExistingTimeConstraint(existingTime []*models.TimeRange) string {
+	if len(existingTime) == 0 {
+		return ""
+	}
+
+	parts := make([]string, 0, len(existingTime))
+
+	for _, tr := range existingTime {
+		start := time.UnixMilli(tr.StartTime).In(global.HCMTimeLocation).Format("15:04")
+		end := time.UnixMilli(tr.EndTime).In(global.HCMTimeLocation).Format("15:04")
+
+		parts = append(parts, fmt.Sprintf("%s - %s", start, end))
+	}
+
+	return fmt.Sprintf("[%s]", strings.Join(parts, ", "))
 }

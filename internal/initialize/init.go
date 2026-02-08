@@ -11,6 +11,7 @@ import (
 
 func InitConfigAndResources() error {
 	loadConfig()
+	loadHCMTimeLocation()
 	initLogger()
 	initMongoDB()
 	initRedis()
