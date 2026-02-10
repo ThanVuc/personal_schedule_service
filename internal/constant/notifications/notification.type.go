@@ -9,9 +9,9 @@ const (
 
 // exchange, queue, routing key
 const (
-	EXCHANGE    = ".exchange"
-	QUEUE       = ".queue"
-	ROUTING_KEY = ".routing_key"
+	EXCHANGE    = "_exchange"
+	QUEUE       = "_queue"
+	ROUTING_KEY = "_routing_key"
 )
 
 // exchanges full names

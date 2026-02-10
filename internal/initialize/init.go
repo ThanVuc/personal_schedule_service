@@ -9,8 +9,9 @@ import (
 	"go.uber.org/zap"
 )
 
-func initConfigAndResources() error {
+func InitConfigAndResources() error {
 	loadConfig()
+	loadHCMTimeLocation()
 	initLogger()
 	initMongoDB()
 	initRedis()

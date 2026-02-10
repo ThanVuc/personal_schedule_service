@@ -2,6 +2,7 @@ package global
 
 import (
 	"personal_schedule_service/pkg/settings"
+	"time"
 
 	"github.com/thanvuc/go-core-lib/cache"
 	"github.com/thanvuc/go-core-lib/cronjob"
@@ -22,4 +23,5 @@ var (
 	EventBusConnector *eventbus.RabbitMQConnector
 	MongoDbConntector *mongolib.MongoConnector
 	CronJobManager    *cronjob.CronManager
+	HCMTimeLocation   *time.Location
 )

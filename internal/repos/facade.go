@@ -66,6 +66,7 @@ type (
 		BulkUpdateWorks(ctx context.Context, models []mongo.WriteModel) error
 		GetFutureRepeatedWorks(ctx context.Context, repeatedID bson.ObjectID, fromTargetDate time.Time) ([]collection.Work, error)
 		DeleteSubTasksByWorkIDs(ctx context.Context, workIDs []bson.ObjectID) error
+		GetExistingTimes(ctx context.Context, userID string, localDate string) ([]*models.TimeRange, error)
 	}
 )
 

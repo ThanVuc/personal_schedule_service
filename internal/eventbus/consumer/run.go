@@ -16,7 +16,13 @@ func RunConsumer(ctx context.Context) {
 		handler:      wire.InjectSyncAuthHandler(),
 	}
 
+	generateWorkConsumer := &WorkGenerationConsumer{
+		logger:  global.Logger,
+		handler: wire.InjectGenerateWorkHandler(),
+	}
+
 	syncAuthDBConsumer.ConsumeUserDB(ctx)
+	generateWorkConsumer.ConsumeWorks(ctx)
 
 	global.Logger.Info("Sync Auth DB Consumer started", "")
 }

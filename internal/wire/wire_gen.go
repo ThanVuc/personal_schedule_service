@@ -65,3 +65,11 @@ func InjectSyncAuthHandler() *handler.SyncAuthHandler {
 	syncAuthHandler := handler.NewSyncAuthHandler(userRepo)
 	return syncAuthHandler
 }
+
+func InjectGenerateWorkHandler() *handler.WorkGenerationHandler {
+	workRepo := repos.NewWorkRepo()
+	labelRepo := repos.NewLabelRepo()
+	workValidator := validation.NewWorkValidator(workRepo, labelRepo)
+	workGenerationHandler := handler.NewWorkGenerationHandler(workRepo, workValidator, labelRepo)
+	return workGenerationHandler
+}
