@@ -26,7 +26,7 @@ const (
 	WorkService_DeleteWork_FullMethodName           = "/personal_schedule.WorkService/DeleteWork"
 	WorkService_GetRecoveryWorks_FullMethodName     = "/personal_schedule.WorkService/GetRecoveryWorks"
 	WorkService_UpdateWorkLabel_FullMethodName      = "/personal_schedule.WorkService/UpdateWorkLabel"
-	WorkService_CommitRecoveryDrafts_FullMethodName = "/personal_schedule.WorkService/CommitRecoveryDrafts"
+	WorkService_AcceptRecoveryDrafts_FullMethodName = "/personal_schedule.WorkService/AcceptRecoveryDrafts"
 	WorkService_DeleteAllDraftWorks_FullMethodName  = "/personal_schedule.WorkService/DeleteAllDraftWorks"
 	WorkService_GenerateWorksByAI_FullMethodName    = "/personal_schedule.WorkService/GenerateWorksByAI"
 )
@@ -41,7 +41,7 @@ type WorkServiceClient interface {
 	DeleteWork(ctx context.Context, in *DeleteWorkRequest, opts ...grpc.CallOption) (*DeleteWorkResponse, error)
 	GetRecoveryWorks(ctx context.Context, in *GetRecoveryWorksRequest, opts ...grpc.CallOption) (*GetRecoveryWorksResponse, error)
 	UpdateWorkLabel(ctx context.Context, in *UpdateWorkLabelRequest, opts ...grpc.CallOption) (*UpdateWorkLabelResponse, error)
-	CommitRecoveryDrafts(ctx context.Context, in *CommitRecoveryDraftsRequest, opts ...grpc.CallOption) (*CommitRecoveryDraftsResponse, error)
+	AcceptRecoveryDrafts(ctx context.Context, in *AcceptAllRecoveryDraftsRequest, opts ...grpc.CallOption) (*AcceptAllRecoveryDraftsResponse, error)
 	DeleteAllDraftWorks(ctx context.Context, in *DeleteAllDraftWorksRequest, opts ...grpc.CallOption) (*DeleteAllDraftWorksResponse, error)
 	GenerateWorksByAI(ctx context.Context, in *GenerateWorksByAIRequest, opts ...grpc.CallOption) (*common.EmptyResponse, error)
 }
@@ -114,10 +114,10 @@ func (c *workServiceClient) UpdateWorkLabel(ctx context.Context, in *UpdateWorkL
 	return out, nil
 }
 
-func (c *workServiceClient) CommitRecoveryDrafts(ctx context.Context, in *CommitRecoveryDraftsRequest, opts ...grpc.CallOption) (*CommitRecoveryDraftsResponse, error) {
+func (c *workServiceClient) AcceptRecoveryDrafts(ctx context.Context, in *AcceptAllRecoveryDraftsRequest, opts ...grpc.CallOption) (*AcceptAllRecoveryDraftsResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(CommitRecoveryDraftsResponse)
-	err := c.cc.Invoke(ctx, WorkService_CommitRecoveryDrafts_FullMethodName, in, out, cOpts...)
+	out := new(AcceptAllRecoveryDraftsResponse)
+	err := c.cc.Invoke(ctx, WorkService_AcceptRecoveryDrafts_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -154,7 +154,7 @@ type WorkServiceServer interface {
 	DeleteWork(context.Context, *DeleteWorkRequest) (*DeleteWorkResponse, error)
 	GetRecoveryWorks(context.Context, *GetRecoveryWorksRequest) (*GetRecoveryWorksResponse, error)
 	UpdateWorkLabel(context.Context, *UpdateWorkLabelRequest) (*UpdateWorkLabelResponse, error)
-	CommitRecoveryDrafts(context.Context, *CommitRecoveryDraftsRequest) (*CommitRecoveryDraftsResponse, error)
+	AcceptRecoveryDrafts(context.Context, *AcceptAllRecoveryDraftsRequest) (*AcceptAllRecoveryDraftsResponse, error)
 	DeleteAllDraftWorks(context.Context, *DeleteAllDraftWorksRequest) (*DeleteAllDraftWorksResponse, error)
 	GenerateWorksByAI(context.Context, *GenerateWorksByAIRequest) (*common.EmptyResponse, error)
 	mustEmbedUnimplementedWorkServiceServer()
@@ -185,8 +185,8 @@ func (UnimplementedWorkServiceServer) GetRecoveryWorks(context.Context, *GetReco
 func (UnimplementedWorkServiceServer) UpdateWorkLabel(context.Context, *UpdateWorkLabelRequest) (*UpdateWorkLabelResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UpdateWorkLabel not implemented")
 }
-func (UnimplementedWorkServiceServer) CommitRecoveryDrafts(context.Context, *CommitRecoveryDraftsRequest) (*CommitRecoveryDraftsResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method CommitRecoveryDrafts not implemented")
+func (UnimplementedWorkServiceServer) AcceptRecoveryDrafts(context.Context, *AcceptAllRecoveryDraftsRequest) (*AcceptAllRecoveryDraftsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method AcceptRecoveryDrafts not implemented")
 }
 func (UnimplementedWorkServiceServer) DeleteAllDraftWorks(context.Context, *DeleteAllDraftWorksRequest) (*DeleteAllDraftWorksResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeleteAllDraftWorks not implemented")
@@ -323,20 +323,20 @@ func _WorkService_UpdateWorkLabel_Handler(srv interface{}, ctx context.Context, 
 	return interceptor(ctx, in, info, handler)
 }
 
-func _WorkService_CommitRecoveryDrafts_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(CommitRecoveryDraftsRequest)
+func _WorkService_AcceptRecoveryDrafts_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(AcceptAllRecoveryDraftsRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(WorkServiceServer).CommitRecoveryDrafts(ctx, in)
+		return srv.(WorkServiceServer).AcceptRecoveryDrafts(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: WorkService_CommitRecoveryDrafts_FullMethodName,
+		FullMethod: WorkService_AcceptRecoveryDrafts_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(WorkServiceServer).CommitRecoveryDrafts(ctx, req.(*CommitRecoveryDraftsRequest))
+		return srv.(WorkServiceServer).AcceptRecoveryDrafts(ctx, req.(*AcceptAllRecoveryDraftsRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -409,8 +409,8 @@ var WorkService_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _WorkService_UpdateWorkLabel_Handler,
 		},
 		{
-			MethodName: "CommitRecoveryDrafts",
-			Handler:    _WorkService_CommitRecoveryDrafts_Handler,
+			MethodName: "AcceptRecoveryDrafts",
+			Handler:    _WorkService_AcceptRecoveryDrafts_Handler,
 		},
 		{
 			MethodName: "DeleteAllDraftWorks",
