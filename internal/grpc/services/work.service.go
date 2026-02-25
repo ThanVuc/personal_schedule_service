@@ -84,10 +84,10 @@ func (s *workService) UpsertWork(ctx context.Context, req *personal_schedule.Ups
 	if req.Id == nil || *req.Id == "" {
 		if isRepeated {
 			if req.StartDate == nil || req.EndDate == 0 || req.RepeatStartDate == nil || req.RepeatEndDate == nil {
-				s.logger.Error("Repeated work must have start_date, end_date, and target_date", requestId)
+				s.logger.Error("Repeated work must have start_date, end_date ", requestId)
 				return &personal_schedule.UpsertWorkResponse{
 					IsSuccess: false,
-					Error:     utils.CustomError(ctx, common.ErrorCode_ERROR_CODE_INTERNAL_ERROR, app_error.RepeatedWorkMissingDates, fmt.Errorf("repeated work must have start_date, end_date, and target_date")),
+					Error:     utils.CustomError(ctx, common.ErrorCode_ERROR_CODE_INTERNAL_ERROR, app_error.RepeatedWorkMissingDates, fmt.Errorf("repeated work must have start_date, end_date")),
 				}, nil
 			}
 			return s.createRepeatedWorks(ctx, work, req, subTasksDB)
@@ -198,7 +198,6 @@ func (s *workService) createRepeatedWorks(ctx context.Context, baseWork *collect
 
 		newWork.StartDate = &thisWorkStart
 		newWork.EndDate = thisWorkEnd
-		newWork.TargetDate = &limitDate
 
 		worksToInsert = append(worksToInsert, newWork)
 
@@ -246,7 +245,7 @@ func (s *workService) updateRepeatedWorksChain(ctx context.Context, currentWorkI
 		}, nil
 	}
 
-	futureWorks, err := s.workRepo.GetFutureRepeatedWorks(ctx, *currentDBWork.RepeatedID, *currentDBWork.TargetDate)
+	futureWorks, err := s.workRepo.GetFutureRepeatedWorks(ctx, *currentDBWork.RepeatedID, *currentDBWork.StartDate)
 	if err != nil {
 		return nil, err
 	}
@@ -538,6 +537,14 @@ func (s *workService) GetWork(ctx context.Context, req *personal_schedule.GetWor
 			Error: utils.PermissionDeniedError(ctx, err),
 		}, nil
 	}
+	var seriesStart, seriesEnd *time.Time
+	if work.RepeatedID != nil {
+		boundaries, err := s.workRepo.GetSeriesBoundaries(ctx, *work.RepeatedID)
+		if err == nil && boundaries != nil {
+			seriesStart = boundaries.MinStartDate
+			seriesEnd = boundaries.MaxEndDate
+		}
+	}
 
 	subTasksDB, err := s.workRepo.GetSubTasksByWorkID(ctx, workID)
 	if err != nil {
@@ -549,6 +556,14 @@ func (s *workService) GetWork(ctx context.Context, req *personal_schedule.GetWor
 	}
 
 	protoWork := s.workMapper.MapAggregatedToWorkDetailProto(*work, subTasksDB)
+	if seriesStart != nil {
+		v := seriesStart.UnixMilli()
+		protoWork.RepeatSeriesStartDate = &v
+	}
+	if seriesEnd != nil {
+		v := seriesEnd.UnixMilli()
+		protoWork.RepeatSeriesEndDate = &v
+	}
 
 	return &personal_schedule.GetWorkResponse{
 		Work:  protoWork,
@@ -734,12 +749,25 @@ func (s *workService) RecoverWorks(ctx context.Context, req *personal_schedule.G
 	var worksToInsert []interface{}
 	var subTasksToInsert []interface{}
 
+	boundariesCache := make(map[string]*repos.SeriesBoundaries)
+
 	for _, oldWork := range sourceWorks {
 		isRecurring := oldWork.Type[0].ID == recurringType.ID
 		if isRecurring {
+			rID := oldWork.RepeatedID.Hex()
+			if _, exists := boundariesCache[rID]; !exists {
+				b, err := s.workRepo.GetSeriesBoundaries(ctx, *oldWork.RepeatedID)
+				if err != nil {
+					s.logger.Warn("Failed to get boundaries for recurring work", "", zap.String("repeated_id", rID))
+					boundariesCache[rID] = nil
+				} else {
+					boundariesCache[rID] = b
+				}
+			}
+			b := boundariesCache[rID]
 			recurrenceStillActive := false
-			if oldWork.TargetDate != nil {
-				targetDay := utils.TruncateToDay(*oldWork.TargetDate)
+			if b != nil && b.MaxEndDate != nil {
+				targetDay := utils.TruncateToDay(*b.MaxEndDate)
 				startDay := utils.TruncateToDay(times.TargetStart)
 				recurrenceStillActive = !targetDay.Before(startDay)
 			}
@@ -857,102 +885,35 @@ func (s *workService) UpdateWorkLabel(ctx context.Context, req *personal_schedul
 	}, nil
 }
 
-// func (s *workService) CommitRecoveryDrafts(ctx context.Context, req *personal_schedule.CommitRecoveryDraftsRequest) (*personal_schedule.CommitRecoveryDraftsResponse, error) {
-// 	draftID, err := s.workRepo.GetLabelByKey(ctx, labels_constant.LabelDraft)
-// 	if err != nil {
-// 		s.logger.Error("Failed to get draft label", "", zap.Error(err))
-// 		return &personal_schedule.CommitRecoveryDraftsResponse{
-// 			IsSuccess: false,
-// 			Message:   "Failed to get draft label",
-// 			Error:     utils.DatabaseError(ctx, err),
-// 		}, nil
-// 	}
-
-// 	if len(req.WorkIds) == 0 {
-// 		return &personal_schedule.CommitRecoveryDraftsResponse{
-// 			IsSuccess: true,
-// 		}, nil
-// 	}
-// 	var workObjectIDs []bson.ObjectID
-// 	for _, id := range req.WorkIds {
-// 		oid, err := bson.ObjectIDFromHex(id)
-// 		if err != nil {
-// 			return &personal_schedule.CommitRecoveryDraftsResponse{
-// 				IsSuccess: false,
-// 			}, nil
-// 		}
-// 		workObjectIDs = append(workObjectIDs, oid)
-// 	}
-
-//		err = s.workRepo.CommitRecoveryDrafts(ctx, req.UserId, workObjectIDs, draftID.ID)
-//		if err != nil {
-//			s.logger.Error("Failed to commit recovery drafts", "", zap.Error(err))
-//			return &personal_schedule.CommitRecoveryDraftsResponse{
-//				IsSuccess: false,
-//				Message:   "Failed to commit recovery drafts",
-//				Error:     utils.DatabaseError(ctx, err),
-//			}, nil
-//		}
-//		return &personal_schedule.CommitRecoveryDraftsResponse{
-//			IsSuccess: true,
-//			Message:   "Recovery drafts committed successfully",
-//		}, nil
-//	}
-
-func (s *workService) CommitRecoveryDrafts(
-	ctx context.Context,
-	req *personal_schedule.CommitRecoveryDraftsRequest,
-) (*personal_schedule.CommitRecoveryDraftsResponse, error) {
-
-	if len(req.WorkIds) == 0 {
-		return &personal_schedule.CommitRecoveryDraftsResponse{
-			IsSuccess: true,
-			Message:   "No drafts to commit",
-		}, nil
-	}
-
+func (s *workService) AcceptAllRecoveryDrafts(ctx context.Context, req *personal_schedule.AcceptAllRecoveryDraftsRequest) (*personal_schedule.AcceptAllRecoveryDraftsResponse, error) {
 	draftLabel, err := s.workRepo.GetLabelByKey(ctx, labels_constant.LabelDraft)
 	if err != nil {
 		s.logger.Error("Failed to get draft label", "", zap.Error(err))
-		return &personal_schedule.CommitRecoveryDraftsResponse{
+		return &personal_schedule.AcceptAllRecoveryDraftsResponse{
 			IsSuccess: false,
 			Message:   "Failed to get draft label",
 			Error:     utils.DatabaseError(ctx, err),
 		}, nil
 	}
 
-	workObjectIDs := make([]bson.ObjectID, 0, len(req.WorkIds))
-	for _, id := range req.WorkIds {
-		oid, err := bson.ObjectIDFromHex(id)
-		if err != nil {
-			return &personal_schedule.CommitRecoveryDraftsResponse{
-				IsSuccess: false,
-				Message:   "Invalid work id",
-			}, nil
-		}
-		workObjectIDs = append(workObjectIDs, oid)
+	worksDraft, err := s.workRepo.GetAllDraftWorksByUserID(ctx, req.UserId)
+	if err != nil {
+		s.logger.Error("Failed to get draft works", "", zap.Error(err))
+		return &personal_schedule.AcceptAllRecoveryDraftsResponse{
+			IsSuccess: false,
+			Message:   "Failed to get draft works",
+			Error:     utils.DatabaseError(ctx, err),
+		}, nil
 	}
 
-	var drafts []repos.AggregatedWork
-	for _, wid := range workObjectIDs {
-		work, err := s.workRepo.GetAggregatedWorkByID(ctx, wid)
-		if err != nil {
-			return &personal_schedule.CommitRecoveryDraftsResponse{
-				IsSuccess: false,
-				Message:   "Error loading draft work",
-				Error:     utils.DatabaseError(ctx, err),
-			}, nil
-		}
-		if work == nil || work.UserID != req.UserId {
-			return &personal_schedule.CommitRecoveryDraftsResponse{
-				IsSuccess: false,
-				Message:   "Draft not found or forbidden",
-			}, nil
-		}
-		drafts = append(drafts, *work)
+	if len(worksDraft) == 0 {
+		return &personal_schedule.AcceptAllRecoveryDraftsResponse{
+			IsSuccess: true,
+			Message:   "No draft works to accept",
+		}, nil
 	}
 
-	for _, work := range drafts {
+	for _, work := range worksDraft {
 		if work.StartDate == nil {
 			continue
 		}
@@ -962,10 +923,10 @@ func (s *workService) CommitRecoveryDrafts(
 			req.UserId,
 			work.StartDate.UnixMilli(),
 			work.EndDate.UnixMilli(),
-			&work.ID, // exclude itself
+			&work.ID,
 		)
 		if err != nil {
-			return &personal_schedule.CommitRecoveryDraftsResponse{
+			return &personal_schedule.AcceptAllRecoveryDraftsResponse{
 				IsSuccess: false,
 				Message:   "Error checking overlapping works",
 				Error:     utils.DatabaseError(ctx, err),
@@ -973,52 +934,36 @@ func (s *workService) CommitRecoveryDrafts(
 		}
 
 		if count > 0 {
-			return &personal_schedule.CommitRecoveryDraftsResponse{
+			return &personal_schedule.AcceptAllRecoveryDraftsResponse{
 				IsSuccess: false,
 				Message:   "Some draft works overlap with existing works",
 			}, nil
 		}
 	}
 
-	err = s.workRepo.CommitRecoveryDrafts(
+	err = s.workRepo.AcceptAllRecoveryDrafts(
 		ctx,
 		req.UserId,
-		workObjectIDs,
 		draftLabel.ID,
 	)
 	if err != nil {
 		s.logger.Error("Failed to commit drafts", "", zap.Error(err))
-		return &personal_schedule.CommitRecoveryDraftsResponse{
+		return &personal_schedule.AcceptAllRecoveryDraftsResponse{
 			IsSuccess: false,
 			Message:   "Failed to commit drafts",
 			Error:     utils.DatabaseError(ctx, err),
 		}, nil
 	}
 
-	return &personal_schedule.CommitRecoveryDraftsResponse{
+	return &personal_schedule.AcceptAllRecoveryDraftsResponse{
 		IsSuccess: true,
 		Message:   "Recovery drafts committed successfully",
 	}, nil
 }
 
 func (s *workService) DeleteAllDraftWorks(ctx context.Context, req *personal_schedule.DeleteAllDraftWorksRequest) (*personal_schedule.DeleteAllDraftWorksResponse, error) {
-	if len(req.WorkIds) == 0 {
-		return &personal_schedule.DeleteAllDraftWorksResponse{
-			IsSuccess: true,
-		}, nil
-	}
-	var workObjectIDs []bson.ObjectID
-	for _, id := range req.WorkIds {
-		oid, err := bson.ObjectIDFromHex(id)
-		if err != nil {
-			return &personal_schedule.DeleteAllDraftWorksResponse{
-				IsSuccess: false,
-			}, nil
-		}
-		workObjectIDs = append(workObjectIDs, oid)
-	}
 
-	err := s.workRepo.DeleteAllDraftWorks(ctx, req.UserId, workObjectIDs)
+	err := s.workRepo.DeleteAllDraftWorks(ctx, req.UserId)
 	if err != nil {
 		s.logger.Error("Failed to delete draft works", "", zap.Error(err))
 		return &personal_schedule.DeleteAllDraftWorksResponse{

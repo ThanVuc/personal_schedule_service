@@ -2,7 +2,6 @@ package repos
 
 import (
 	"context"
-	"fmt"
 	"personal_schedule_service/internal/collection"
 	"personal_schedule_service/internal/grpc/models"
 	"personal_schedule_service/internal/grpc/utils"
@@ -27,6 +26,11 @@ type GoalInfo struct {
 	Name string        `bson:"name"`
 }
 
+type SeriesBoundaries struct {
+	MinStartDate *time.Time `bson:"min_start_date"`
+	MaxEndDate   *time.Time `bson:"max_end_date"`
+}
+
 type AggregatedWork struct {
 	ID                  bson.ObjectID      `bson:"_id"`
 	Name                string             `bson:"name"`
@@ -45,7 +49,6 @@ type AggregatedWork struct {
 	Overdue             []collection.Label `bson:"overdue,omitempty"`
 	Draft               []collection.Label `bson:"draftInfo,omitempty"`
 	RepeatedID          *bson.ObjectID     `bson:"repeated_id,omitempty"`
-	TargetDate          *time.Time         `bson:"target_date,omitempty"`
 }
 
 type totalCountWorksResult struct {
@@ -294,7 +297,6 @@ func (wr *workRepo) GetWorks(ctx context.Context, req *personal_schedule.GetWork
 			wr.logger.Error("Failed to decode GetWorks count results", "err", zap.Error(err))
 		}
 	}
-	fmt.Println("Total works:", totalWorks)
 
 	return works, totalWorks, nil
 }
@@ -626,10 +628,10 @@ func (wr *workRepo) GetLabelByKey(ctx context.Context, key string) (*collection.
 	return &label, nil
 }
 
-func (wr *workRepo) CommitRecoveryDrafts(ctx context.Context, userID string, workIDs []bson.ObjectID, draftID bson.ObjectID) error {
+
+func (wr *workRepo) AcceptAllRecoveryDrafts(ctx context.Context, userID string, draftID bson.ObjectID) error {
 	coll := wr.mongoConnector.GetCollection(collection.WorksCollection)
-	filler := bson.M{
-		"_id":      bson.M{"$in": workIDs},
+	filter := bson.M{
 		"user_id":  userID,
 		"draft_id": draftID,
 	}
@@ -638,15 +640,36 @@ func (wr *workRepo) CommitRecoveryDrafts(ctx context.Context, userID string, wor
 			"draft_id": "",
 		},
 	}
-	_, err := coll.UpdateMany(ctx, filler, update)
-	wr.logger.Info("CommitRecoveryDrafts", "", zap.Int("count", len(workIDs)))
+	_, err := coll.UpdateMany(ctx, filter, update)
+	wr.logger.Info("AcceptAllRecoveryDrafts", "", zap.String("user_id", userID), zap.String("draft_id", draftID.Hex()))
 	return err
 }
 
-func (wr *workRepo) DeleteAllDraftWorks(ctx context.Context, userID string, workIDs []bson.ObjectID) error {
+func (wr *workRepo) GetAllDraftWorksByUserID(ctx context.Context, userID string) ([]collection.Work, error) {
 	coll := wr.mongoConnector.GetCollection(collection.WorksCollection)
 	filter := bson.M{
-		"_id":     bson.M{"$in": workIDs},
+		"user_id": userID,
+		"draft_id": bson.M{
+			"$exists": true,
+			"$ne":     nil,
+		},
+	}
+	cursor, err := coll.Find(ctx, filter)
+	if err != nil {
+		return nil, err
+	}
+	defer cursor.Close(ctx)
+
+	var works []collection.Work
+	if err = cursor.All(ctx, &works); err != nil {
+		return nil, err
+	}
+	return works, nil
+}
+
+func (wr *workRepo) DeleteAllDraftWorks(ctx context.Context, userID string) error {
+	coll := wr.mongoConnector.GetCollection(collection.WorksCollection)
+	filter := bson.M{
 		"user_id": userID,
 		"draft_id": bson.M{
 			"$exists": true,
@@ -657,10 +680,9 @@ func (wr *workRepo) DeleteAllDraftWorks(ctx context.Context, userID string, work
 	if err != nil {
 		return err
 	}
-	wr.logger.Info("DeleteAllDraftWorks", "", zap.Int64("deleted_count", result.DeletedCount))
+	wr.logger.Info("DeleteAllDraftWorks", "", zap.String("user_id", userID), zap.Int64("deleted_count", result.DeletedCount))
 	return nil
 }
-
 func (wr *workRepo) BulkUpdateWorks(ctx context.Context, models []mongo.WriteModel) error {
 	if len(models) == 0 {
 		return nil
@@ -670,18 +692,17 @@ func (wr *workRepo) BulkUpdateWorks(ctx context.Context, models []mongo.WriteMod
 	return err
 }
 
-func (wr *workRepo) GetFutureRepeatedWorks(ctx context.Context, repeatedID bson.ObjectID, fromTargetDate time.Time) ([]collection.Work, error) {
+func (wr *workRepo) GetFutureRepeatedWorks(ctx context.Context, repeatedID bson.ObjectID, fromStartDate time.Time) ([]collection.Work, error) {
 	coll := wr.mongoConnector.GetCollection(collection.WorksCollection)
-
 	filter := bson.M{
 		"repeated_id": repeatedID,
-		"target_date": bson.M{"$gte": fromTargetDate},
+		"start_date":  bson.M{"$gte": fromStartDate},
 	}
-
-	opts := options.Find().SetSort(bson.D{{Key: "target_date", Value: 1}})
+	opts := options.Find().SetSort(bson.D{{Key: "start_date", Value: 1}})
 
 	cursor, err := coll.Find(ctx, filter, opts)
 	if err != nil {
+		wr.logger.Error("Failed to find future repeated works", "err", zap.Error(err))
 		return nil, err
 	}
 	defer cursor.Close(ctx)
@@ -691,6 +712,35 @@ func (wr *workRepo) GetFutureRepeatedWorks(ctx context.Context, repeatedID bson.
 		return nil, err
 	}
 	return results, nil
+}
+
+func (wr *workRepo) GetSeriesBoundaries(ctx context.Context, repeatedID bson.ObjectID) (*SeriesBoundaries, error) {
+	coll := wr.mongoConnector.GetCollection(collection.WorksCollection)
+	pipeline := mongo.Pipeline{
+		{{Key: "$match", Value: bson.M{"repeated_id": repeatedID}}},
+		{{Key: "$group", Value: bson.M{
+			"_id":            "$repeated_id",
+			"min_start_date": bson.M{"$min": "$start_date"},
+			"max_end_date":   bson.M{"$max": "$end_date"},
+		}}},
+	}
+
+	cursor, err := coll.Aggregate(ctx, pipeline)
+	if err != nil {
+		return nil, err
+	}
+	defer cursor.Close(ctx)
+
+	var results []SeriesBoundaries
+	if err := cursor.All(ctx, &results); err != nil {
+		return nil, err
+	}
+
+	if len(results) == 0 {
+		return nil, nil
+	}
+
+	return &results[0], nil
 }
 
 func (wr *workRepo) DeleteSubTasksByWorkIDs(ctx context.Context, workIDs []bson.ObjectID) error {

@@ -27,7 +27,6 @@ type Work struct {
 	UserID              string         `bson:"user_id" json:"user_id"`
 	GoalID              *bson.ObjectID `bson:"goal_id" json:"goal_id"`
 	RepeatedID          *bson.ObjectID `bson:"repeated_id,omitempty" json:"repeated_id,omitempty"`
-	TargetDate          *time.Time     `bson:"target_date,omitempty" json:"target_date,omitempty"`
 	CreatedAt           time.Time      `bson:"created_at" json:"created_at"`
 	LastModifiedAt      time.Time      `bson:"last_modified_at" json:"last_modified_at"`
 }
@@ -82,7 +81,6 @@ func createWorkCollection() error {
 				"user_id":          bson.M{"bsonType": "string"},
 				"goal_id":          bson.M{"bsonType": []string{"objectId", "null"}},
 				"repeated_id":      bson.M{"bsonType": []string{"objectId", "null"}},
-				"target_date":      bson.M{"bsonType": []string{"date", "null"}},
 				"created_at":       bson.M{"bsonType": "date"},
 				"last_modified_at": bson.M{"bsonType": "date"},
 			},
@@ -121,6 +119,7 @@ func createWorkCollection() error {
 		{Keys: bson.D{{Key: "category_id", Value: 1}}, Options: options.Index().SetName("idx_category")},
 		{Keys: bson.D{{Key: "draft_id", Value: 1}}, Options: options.Index().SetName("idx_draft")},
 		{Keys: bson.D{{Key: "goal_id", Value: 1}}, Options: options.Index().SetName("idx_goal")},
+		{Keys: bson.D{{Key: "repeated_id", Value: 1}}, Options: options.Index().SetName("idx_repeated")},
 	}
 
 	return connector.CreateCollection(ctx, WorksCollection, workValidator, workIndexes)

@@ -45,8 +45,8 @@ func (wc *WorkController) UpdateWorkLabel(ctx context.Context, req *personal_sch
 	return utils.WithSafePanic(ctx, req, wc.workService.UpdateWorkLabel)
 }
 
-func (wc *WorkController) CommitRecoveryDrafts(ctx context.Context, req *personal_schedule.CommitRecoveryDraftsRequest) (*personal_schedule.CommitRecoveryDraftsResponse, error) {
-	return utils.WithSafePanic(ctx, req, wc.workService.CommitRecoveryDrafts)
+func (wc *WorkController) AcceptRecoveryDrafts(ctx context.Context, req *personal_schedule.AcceptAllRecoveryDraftsRequest) (*personal_schedule.AcceptAllRecoveryDraftsResponse, error) {
+	return utils.WithSafePanic(ctx, req, wc.workService.AcceptAllRecoveryDrafts)
 }
 
 func (wc *WorkController) DeleteAllDraftWorks(ctx context.Context, req *personal_schedule.DeleteAllDraftWorksRequest) (*personal_schedule.DeleteAllDraftWorksResponse, error) {
