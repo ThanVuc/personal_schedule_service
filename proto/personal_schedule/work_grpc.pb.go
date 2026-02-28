@@ -20,15 +20,15 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	WorkService_UpsertWork_FullMethodName           = "/personal_schedule.WorkService/UpsertWork"
-	WorkService_GetWorks_FullMethodName             = "/personal_schedule.WorkService/GetWorks"
-	WorkService_GetWork_FullMethodName              = "/personal_schedule.WorkService/GetWork"
-	WorkService_DeleteWork_FullMethodName           = "/personal_schedule.WorkService/DeleteWork"
-	WorkService_GetRecoveryWorks_FullMethodName     = "/personal_schedule.WorkService/GetRecoveryWorks"
-	WorkService_UpdateWorkLabel_FullMethodName      = "/personal_schedule.WorkService/UpdateWorkLabel"
-	WorkService_AcceptRecoveryDrafts_FullMethodName = "/personal_schedule.WorkService/AcceptRecoveryDrafts"
-	WorkService_DeleteAllDraftWorks_FullMethodName  = "/personal_schedule.WorkService/DeleteAllDraftWorks"
-	WorkService_GenerateWorksByAI_FullMethodName    = "/personal_schedule.WorkService/GenerateWorksByAI"
+	WorkService_UpsertWork_FullMethodName          = "/personal_schedule.WorkService/UpsertWork"
+	WorkService_GetWorks_FullMethodName            = "/personal_schedule.WorkService/GetWorks"
+	WorkService_GetWork_FullMethodName             = "/personal_schedule.WorkService/GetWork"
+	WorkService_DeleteWork_FullMethodName          = "/personal_schedule.WorkService/DeleteWork"
+	WorkService_GetRecoveryWorks_FullMethodName    = "/personal_schedule.WorkService/GetRecoveryWorks"
+	WorkService_UpdateWorkLabel_FullMethodName     = "/personal_schedule.WorkService/UpdateWorkLabel"
+	WorkService_SaveDraftAsRealWork_FullMethodName = "/personal_schedule.WorkService/SaveDraftAsRealWork"
+	WorkService_DeleteAllDraftWorks_FullMethodName = "/personal_schedule.WorkService/DeleteAllDraftWorks"
+	WorkService_GenerateWorksByAI_FullMethodName   = "/personal_schedule.WorkService/GenerateWorksByAI"
 )
 
 // WorkServiceClient is the client API for WorkService service.
@@ -41,7 +41,7 @@ type WorkServiceClient interface {
 	DeleteWork(ctx context.Context, in *DeleteWorkRequest, opts ...grpc.CallOption) (*DeleteWorkResponse, error)
 	GetRecoveryWorks(ctx context.Context, in *GetRecoveryWorksRequest, opts ...grpc.CallOption) (*GetRecoveryWorksResponse, error)
 	UpdateWorkLabel(ctx context.Context, in *UpdateWorkLabelRequest, opts ...grpc.CallOption) (*UpdateWorkLabelResponse, error)
-	AcceptRecoveryDrafts(ctx context.Context, in *AcceptAllRecoveryDraftsRequest, opts ...grpc.CallOption) (*AcceptAllRecoveryDraftsResponse, error)
+	SaveDraftAsRealWork(ctx context.Context, in *SaveDraftAsRealWorkRequest, opts ...grpc.CallOption) (*SaveDraftAsRealWorkResponse, error)
 	DeleteAllDraftWorks(ctx context.Context, in *DeleteAllDraftWorksRequest, opts ...grpc.CallOption) (*DeleteAllDraftWorksResponse, error)
 	GenerateWorksByAI(ctx context.Context, in *GenerateWorksByAIRequest, opts ...grpc.CallOption) (*common.EmptyResponse, error)
 }
@@ -114,10 +114,10 @@ func (c *workServiceClient) UpdateWorkLabel(ctx context.Context, in *UpdateWorkL
 	return out, nil
 }
 
-func (c *workServiceClient) AcceptRecoveryDrafts(ctx context.Context, in *AcceptAllRecoveryDraftsRequest, opts ...grpc.CallOption) (*AcceptAllRecoveryDraftsResponse, error) {
+func (c *workServiceClient) SaveDraftAsRealWork(ctx context.Context, in *SaveDraftAsRealWorkRequest, opts ...grpc.CallOption) (*SaveDraftAsRealWorkResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(AcceptAllRecoveryDraftsResponse)
-	err := c.cc.Invoke(ctx, WorkService_AcceptRecoveryDrafts_FullMethodName, in, out, cOpts...)
+	out := new(SaveDraftAsRealWorkResponse)
+	err := c.cc.Invoke(ctx, WorkService_SaveDraftAsRealWork_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -154,7 +154,7 @@ type WorkServiceServer interface {
 	DeleteWork(context.Context, *DeleteWorkRequest) (*DeleteWorkResponse, error)
 	GetRecoveryWorks(context.Context, *GetRecoveryWorksRequest) (*GetRecoveryWorksResponse, error)
 	UpdateWorkLabel(context.Context, *UpdateWorkLabelRequest) (*UpdateWorkLabelResponse, error)
-	AcceptRecoveryDrafts(context.Context, *AcceptAllRecoveryDraftsRequest) (*AcceptAllRecoveryDraftsResponse, error)
+	SaveDraftAsRealWork(context.Context, *SaveDraftAsRealWorkRequest) (*SaveDraftAsRealWorkResponse, error)
 	DeleteAllDraftWorks(context.Context, *DeleteAllDraftWorksRequest) (*DeleteAllDraftWorksResponse, error)
 	GenerateWorksByAI(context.Context, *GenerateWorksByAIRequest) (*common.EmptyResponse, error)
 	mustEmbedUnimplementedWorkServiceServer()
@@ -185,8 +185,8 @@ func (UnimplementedWorkServiceServer) GetRecoveryWorks(context.Context, *GetReco
 func (UnimplementedWorkServiceServer) UpdateWorkLabel(context.Context, *UpdateWorkLabelRequest) (*UpdateWorkLabelResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UpdateWorkLabel not implemented")
 }
-func (UnimplementedWorkServiceServer) AcceptRecoveryDrafts(context.Context, *AcceptAllRecoveryDraftsRequest) (*AcceptAllRecoveryDraftsResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method AcceptRecoveryDrafts not implemented")
+func (UnimplementedWorkServiceServer) SaveDraftAsRealWork(context.Context, *SaveDraftAsRealWorkRequest) (*SaveDraftAsRealWorkResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method SaveDraftAsRealWork not implemented")
 }
 func (UnimplementedWorkServiceServer) DeleteAllDraftWorks(context.Context, *DeleteAllDraftWorksRequest) (*DeleteAllDraftWorksResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeleteAllDraftWorks not implemented")
@@ -323,20 +323,20 @@ func _WorkService_UpdateWorkLabel_Handler(srv interface{}, ctx context.Context, 
 	return interceptor(ctx, in, info, handler)
 }
 
-func _WorkService_AcceptRecoveryDrafts_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(AcceptAllRecoveryDraftsRequest)
+func _WorkService_SaveDraftAsRealWork_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SaveDraftAsRealWorkRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(WorkServiceServer).AcceptRecoveryDrafts(ctx, in)
+		return srv.(WorkServiceServer).SaveDraftAsRealWork(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: WorkService_AcceptRecoveryDrafts_FullMethodName,
+		FullMethod: WorkService_SaveDraftAsRealWork_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(WorkServiceServer).AcceptRecoveryDrafts(ctx, req.(*AcceptAllRecoveryDraftsRequest))
+		return srv.(WorkServiceServer).SaveDraftAsRealWork(ctx, req.(*SaveDraftAsRealWorkRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -409,8 +409,8 @@ var WorkService_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _WorkService_UpdateWorkLabel_Handler,
 		},
 		{
-			MethodName: "AcceptRecoveryDrafts",
-			Handler:    _WorkService_AcceptRecoveryDrafts_Handler,
+			MethodName: "SaveDraftAsRealWork",
+			Handler:    _WorkService_SaveDraftAsRealWork_Handler,
 		},
 		{
 			MethodName: "DeleteAllDraftWorks",
