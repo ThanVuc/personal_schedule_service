@@ -7,6 +7,7 @@ const (
 // Cronjob names
 const (
 	CREATE_DAILY_WORK_CRONJOB = SERIVCE + "_create_daily_work_cronjob"
+	DELETE_DRAFT_WORK_CRONJOB = SERIVCE + "_delete_draft_work_cronjob"
 )
 
 // Location constants

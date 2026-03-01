@@ -721,15 +721,6 @@ func (s *workService) RecoverWorks(ctx context.Context, req *personal_schedule.G
 		return nil, err
 	}
 
-	if err := s.workRepo.DeleteDraftsByDate(ctx, req.UserId, times.TargetStart, times.TargetEnd); err != nil {
-		s.logger.Error("Failed to delete drafts by date", "", zap.Error(err))
-		return &personal_schedule.GetRecoveryWorksResponse{
-			IsSuccess: false,
-			Message:   "Failed to delete drafts by date",
-			Error:     utils.DatabaseError(ctx, err),
-		}, nil
-	}
-
 	sourceWorks, err := s.workRepo.GetAggregatedWorksByDateRangeMs(ctx, req.UserId, times.SourceStart.UnixMilli(), times.SourceEnd.UnixMilli())
 	if err != nil {
 		s.logger.Error("Failed to get source works", "", zap.Error(err))
@@ -786,6 +777,17 @@ func (s *workService) RecoverWorks(ctx context.Context, req *personal_schedule.G
 			}, nil
 		}
 
+		count, err := s.workRepo.CountOverlappingWorks(ctx, newWork.UserID, newWork.StartDate.UnixMilli(), newWork.EndDate.UnixMilli(), nil)
+		if err != nil {
+			return &personal_schedule.GetRecoveryWorksResponse{
+				IsSuccess: false,
+				Message:   "Failed to check overlapping works",
+				Error:     utils.DatabaseError(ctx, err),
+			}, nil
+		}
+		if count > 0 {
+			continue
+		}
 		worksToInsert = append(worksToInsert, newWork)
 
 		for _, st := range subtasks {
@@ -885,11 +887,11 @@ func (s *workService) UpdateWorkLabel(ctx context.Context, req *personal_schedul
 	}, nil
 }
 
-func (s *workService) AcceptAllRecoveryDrafts(ctx context.Context, req *personal_schedule.AcceptAllRecoveryDraftsRequest) (*personal_schedule.AcceptAllRecoveryDraftsResponse, error) {
+func (s *workService) SaveDraftAsRealWork(ctx context.Context, req *personal_schedule.SaveDraftAsRealWorkRequest) (*personal_schedule.SaveDraftAsRealWorkResponse, error) {
 	draftLabel, err := s.workRepo.GetLabelByKey(ctx, labels_constant.LabelDraft)
 	if err != nil {
 		s.logger.Error("Failed to get draft label", "", zap.Error(err))
-		return &personal_schedule.AcceptAllRecoveryDraftsResponse{
+		return &personal_schedule.SaveDraftAsRealWorkResponse{
 			IsSuccess: false,
 			Message:   "Failed to get draft label",
 			Error:     utils.DatabaseError(ctx, err),
@@ -899,7 +901,7 @@ func (s *workService) AcceptAllRecoveryDrafts(ctx context.Context, req *personal
 	worksDraft, err := s.workRepo.GetAllDraftWorksByUserID(ctx, req.UserId)
 	if err != nil {
 		s.logger.Error("Failed to get draft works", "", zap.Error(err))
-		return &personal_schedule.AcceptAllRecoveryDraftsResponse{
+		return &personal_schedule.SaveDraftAsRealWorkResponse{
 			IsSuccess: false,
 			Message:   "Failed to get draft works",
 			Error:     utils.DatabaseError(ctx, err),
@@ -907,7 +909,7 @@ func (s *workService) AcceptAllRecoveryDrafts(ctx context.Context, req *personal
 	}
 
 	if len(worksDraft) == 0 {
-		return &personal_schedule.AcceptAllRecoveryDraftsResponse{
+		return &personal_schedule.SaveDraftAsRealWorkResponse{
 			IsSuccess: true,
 			Message:   "No draft works to accept",
 		}, nil
@@ -926,7 +928,7 @@ func (s *workService) AcceptAllRecoveryDrafts(ctx context.Context, req *personal
 			&work.ID,
 		)
 		if err != nil {
-			return &personal_schedule.AcceptAllRecoveryDraftsResponse{
+			return &personal_schedule.SaveDraftAsRealWorkResponse{
 				IsSuccess: false,
 				Message:   "Error checking overlapping works",
 				Error:     utils.DatabaseError(ctx, err),
@@ -934,28 +936,28 @@ func (s *workService) AcceptAllRecoveryDrafts(ctx context.Context, req *personal
 		}
 
 		if count > 0 {
-			return &personal_schedule.AcceptAllRecoveryDraftsResponse{
+			return &personal_schedule.SaveDraftAsRealWorkResponse{
 				IsSuccess: false,
 				Message:   "Some draft works overlap with existing works",
 			}, nil
 		}
 	}
 
-	err = s.workRepo.AcceptAllRecoveryDrafts(
+	err = s.workRepo.SaveDraftAsRealWork(
 		ctx,
 		req.UserId,
 		draftLabel.ID,
 	)
 	if err != nil {
 		s.logger.Error("Failed to commit drafts", "", zap.Error(err))
-		return &personal_schedule.AcceptAllRecoveryDraftsResponse{
+		return &personal_schedule.SaveDraftAsRealWorkResponse{
 			IsSuccess: false,
 			Message:   "Failed to commit drafts",
 			Error:     utils.DatabaseError(ctx, err),
 		}, nil
 	}
 
-	return &personal_schedule.AcceptAllRecoveryDraftsResponse{
+	return &personal_schedule.SaveDraftAsRealWorkResponse{
 		IsSuccess: true,
 		Message:   "Recovery drafts committed successfully",
 	}, nil
@@ -1083,4 +1085,19 @@ func buildExistingTimeConstraint(existingTime []*models.TimeRange) string {
 	}
 
 	return fmt.Sprintf("[%s]", strings.Join(parts, ", "))
+}
+
+func (s *workService) DeleteExpiredDraftWorks(ctx context.Context) error {
+	loc, _ := time.LoadLocation("Asia/Ho_Chi_Minh")
+	now := time.Now().In(loc)
+
+	todayMidnight := time.Date(
+		now.Year(),
+		now.Month(),
+		now.Day(),
+		0, 0, 0, 0,
+		loc,
+	)
+
+	return s.workRepo.DeleteDraftBefore(ctx, todayMidnight)
 }
