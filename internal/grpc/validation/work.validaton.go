@@ -6,6 +6,7 @@ import (
 	"personal_schedule_service/internal/collection"
 	labels_constant "personal_schedule_service/internal/constant/labels"
 	event_models "personal_schedule_service/internal/eventbus/models"
+	"personal_schedule_service/internal/grpc/utils"
 	"personal_schedule_service/internal/repos"
 	app_error "personal_schedule_service/pkg/settings/error"
 	"personal_schedule_service/proto/common"
@@ -97,6 +98,84 @@ func (wv *workValidator) ValidateUpsertWork(ctx context.Context, req *personal_s
 			}
 			if *req.RepeatStartDate >= *req.RepeatEndDate {
 				return NewValidationError(common.ErrorCode_ERROR_CODE_INTERNAL_ERROR, app_error.RepeatedWorkInvalidDates, "invalid repeat dates for non-repeated work")
+			}
+			baseStart := time.UnixMilli(*req.StartDate).UTC()
+			baseEnd := time.UnixMilli(req.EndDate).UTC()
+			duration := baseEnd.Sub(baseStart)
+
+			hour, min, sec := baseStart.Clock()
+
+			loopDate := time.UnixMilli(*req.RepeatStartDate).UTC()
+			limitDate := time.UnixMilli(*req.RepeatEndDate).UTC()
+
+			firstInstanceStart := time.Date(
+				loopDate.Year(), loopDate.Month(), loopDate.Day(),
+				hour, min, sec, 0, time.UTC,
+			)
+
+			lastInstanceStart := time.Date(
+				limitDate.Year(), limitDate.Month(), limitDate.Day(),
+				hour, min, sec, 0, time.UTC,
+			)
+
+			rangeStart := firstInstanceStart
+			rangeEnd := lastInstanceStart.Add(duration)
+
+			var excludeWorkID *bson.ObjectID
+			if req.Id != nil && *req.Id != "" {
+				workID, err := bson.ObjectIDFromHex(*req.Id)
+				if err == nil {
+					excludeWorkID = &workID
+				}
+			}
+
+			existingWorks, err := wv.workRepo.GetWorksInRange(
+				ctx,
+				req.UserId,
+				rangeStart.UnixMilli(),
+				rangeEnd.UnixMilli(),
+				excludeWorkID,
+			)
+
+			if err != nil {
+				return NewValidationError(
+					common.ErrorCode_ERROR_CODE_DATABASE_ERROR,
+					app_error.TimeOverlap,
+					"error retrieving works for overlap check",
+				)
+			}
+
+			for !utils.TruncateToDay(loopDate).After(utils.TruncateToDay(limitDate)) {
+
+				y, m, d := loopDate.Date()
+
+				instanceStart := time.Date(y, m, d, hour, min, sec, 0, time.UTC)
+				instanceEnd := instanceStart.Add(duration)
+
+				for _, w := range existingWorks {
+
+					if w.StartDate == nil {
+						continue
+					}
+
+					existingStart := *w.StartDate
+					existingEnd := w.EndDate
+
+					if instanceStart.Before(existingEnd) &&
+						instanceEnd.After(existingStart) {
+
+						return NewValidationError(
+							common.ErrorCode_ERROR_CODE_DATABASE_ERROR,
+							app_error.TimeOverlap,
+							fmt.Sprintf(
+								"work overlaps on %s",
+								instanceStart.Format("2006-01-02"),
+							),
+						)
+					}
+				}
+
+				loopDate = loopDate.AddDate(0, 0, 1)
 			}
 		}
 

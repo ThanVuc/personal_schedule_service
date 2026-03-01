@@ -35,9 +35,10 @@ type (
 		DeleteWork(ctx context.Context, req *personal_schedule.DeleteWorkRequest) (*personal_schedule.DeleteWorkResponse, error)
 		RecoverWorks(ctx context.Context, req *personal_schedule.GetRecoveryWorksRequest) (*personal_schedule.GetRecoveryWorksResponse, error)
 		UpdateWorkLabel(ctx context.Context, req *personal_schedule.UpdateWorkLabelRequest) (*personal_schedule.UpdateWorkLabelResponse, error)
-		AcceptAllRecoveryDrafts(ctx context.Context, req *personal_schedule.AcceptAllRecoveryDraftsRequest) (*personal_schedule.AcceptAllRecoveryDraftsResponse, error)
+		SaveDraftAsRealWork(ctx context.Context, req *personal_schedule.SaveDraftAsRealWorkRequest) (*personal_schedule.SaveDraftAsRealWorkResponse, error)
 		DeleteAllDraftWorks(ctx context.Context, req *personal_schedule.DeleteAllDraftWorksRequest) (*personal_schedule.DeleteAllDraftWorksResponse, error)
 		GenerateWorksFromAI(ctx context.Context, req *personal_schedule.GenerateWorksByAIRequest) (*common.EmptyResponse, error)
+		DeleteExpiredDraftWorks(ctx context.Context) error
 	}
 )
 

@@ -47,3 +47,26 @@ func (c *WorkCronJob) CreateDailyWorkCronJob(ctx context.Context) {
 	}
 	jobScheduler.Start()
 }
+
+func (c *WorkCronJob) DeleteDraftWorkCronJob(ctx context.Context) {
+	// Define the cron schedule (every day at midnight)
+	jobschedule := cronjob.NewCronScheduler(global.RedisDb, cronjob_constant.DELETE_DRAFT_WORK_CRONJOB, cron.WithLocation(time.UTC))
+
+	c.cronJobManager.AddScheduler(jobschedule)
+
+	err := jobschedule.ScheduleCronJob("*/6 * * * *", func() {
+		// Logic to delete expired draft work entries
+		c.logger.Info("Executing DeleteDraftWorkCronJob", "")
+
+		err := c.workService.DeleteExpiredDraftWorks(context.Background())
+		if err != nil {
+			c.logger.Error("DeleteExpiredDraftWorks failed", "", zap.Error(err))
+		}
+	})
+
+	if err != nil {
+		c.logger.Error("Failed to handle DeleteDraftWorkCronJob", "", zap.Error(err))
+	}
+
+	jobschedule.Start()
+}

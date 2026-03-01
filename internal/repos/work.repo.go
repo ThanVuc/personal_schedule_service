@@ -2,6 +2,7 @@ package repos
 
 import (
 	"context"
+	"fmt"
 	"personal_schedule_service/internal/collection"
 	"personal_schedule_service/internal/grpc/models"
 	"personal_schedule_service/internal/grpc/utils"
@@ -628,8 +629,7 @@ func (wr *workRepo) GetLabelByKey(ctx context.Context, key string) (*collection.
 	return &label, nil
 }
 
-
-func (wr *workRepo) AcceptAllRecoveryDrafts(ctx context.Context, userID string, draftID bson.ObjectID) error {
+func (wr *workRepo) SaveDraftAsRealWork(ctx context.Context, userID string, draftID bson.ObjectID) error {
 	coll := wr.mongoConnector.GetCollection(collection.WorksCollection)
 	filter := bson.M{
 		"user_id":  userID,
@@ -641,7 +641,7 @@ func (wr *workRepo) AcceptAllRecoveryDrafts(ctx context.Context, userID string, 
 		},
 	}
 	_, err := coll.UpdateMany(ctx, filter, update)
-	wr.logger.Info("AcceptAllRecoveryDrafts", "", zap.String("user_id", userID), zap.String("draft_id", draftID.Hex()))
+	wr.logger.Info("SaveDraftAsRealWork", "", zap.String("user_id", userID), zap.String("draft_id", draftID.Hex()))
 	return err
 }
 
@@ -785,4 +785,65 @@ func (wr *workRepo) GetExistingTimes(ctx context.Context, userID string, localDa
 	}
 
 	return existingTimes, nil
+}
+
+func (wr *workRepo) DeleteDraftBefore(ctx context.Context, before time.Time) error {
+	coll := wr.mongoConnector.GetCollection(collection.WorksCollection)
+
+	filter := bson.M{
+		"draft_id":   bson.M{"$ne": nil},
+		"created_at": bson.M{"$lt": before},
+	}
+
+	result, err := coll.DeleteMany(ctx, filter)
+	if err != nil {
+		return err
+	}
+
+	fmt.Println("Deleted draft count:", result.DeletedCount)
+	return nil
+}
+
+func (wr *workRepo) GetWorksInRange(ctx context.Context, userID string, startMs, endMs int64, excludeWorkID *bson.ObjectID) ([]collection.Work, error) {
+	coll := wr.mongoConnector.GetCollection(collection.WorksCollection)
+
+	fromTime := time.UnixMilli(startMs).UTC()
+	toTime := time.UnixMilli(endMs).UTC()
+
+	filter := bson.M{
+		"user_id": userID,
+		"start_date": bson.M{
+			"$lt": toTime,
+		},
+		"end_date": bson.M{
+			"$gt": fromTime,
+		},
+	}
+
+	if excludeWorkID != nil {
+		filter["_id"] = bson.M{
+			"$ne": *excludeWorkID,
+		}
+	}
+
+	projection := bson.M{
+		"_id":        1,
+		"start_date": 1,
+		"end_date":   1,
+	}
+
+	opts := options.Find().SetProjection(projection)
+
+	cursor, err := coll.Find(ctx, filter, opts)
+	if err != nil {
+		return nil, err
+	}
+	defer cursor.Close(ctx)
+
+	var works []collection.Work
+	if err := cursor.All(ctx, &works); err != nil {
+		return nil, err
+	}
+
+	return works, nil
 }
