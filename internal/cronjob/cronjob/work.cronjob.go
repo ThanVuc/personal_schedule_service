@@ -54,7 +54,7 @@ func (c *WorkCronJob) DeleteDraftWorkCronJob(ctx context.Context) {
 
 	c.cronJobManager.AddScheduler(jobschedule)
 
-	err := jobschedule.ScheduleCronJob("*/6 * * * *", func() {
+	err := jobschedule.ScheduleCronJob("0 17 * * *", func() {
 		// Logic to delete expired draft work entries
 		c.logger.Info("Executing DeleteDraftWorkCronJob", "")
 

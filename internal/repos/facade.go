@@ -41,6 +41,7 @@ type (
 		GetGoalsForDialog(ctx context.Context, userID string) ([]collection.Goal, error)
 		UpdateGoalField(ctx context.Context, goalID bson.ObjectID, fieldName string, labelID bson.ObjectID) error
 		GetLabelByKey(ctx context.Context, key string) (*collection.Label, error)
+		CheckNameExistence(ctx context.Context, userID string, nameNormalized string, excludeGoalID *bson.ObjectID) (bool, error)
 	}
 
 	WorkRepo interface {

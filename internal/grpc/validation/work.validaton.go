@@ -58,6 +58,12 @@ func (wv *workValidator) ValidateUpsertWork(ctx context.Context, req *personal_s
 	if err := wv.checkLabel(ctx, req.CategoryId, "CategoryId"); err != nil {
 		return err
 	}
+
+	nameNormalized := utils.RemoveAccent(req.Name)
+	if nameNormalized == "" {
+		return NewValidationError(common.ErrorCode_ERROR_CODE_INTERNAL_ERROR, app_error.InvalidWorkName, "work name cannot be empty or only contain special characters")
+	}
+
 	if req.GoalId != nil && *req.GoalId != "" {
 		if _, err := bson.ObjectIDFromHex(*req.GoalId); err != nil {
 			return NewValidationError(common.ErrorCode_ERROR_CODE_NOT_FOUND, app_error.GoalNotFoundCode, "invalid GoalId")

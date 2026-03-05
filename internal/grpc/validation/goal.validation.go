@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	labels_constant "personal_schedule_service/internal/constant/labels"
+	"personal_schedule_service/internal/grpc/utils"
 	"personal_schedule_service/internal/repos"
 	app_error "personal_schedule_service/pkg/settings/error"
 	"personal_schedule_service/proto/common"
@@ -48,6 +49,11 @@ func (gv *goalValidator) ValidationGoal(ctx context.Context, req *personal_sched
 		return err
 	}
 
+	nameNormalized := utils.RemoveAccent(req.Name)
+	if nameNormalized == "" {
+		return NewValidationError(common.ErrorCode_ERROR_CODE_INTERNAL_ERROR, app_error.InvalidGoalName, "goal name cannot be empty or only contain special characters")
+	}
+
 	for _, task := range req.Tasks {
 		if task.Id != nil && *task.Id != "" {
 			if _, err := bson.ObjectIDFromHex(*task.Id); err != nil {
@@ -74,15 +80,15 @@ func (gv *goalValidator) ValidationGoal(ctx context.Context, req *personal_sched
 		return err
 	}
 	if label.Key == "PENDING" || label.Key == "IN_PROGRESS" {
-		countPending , err := gv.labelRepo.CountGoalByLabelKey(ctx, labels_constant.LabelPending)
+		countPending, err := gv.labelRepo.CountGoalByLabelKey(ctx, labels_constant.LabelPending)
 		if err != nil {
 			return err
 		}
-		countInProgress , err := gv.labelRepo.CountGoalByLabelKey(ctx, labels_constant.LabelInProgress)
+		countInProgress, err := gv.labelRepo.CountGoalByLabelKey(ctx, labels_constant.LabelInProgress)
 		if err != nil {
 			return err
 		}
-		if countPending + countInProgress >= 5 {
+		if countPending+countInProgress >= 5 {
 			return NewValidationError(common.ErrorCode_ERROR_CODE_INTERNAL_ERROR, app_error.GoalLimitExceeded, "You can only have up to 5 goals with status PENDING or IN_PROGRESS")
 		}
 	}
@@ -101,6 +107,13 @@ func (gv *goalValidator) ValidationGoal(ctx context.Context, req *personal_sched
 		}
 		if existingGoal.UserID != req.UserId {
 			return NewValidationError(common.ErrorCode_ERROR_CODE_PERMISSION_DENIED, app_error.GoalForbidden, "user does not have permission to modify this goal")
+		}
+		exists, err := gv.goalRepo.CheckNameExistence(ctx, req.UserId, nameNormalized, &goalID)
+		if err != nil {
+			return err
+		}
+		if exists {
+			return NewValidationError(common.ErrorCode_ERROR_CODE_INTERNAL_ERROR, app_error.InvalidGoalName, "goal name already exists")
 		}
 	}
 

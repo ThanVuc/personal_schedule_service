@@ -720,6 +720,11 @@ func (s *workService) RecoverWorks(ctx context.Context, req *personal_schedule.G
 		s.logger.Error("Failed to get draft label", "", zap.Error(err))
 		return nil, err
 	}
+	today, err := s.workRepo.GetLabelByKey(ctx, labels_constant.LabelInDay)
+	if err != nil {
+		s.logger.Error("Failed to get in-day label", "", zap.Error(err))
+		return nil, err
+	}
 
 	sourceWorks, err := s.workRepo.GetAggregatedWorksByDateRangeMs(ctx, req.UserId, times.SourceStart.UnixMilli(), times.SourceEnd.UnixMilli())
 	if err != nil {
@@ -775,6 +780,10 @@ func (s *workService) RecoverWorks(ctx context.Context, req *personal_schedule.G
 				Message:   "Failed to clone single work",
 				Error:     utils.DatabaseError(ctx, err),
 			}, nil
+		}
+		if isRecurring {
+			newWork.TypeID = today.ID
+			newWork.RepeatedID = nil
 		}
 
 		count, err := s.workRepo.CountOverlappingWorks(ctx, newWork.UserID, newWork.StartDate.UnixMilli(), newWork.EndDate.UnixMilli(), nil)
