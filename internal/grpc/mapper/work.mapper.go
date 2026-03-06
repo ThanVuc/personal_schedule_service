@@ -45,6 +45,10 @@ func (m *workMapper) mapProtoWorkToDB(req *personal_schedule.UpsertWorkRequest) 
 	if err != nil {
 		return nil, err
 	}
+	draftID, err := bson.ObjectIDFromHex(*req.DraftId)
+	if err != nil {
+		return nil, err
+	}
 
 	normalizedName := utils.RemoveAccent(req.Name)
 
@@ -77,6 +81,7 @@ func (m *workMapper) mapProtoWorkToDB(req *personal_schedule.UpsertWorkRequest) 
 		PriorityID:          priorityID,
 		TypeID:              typeID,
 		CategoryID:          categoryID,
+		DraftID:             &draftID,
 		UserID:              req.UserId,
 		GoalID:              goalID,
 	}, nil

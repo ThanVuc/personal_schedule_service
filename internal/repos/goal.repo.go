@@ -354,3 +354,19 @@ func (r *goalRepo) GetLabelByKey(ctx context.Context, key string) (*collection.L
 	}
 	return &label, nil
 }
+
+func (r *goalRepo) CheckNameExistence(ctx context.Context, userID string, nameNormalized string, excludeGoalID *bson.ObjectID) (bool, error) {
+	coll := r.mongoConnector.GetCollection(collection.GoalsCollection)
+	filter := bson.M{
+		"user_id":         userID,
+		"name_normalized": nameNormalized,
+	}
+	if excludeGoalID != nil {
+		filter["_id"] = bson.M{"$ne": *excludeGoalID}
+	}
+	count, err := coll.CountDocuments(ctx, filter)
+	if err != nil {
+		return false, err
+	}
+	return count > 0, nil
+}
