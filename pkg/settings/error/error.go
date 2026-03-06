@@ -17,4 +17,6 @@ const (
 	GoalLimitExceeded        = 10013
 	RepeatedWorkMissingDates = 10014
 	RepeatedWorkInvalidDates = 10015
+	InvalidGoalName          = 10016
+	InvalidWorkName          = 10017
 )
