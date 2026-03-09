@@ -45,9 +45,13 @@ func (m *workMapper) mapProtoWorkToDB(req *personal_schedule.UpsertWorkRequest) 
 	if err != nil {
 		return nil, err
 	}
-	draftID, err := bson.ObjectIDFromHex(*req.DraftId)
-	if err != nil {
-		return nil, err
+
+	var draftID bson.ObjectID
+	if req.DraftId != nil && *req.DraftId != "" {
+		draftID, err = bson.ObjectIDFromHex(*req.DraftId)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	normalizedName := utils.RemoveAccent(req.Name)

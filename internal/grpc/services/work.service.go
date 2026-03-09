@@ -58,6 +58,10 @@ func (s *workService) UpsertWork(ctx context.Context, req *personal_schedule.Ups
 				Error:     utils.CustomError(ctx, ve.Category, ve.Code, err),
 			}, nil
 		}
+		return &personal_schedule.UpsertWorkResponse{
+			IsSuccess: false,
+			Error:     utils.InternalServerError(ctx, err),
+		}, nil
 	}
 
 	work, subTasksDB, err := s.workMapper.MapUpsertProtoToModels(req)
@@ -75,7 +79,7 @@ func (s *workService) UpsertWork(ctx context.Context, req *personal_schedule.Ups
 		return &personal_schedule.UpsertWorkResponse{
 			IsSuccess: false,
 			Error:     utils.DatabaseError(ctx, err),
-		}, err
+		}, nil
 	}
 
 	isRepeated := work.TypeID == repeatLabel.ID
@@ -102,7 +106,7 @@ func (s *workService) UpsertWork(ctx context.Context, req *personal_schedule.Ups
 			s.logger.Error("Failed to create work", requestId, zap.Error(err))
 			return &personal_schedule.UpsertWorkResponse{
 				IsSuccess: false, Message: "Failed to create work", Error: utils.DatabaseError(ctx, err),
-			}, err
+			}, nil
 		}
 		work.ID = newID
 
@@ -128,7 +132,7 @@ func (s *workService) UpsertWork(ctx context.Context, req *personal_schedule.Ups
 			s.logger.Error("Failed to update work", requestId, zap.Error(err))
 			return &personal_schedule.UpsertWorkResponse{
 				IsSuccess: false, Message: "Failed to update work", Error: utils.DatabaseError(ctx, err),
-			}, err
+			}, nil
 		}
 		work.ID = workID
 	}
@@ -136,7 +140,7 @@ func (s *workService) UpsertWork(ctx context.Context, req *personal_schedule.Ups
 		s.logger.Error("Failed to sync sub-tasks", requestId, zap.Error(err))
 		return &personal_schedule.UpsertWorkResponse{
 			IsSuccess: false, Message: "Failed to sync sub-tasks (Work was upserted but tasks failed)", Error: utils.DatabaseError(ctx, err),
-		}, err
+		}, nil
 	}
 
 	if len(req.Notifications) > 0 {
